@@ -1,5 +1,6 @@
 import { useTask } from "./useTask";
 import { AiJobTools } from "./AiTools";
+import DuplicateReview from "./DuplicateReview";
 import { optional } from "./forms";
 import { useEffect, useState } from "react";
 import ShortlistButton from "./ShortlistButton";
@@ -99,6 +100,13 @@ export default function JobDetail({
       </nav>
       {tab === "review" && (
         <AiJobTools job={job} saved={() => setRefresh(refresh + 1)} />
+      )}
+      {tab === "review" && (
+        <DuplicateReview
+          key={job.version}
+          job={job}
+          saved={() => setRefresh(refresh + 1)}
+        />
       )}
       {tab === "review" && (
         <JobReview
