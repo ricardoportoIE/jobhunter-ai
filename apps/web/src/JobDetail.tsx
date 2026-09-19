@@ -1,6 +1,7 @@
 import { useTask } from './useTask';
 import { optional } from './forms';
 import { useEffect, useState } from 'react';
+import ShortlistButton from './ShortlistButton';
 import { api } from './api';
 import { categories, gates, outcomes, recommendations, type Assessment, type Category, type Fact, type Job, type Match, type Profile, type Requirement } from './types';
 import { ErrorState, Field, Loading } from './ui';
@@ -61,5 +62,6 @@ export function MatchResult({ match }: { match: Match }) {
   return <section className="match-result">{match.stale && <p role="alert">Análise desatualizada: o perfil, a vaga ou a validade de um fato mudou. Revise e calcule novamente.</p>}<div className="score-grid"><div><span>Compatibilidade</span><strong>{match.score === null ? '—' : `${match.score}%`}</strong><small>{match.score === null ? 'Dados insuficientes' : 'Atendimento dos critérios conhecidos'}</small></div><div><span>Cobertura</span><strong>{Math.round(match.coverage * 100)}%</strong><small>Quanto dos requisitos foi avaliado</small></div><div><span>Recomendação</span><h2>{recommendations[match.recommendation]}</h2><small>{gates[match.employment_gate]}</small></div></div>
     <section className="panel"><h2>Bloqueios e lacunas</h2>{match.blockers.map((b, i) => <p className="blocker" key={i}>{b.reason}</p>)}{!match.gaps.length && !match.blockers.length && <p>Nenhuma lacuna entre os critérios avaliados.</p>}{match.gaps.map((gap) => <article className="record" key={gap.requirement_id}><h3>{gap.text} · {outcomes[gap.status]}</h3><p>{gap.reason}</p></article>)}{match.review_flags.length > 0 && <p className="muted">Pontos de revisão: {match.review_flags.join(', ')}</p>}</section>
     <section className="panel"><h2>Como o resultado foi calculado</h2>{match.breakdown.map((category) => <details className="category" key={category.category}><summary>{categories[category.category]} · peso {category.weight} · cobertura {Math.round(category.coverage * 100)}%</summary>{!category.assessments.length && <p>Sem critérios estruturados nesta categoria.</p>}{category.assessments.map((item) => <article key={item.requirement_id} className="record"><p><strong>{outcomes[item.status]}</strong> · {item.reason}</p>{item.fact_ids.map((id) => <p key={id}>Fato: {match.profile_snapshot.facts.find((fact) => fact.id === id)?.claim || id}</p>)}{item.evidence_ids.map((id) => { const evidence = match.profile_snapshot.evidence.find((e) => e.id === id); return evidence ? <details key={id}><summary>Ver evidência: {evidence.source_ref}</summary><p>{evidence.locator}</p><p className="preserve">{evidence.content}</p><p className="muted">Versão {evidence.version} preservada nesta análise.</p></details> : null; })}</article>)}</details>)}</section>
+    <ShortlistButton match={match} />
   </section>;
 }
