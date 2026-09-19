@@ -45,6 +45,7 @@ class JobImport(Input):
             raise ValueError("Empty content")
         if self.source_url:
             url = urlsplit(self.source_url)
+            _ = url.port
             if (
                 url.scheme not in {"http", "https"}
                 or not url.hostname
@@ -62,6 +63,7 @@ class Requirement(Input):
     importance: Literal["required", "preferred"] = "required"
     is_eliminatory: bool = False
     source_locator: Text
+    future_authorisation: bool = False
 
 
 class Salary(Input):
