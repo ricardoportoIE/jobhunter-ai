@@ -6,7 +6,7 @@ Implementação local autorizada em 2026-09-20. Um commit por etapa; nenhum push
 |---|---|---|
 | P2-01 | OpenAI, segredo privado e contratos | Implementado |
 | P2-02 | Reservas atômicas, custos, limites e tracing | Implementado |
-| P2-03 | Parser com saída estruturada e citações verificadas | Pendente |
+| P2-03 | Parser com saída estruturada e citações verificadas | Implementado |
 | P2-04 | Normalização, confiança e revisão na interface | Pendente |
 | P2-05 | Embeddings e busca semântica | Pendente |
 | P2-06 | Possíveis duplicados por similaridade | Pendente |

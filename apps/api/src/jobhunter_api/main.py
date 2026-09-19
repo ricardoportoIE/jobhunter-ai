@@ -10,6 +10,7 @@ from jobhunter_api.applications import router as applications_router
 from jobhunter_api.auth import router as session_router
 from jobhunter_api.database import check_database
 from jobhunter_api.errors import install_errors
+from jobhunter_api.job_parser import router as parser_router
 from jobhunter_api.jobs import router as jobs_router
 from jobhunter_api.matching import router as matching_router
 from jobhunter_api.middleware import RequestBoundary
@@ -64,6 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(matching_router)
     application.include_router(applications_router)
     application.include_router(privacy_router)
+    application.include_router(parser_router)
     application.include_router(ai_router)
 
     @application.get("/api/health/live", tags=["health"])
