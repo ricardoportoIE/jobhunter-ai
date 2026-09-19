@@ -1,6 +1,7 @@
 import { useTask } from "./useTask";
 import { AiJobTools } from "./AiTools";
 import DuplicateReview from "./DuplicateReview";
+import AiMatching from "./AiMatching";
 import { optional } from "./forms";
 import { useEffect, useState } from "react";
 import ShortlistButton from "./ShortlistButton";
@@ -117,6 +118,7 @@ export default function JobDetail({
       )}
       {tab === "analyse" && (
         <AnalysisForm
+          key={`${job.version}:${profile.version}`}
           job={job}
           profile={profile}
           facts={facts}
@@ -459,6 +461,8 @@ function AnalysisForm({
   onResult: (result: Match) => void;
 }) {
   const task = useTask();
+  const [aiRun, setAiRun] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
   const [assessments, setAssessments] = useState<Assessment[]>(() =>
     job.requirements.map((req) => ({
       requirement_id: req.id,
@@ -468,6 +472,7 @@ function AnalysisForm({
     })),
   );
   function change(id: string, update: Partial<Assessment>) {
+    setConfirmed(false);
     setAssessments((items) =>
       items.map((item) =>
         item.requirement_id === id ? { ...item, ...update } : item,
@@ -488,6 +493,16 @@ function AnalysisForm({
   return (
     <section className="panel narrow">
       <h2>Avalie o atendimento de cada requisito</h2>
+      <AiMatching
+        job={job}
+        profile={profile}
+        facts={facts}
+        apply={(items, run) => {
+          setAssessments(items);
+          setAiRun(run);
+          setConfirmed(false);
+        }}
+      />
       <p>
         Somente fatos verificados e autorizados para matching podem sustentar
         respostas positivas. Uma avaliação manual não cria experiência
@@ -502,6 +517,7 @@ function AnalysisForm({
                 job_version: job.version,
                 profile_version: profile.version,
                 review_confirmed: true,
+                ai_run_id: aiRun,
                 assessments: assessments.map((a) => ({
                   ...a,
                   reason: a.reason || "Informação ainda desconhecida.",
@@ -586,7 +602,12 @@ function AnalysisForm({
           );
         })}
         <label className="check">
-          <input type="checkbox" required />
+          <input
+            type="checkbox"
+            required
+            checked={confirmed}
+            onChange={(event) => setConfirmed(event.target.checked)}
+          />
           Confirmo estas avaliações e a validade das referências selecionadas.
         </label>
         {task.feedback}

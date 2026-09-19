@@ -29,6 +29,7 @@ class Analysis(Input):
     profile_version: int = Field(ge=1)
     review_confirmed: Literal[True]
     assessments: list[Assessment] = Field(default_factory=list, max_length=100)
+    ai_run_id: UUID | None = None
 
 
 @router.post("/jobs/{job_id}/analyse", status_code=201)
@@ -50,6 +51,19 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
         if not stored:
             raise Problem(409, "REVIEW_REQUIRED", "Snapshot do perfil ausente.")
         assessments = [item.model_dump(mode="json") for item in data.assessments]
+        if data.ai_run_id:
+            suggestion = db.execute(
+                "SELECT result FROM ai_calls WHERE id=%s AND owner_id=%s "
+                "AND operation='suggest' AND status='succeeded'",
+                (data.ai_run_id, actor.id),
+            ).fetchone()
+            if (
+                not suggestion
+                or suggestion["result"]["job_id"] != str(job_id)
+                or suggestion["result"]["job_version"] != data.job_version
+                or suggestion["result"]["profile_version"] != data.profile_version
+            ):
+                raise Problem(409, "STALE_SUGGESTION", "Sugestão de IA ausente ou desatualizada.")
         at = datetime.now(UTC)
         try:
             result = evaluate(public(job), stored["data"], assessments, at)
@@ -71,6 +85,7 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
                 "profile_snapshot": stored["data"],
                 "input_assessments": assessments,
                 "reviewed_by": str(actor.id),
+                "ai_run_id": str(data.ai_run_id) if data.ai_run_id else None,
             },
         )
         # SCORED is derived workflow metadata, not an edit to reviewed source content.
