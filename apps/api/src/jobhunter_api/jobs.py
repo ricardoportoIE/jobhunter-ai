@@ -1,0 +1,180 @@
+"""Manual import and reviewed requirements. URLs are never fetched."""
+
+from __future__ import annotations
+
+import hashlib
+from typing import Annotated, Literal
+from urllib.parse import urlsplit
+from uuid import UUID, uuid4
+
+from fastapi import APIRouter, Query, Request
+from pydantic import ConfigDict, Field, model_validator
+
+from jobhunter_api.auth import Actor, settings_for
+from jobhunter_api.errors import Problem
+from jobhunter_api.profile import Input, Text, Version
+from jobhunter_api.records import get_record, insert, owner_lock, public, update
+from jobhunter_api.store import Row, connect
+
+router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
+type Category = Literal[
+    "technical_skills",
+    "seniority_experience",
+    "portfolio",
+    "education",
+    "location_work_mode",
+    "salary",
+    "work_authorisation_hours",
+    "career_value",
+]
+
+
+class JobImport(Input):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
+    raw_text: str = Field(min_length=1, max_length=50000)
+    source_name: str = Field(default="manual", min_length=1, max_length=200)
+    source_url: str | None = Field(default=None, max_length=2000)
+    external_id: str | None = Field(default=None, min_length=1, max_length=200)
+    location_hint: str | None = Field(default=None, max_length=200)
+
+    @model_validator(mode="after")
+    def reference(self) -> JobImport:
+        if not self.raw_text.strip():
+            raise ValueError("Empty content")
+        if self.source_url:
+            url = urlsplit(self.source_url)
+            if (
+                url.scheme not in {"http", "https"}
+                or not url.hostname
+                or url.username
+                or url.password
+            ):
+                raise ValueError("Only HTTP(S) references without credentials are accepted")
+        return self
+
+
+class Requirement(Input):
+    id: UUID = Field(default_factory=uuid4)
+    text: Text
+    category: Category
+    importance: Literal["required", "preferred"] = "required"
+    is_eliminatory: bool = False
+    source_locator: Text
+
+
+class Salary(Input):
+    minimum: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    maximum: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    currency: str | None = Field(default=None, pattern="^[A-Z]{3}$")
+    period: Literal["hour", "day", "month", "year"] | None = None
+
+    @model_validator(mode="after")
+    def range(self) -> Salary:
+        if self.minimum is not None and self.maximum is not None and self.minimum > self.maximum:
+            raise ValueError("Salary range reversed")
+        return self
+
+
+class JobEdit(Version):
+    title: Text | None = None
+    company_name: Text | None = None
+    location: Text | None = None
+    country: Literal["IE", "GB", "OTHER"] | None = None
+    work_mode: Literal["hybrid", "onsite", "remote"] | None = None
+    employment_type: Text | None = None
+    seniority: Text | None = None
+    salary: Salary | None = None
+    work_authorisation: Text | None = None
+    sponsorship: Literal["available", "unavailable", "conditional"] | None = None
+    requirements: list[Requirement] = Field(default_factory=list, max_length=100)
+    risk_flags: list[Text] = Field(default_factory=list, max_length=30)
+    archived: bool = False
+    review_confirmed: bool = False
+
+    @model_validator(mode="after")
+    def identifiers(self) -> JobEdit:
+        if len({r.id for r in self.requirements}) != len(self.requirements):
+            raise ValueError("Duplicate requirement")
+        return self
+
+
+@router.post("/import", status_code=201)
+def import_job(data: JobImport, actor: Actor, request: Request) -> Row:
+    with connect(settings_for(request)) as db:
+        owner_lock(db, actor.id)
+        payload = JobEdit(expected_version=1).model_dump(
+            mode="json", exclude={"expected_version", "review_confirmed"}
+        )
+        payload.update(
+            data.model_dump(),
+            content_sha256=hashlib.sha256(data.raw_text.encode()).hexdigest(),
+            status="DISCOVERED",
+            reviewed_by=None,
+            reviewed_at=None,
+        )
+        return public(insert(db, actor.id, "job", payload))
+
+
+@router.get("")
+def jobs(
+    actor: Actor,
+    request: Request,
+    limit: Annotated[int, Query(ge=1, le=100)] = 30,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    q: str = "",
+    status: Literal["DISCOVERED", "PARSED", "SCORED"] | None = None,
+    archived: bool = False,
+) -> Row:
+    if len(q) > 200:
+        raise Problem(422, "INVALID_INPUT", "Pesquisa muito longa.")
+    with connect(settings_for(request)) as db:
+        conditions = (
+            "owner_id=%s AND kind='job' AND NOT deleted AND "
+            "(data->>'archived')::boolean=%s AND "
+            "(%s::text IS NULL OR data->>'status'=%s) AND "
+            "(coalesce(data->>'title','') ILIKE %s OR coalesce(data->>'company_name','') ILIKE %s)"
+        )
+        params = (actor.id, archived, status, status, f"%{q}%", f"%{q}%")
+        # conditions contains only fixed SQL; all user values are bound parameters.
+        from psycopg import sql
+
+        rows = db.execute(
+            sql.SQL(
+                "SELECT * FROM records WHERE "
+                + conditions
+                + " ORDER BY updated_at DESC,id LIMIT %s OFFSET %s"
+            ),
+            (*params, limit, offset),
+        ).fetchall()
+        total = db.execute(
+            sql.SQL("SELECT count(*) AS total FROM records WHERE " + conditions), params
+        ).fetchone()
+        return {
+            "items": [public(r) for r in rows],
+            "total": total["total"] if total else 0,
+            "limit": limit,
+            "offset": offset,
+        }
+
+
+@router.get("/{job_id}")
+def job(job_id: UUID, actor: Actor, request: Request) -> Row:
+    with connect(settings_for(request)) as db:
+        return public(get_record(db, actor.id, "job", job_id))
+
+
+@router.patch("/{job_id}")
+def edit_job(job_id: UUID, data: JobEdit, actor: Actor, request: Request) -> Row:
+    from datetime import UTC, datetime
+
+    with connect(settings_for(request)) as db:
+        owner_lock(db, actor.id)
+        row = get_record(db, actor.id, "job", job_id)
+        payload = {
+            **row["data"],
+            **data.model_dump(mode="json", exclude={"expected_version", "review_confirmed"}),
+            "status": "PARSED" if data.review_confirmed else "DISCOVERED",
+            "reviewed_by": str(actor.id) if data.review_confirmed else None,
+            "reviewed_at": datetime.now(UTC).isoformat() if data.review_confirmed else None,
+        }
+        return public(update(db, row, data.expected_version, payload))
