@@ -15,6 +15,20 @@ jobs:
   api:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: jobhunter
+          POSTGRES_PASSWORD: ci-synthetic-only
+          POSTGRES_DB: jobhunter
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd "pg_isready -U jobhunter"
+          --health-interval 5s --health-timeout 3s --health-retries 12
+    env:
+      JOBHUNTER_DB_PASSWORD: ci-synthetic-only
+      JOBHUNTER_TEST_DB_NAME: jobhunter_test_ci
     defaults:
       run:
         working-directory: apps/api

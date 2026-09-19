@@ -5,7 +5,9 @@ from typing import Annotated, Literal
 from fastapi import Depends, FastAPI, Request, Response
 from pydantic import BaseModel
 
+from jobhunter_api.auth import router as session_router
 from jobhunter_api.database import check_database
+from jobhunter_api.errors import install_errors
 from jobhunter_api.settings import Settings
 
 
@@ -47,6 +49,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/api/openapi.json",
         lifespan=lifespan,
     )
+    install_errors(application)
+    application.include_router(session_router)
 
     @application.get("/api/health/live", tags=["health"])
     def live() -> LiveStatus:
