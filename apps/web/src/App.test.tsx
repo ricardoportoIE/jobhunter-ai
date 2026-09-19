@@ -1,37 +1,50 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
-import App from './Foundation';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import App from "./Foundation";
 
-const healthy = () => new Response(JSON.stringify({ status: 'ready', checks: { database: 'ok' } }));
+const healthy = () =>
+  new Response(JSON.stringify({ status: "ready", checks: { database: "ok" } }));
 
-describe('workspace connection', () => {
-  it('shows a successful check without presenting private profile data', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(healthy()));
+describe("workspace connection", () => {
+  it("shows a successful check without presenting private profile data", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(healthy()));
     render(<App />);
-    expect(await screen.findByText('Ambiente conectado')).toBeInTheDocument();
-    expect(screen.getByText(/Seu perfil privado ainda não/)).toBeInTheDocument();
+    expect(await screen.findByText("Ambiente conectado")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Seu perfil privado ainda não/),
+    ).toBeInTheDocument();
   });
 
-  it('reports database unavailability and supports retry', async () => {
-    const fetchMock = vi.fn().mockResolvedValueOnce(new Response('{}', { status: 503 }))
+  it("reports database unavailability and supports retry", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 503 }))
       .mockResolvedValueOnce(healthy());
-    vi.stubGlobal('fetch', fetchMock);
+    vi.stubGlobal("fetch", fetchMock);
     render(<App />);
-    expect(await screen.findByText('Conexão indisponível')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /Verificar conexão/ }));
-    expect(await screen.findByText('Ambiente conectado')).toBeInTheDocument();
+    expect(await screen.findByText("Conexão indisponível")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: /Verificar conexão/ }),
+    );
+    expect(await screen.findByText("Ambiente conectado")).toBeInTheDocument();
   });
 
-  it('does not treat a malformed success response as ready', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"status":"ready"}')));
+  it("does not treat a malformed success response as ready", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response('{"status":"ready"}')),
+    );
     render(<App />);
-    expect(await screen.findByText('Conexão indisponível')).toBeInTheDocument();
+    expect(await screen.findByText("Conexão indisponível")).toBeInTheDocument();
   });
 
-  it('handles network errors', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Network error')));
+  it("handles network errors", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new TypeError("Network error")),
+    );
     render(<App />);
-    expect(await screen.findByText('Conexão indisponível')).toBeInTheDocument();
+    expect(await screen.findByText("Conexão indisponível")).toBeInTheDocument();
   });
 });

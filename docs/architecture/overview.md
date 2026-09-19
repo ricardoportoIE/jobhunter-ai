@@ -21,7 +21,7 @@ flowchart LR
 
 Um backend, um banco e módulos com limites explícitos. Domínio não importa FastAPI, SDK de LLM ou detalhes AWS. Adaptadores convertem contratos externos para o domínio. React consome API; não acessa banco, providers ou segredos diretamente. Aplicação e banco locais ficam limitados ao loopback, com credenciais locais fora do Git.
 
-Estrutura futura mínima: `apps/api`, `apps/web`, `packages/domain`, `tests`, `infrastructure`. Workers, renderer, MCP e pacotes de agentes surgem apenas quando suas fases precisarem deles. Os diretórios de aplicação ainda não foram criados.
+Estrutura implementada: `apps/api` e `apps/web`, com testes junto de cada aplicação e scripts de validação na raiz. O motor puro está em `jobhunter_api/scoring.py`, sem FastAPI ou PostgreSQL. Workers, renderer, MCP e infraestrutura cloud surgem quando suas fases precisarem deles. [Contratos concretizados na fase 1](../phase-1/runtime-contracts.md).
 
 ## Evolução AWS — referência para fase 5
 

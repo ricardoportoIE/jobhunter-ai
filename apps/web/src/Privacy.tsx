@@ -1,7 +1,55 @@
-import { api } from './api';
-import { useTask } from './useTask';
+import { api } from "./api";
+import { useTask } from "./useTask";
 
 export default function Privacy() {
   const task = useTask();
-  return <><p className="eyebrow">SEUS DADOS</p><h1>Privacidade e histórico</h1><section className="panel narrow"><h2>Exportar os dados da aplicação</h2><p>O arquivo inclui perfil, fatos, evidências, vagas, análises, candidaturas e histórico de alterações. Guarde-o em um local privado.</p>{task.feedback}<button className="primary" disabled={task.busy} onClick={() => { void task.run(async () => { const data = await api<unknown>('/candidate/export'); const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = 'jobhunter-export.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }, 'Exportação preparada.'); }}>Baixar exportação</button></section><section className="panel narrow"><h2>Eliminar os dados locais</h2><p>A eliminação completa, incluindo snapshots e auditoria, é uma operação administrativa local descrita no guia do projeto. Ela encerra todas as sessões e preserva a conta de acesso.</p><p>Remover um fato ou evidência da tela invalida análises, mas mantém versões anteriores no histórico. O comando administrativo elimina esses registros do banco. Documentos de origem e exportações guardadas fora da aplicação precisam ser tratados separadamente.</p></section></>;
+  return (
+    <>
+      <p className="eyebrow">SEUS DADOS</p>
+      <h1>Privacidade e histórico</h1>
+      <section className="panel narrow">
+        <h2>Exportar os dados da aplicação</h2>
+        <p>
+          O arquivo inclui perfil, fatos, evidências, vagas, análises,
+          candidaturas e histórico de alterações. Guarde-o em um local privado.
+        </p>
+        {task.feedback}
+        <button
+          className="primary"
+          disabled={task.busy}
+          onClick={() => {
+            void task.run(async () => {
+              const data = await api<unknown>("/candidate/export");
+              const url = URL.createObjectURL(
+                new Blob([JSON.stringify(data, null, 2)], {
+                  type: "application/json",
+                }),
+              );
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "jobhunter-export.json";
+              link.click();
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }, "Exportação preparada.");
+          }}
+        >
+          Baixar exportação
+        </button>
+      </section>
+      <section className="panel narrow">
+        <h2>Eliminar os dados locais</h2>
+        <p>
+          A eliminação completa, incluindo snapshots e auditoria, é uma operação
+          administrativa local descrita no guia do projeto. Ela encerra todas as
+          sessões e preserva a conta de acesso.
+        </p>
+        <p>
+          Remover um fato ou evidência da tela invalida análises, mas mantém
+          versões anteriores no histórico. O comando administrativo elimina
+          esses registros do banco. Documentos de origem e exportações guardadas
+          fora da aplicação precisam ser tratados separadamente.
+        </p>
+      </section>
+    </>
+  );
 }

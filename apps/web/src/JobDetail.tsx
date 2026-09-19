@@ -1,67 +1,692 @@
-import { useTask } from './useTask';
-import { optional } from './forms';
-import { useEffect, useState } from 'react';
-import ShortlistButton from './ShortlistButton';
-import { api } from './api';
-import { categories, gates, outcomes, recommendations, type Assessment, type Category, type Fact, type Job, type Match, type Profile, type Requirement } from './types';
-import { ErrorState, Field, Loading } from './ui';
+import { useTask } from "./useTask";
+import { optional } from "./forms";
+import { useEffect, useState } from "react";
+import ShortlistButton from "./ShortlistButton";
+import { api } from "./api";
+import {
+  categories,
+  gates,
+  outcomes,
+  recommendations,
+  reviewFlags,
+  type Assessment,
+  type Category,
+  type Fact,
+  type Job,
+  type Match,
+  type Profile,
+  type Requirement,
+} from "./types";
+import { ErrorState, Field, Loading } from "./ui";
 
-export default function JobDetail({ id, profile, facts }: { id: string; profile: Profile; facts: Fact[] }) {
-  const [job, setJob] = useState<Job | null>(null); const [error, setError] = useState(''); const [refresh, setRefresh] = useState(0);
-  const [tab, setTab] = useState<'review' | 'analyse' | 'result'>('review'); const [match, setMatch] = useState<Match | null>(null);
-  useEffect(() => { let active = true;
-    Promise.all([api<Job>(`/jobs/${id}`), api<{ id: string }[]>(`/jobs/${id}/matches`)]).then(async ([item, matches]) => {
-      const latest = matches[0] ? await api<Match>(`/matches/${matches[0].id}`) : null;
-      if (active) { setJob(item); setMatch(latest); setError(''); }
-    }).catch((reason: Error) => { if (active) setError(reason.message); });
-    return () => { active = false; };
+export default function JobDetail({
+  id,
+  profile,
+  facts,
+}: {
+  id: string;
+  profile: Profile;
+  facts: Fact[];
+}) {
+  const [job, setJob] = useState<Job | null>(null);
+  const [error, setError] = useState("");
+  const [refresh, setRefresh] = useState(0);
+  const [tab, setTab] = useState<"review" | "analyse" | "result">("review");
+  const [match, setMatch] = useState<Match | null>(null);
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      api<Job>(`/jobs/${id}`),
+      api<{ id: string }[]>(`/jobs/${id}/matches`),
+    ])
+      .then(async ([item, matches]) => {
+        const latest = matches[0]
+          ? await api<Match>(`/matches/${matches[0].id}`)
+          : null;
+        if (active) {
+          setJob(item);
+          setMatch(latest);
+          setError("");
+        }
+      })
+      .catch((reason: Error) => {
+        if (active) setError(reason.message);
+      });
+    return () => {
+      active = false;
+    };
   }, [id, refresh, profile.version]);
-  if (error) return <ErrorState error={error} retry={() => setRefresh(refresh + 1)} />;
+  if (error)
+    return <ErrorState error={error} retry={() => setRefresh(refresh + 1)} />;
   if (!job) return <Loading />;
-  return <><a className="back" href="#inbox">← Voltar à Inbox</a><div className="page-heading"><div><p className="eyebrow">{job.status} · VERSÃO {job.version}</p><h1>{job.title || 'Revisar oportunidade'}</h1><p>{job.company_name || 'Empresa não informada'} · {job.location || 'Local não informado'}</p></div></div>
-    <nav className="tabs" aria-label="Etapas da oportunidade"><button aria-pressed={tab === 'review'} onClick={() => setTab('review')}>1. Revisar vaga</button><button aria-pressed={tab === 'analyse'} onClick={() => setTab('analyse')}>2. Avaliar requisitos</button><button aria-pressed={tab === 'result'} onClick={() => setTab('result')}>3. Resultado e evidências</button></nav>
-    {tab === 'review' && <JobReview key={job.version} job={job} saved={() => setRefresh(refresh + 1)} />}
-    {tab === 'analyse' && <AnalysisForm job={job} profile={profile} facts={facts} onResult={(result) => { setMatch(result); setTab('result'); setRefresh(refresh + 1); }} />}
-    {tab === 'result' && (match ? <MatchResult match={match} /> : <section className="empty"><h2>Análise ainda não realizada</h2><p>Revise a vaga e avalie seus requisitos para obter um resultado.</p></section>)}
-  </>;
+  return (
+    <>
+      <a className="back" href="#inbox">
+        ← Voltar à Inbox
+      </a>
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">
+            {job.status} · VERSÃO {job.version}
+          </p>
+          <h1>{job.title || "Revisar oportunidade"}</h1>
+          <p>
+            {job.company_name || "Empresa não informada"} ·{" "}
+            {job.location || "Local não informado"}
+          </p>
+        </div>
+      </div>
+      <nav className="tabs" aria-label="Etapas da oportunidade">
+        <button
+          aria-pressed={tab === "review"}
+          onClick={() => setTab("review")}
+        >
+          1. Revisar vaga
+        </button>
+        <button
+          aria-pressed={tab === "analyse"}
+          onClick={() => setTab("analyse")}
+        >
+          2. Avaliar requisitos
+        </button>
+        <button
+          aria-pressed={tab === "result"}
+          onClick={() => setTab("result")}
+        >
+          3. Resultado e evidências
+        </button>
+      </nav>
+      {tab === "review" && (
+        <JobReview
+          key={job.version}
+          job={job}
+          saved={() => setRefresh(refresh + 1)}
+        />
+      )}
+      {tab === "analyse" && (
+        <AnalysisForm
+          job={job}
+          profile={profile}
+          facts={facts}
+          onResult={(result) => {
+            setMatch(result);
+            setTab("result");
+            setRefresh(refresh + 1);
+          }}
+        />
+      )}
+      {tab === "result" &&
+        (match ? (
+          <MatchResult match={match} />
+        ) : (
+          <section className="empty">
+            <h2>Análise ainda não realizada</h2>
+            <p>
+              Revise a vaga e avalie seus requisitos para obter um resultado.
+            </p>
+          </section>
+        ))}
+    </>
+  );
 }
 
 function JobReview({ job, saved }: { job: Job; saved: () => void }) {
-  const [requirements, setRequirements] = useState<Requirement[]>(job.requirements); const task = useTask();
-  function change(id: string, update: Partial<Requirement>) { setRequirements((items) => items.map((item) => item.id === id ? { ...item, ...update } : item)); }
-  return <div className="split review-layout"><section className="panel"><h2>Campos estruturados</h2><form onSubmit={(event) => {
-    event.preventDefault(); const data = new FormData(event.currentTarget);
-    const minimum = optional(data, 'salary_min'); const maximum = optional(data, 'salary_max'); const currency = optional(data, 'currency'); const period = optional(data, 'period');
-    void task.run(async () => { await api(`/jobs/${job.id}`, 'PATCH', { expected_version: job.version, title: optional(data, 'title'), company_name: optional(data, 'company_name'), location: optional(data, 'location'), country: optional(data, 'country'), work_mode: optional(data, 'work_mode'), employment_type: optional(data, 'employment_type'), seniority: optional(data, 'seniority'), salary: minimum || maximum || currency || period ? { minimum: minimum ? Number(minimum) : null, maximum: maximum ? Number(maximum) : null, currency, period } : null, sponsorship: optional(data, 'sponsorship'), work_authorisation: optional(data, 'work_authorisation'), requirements, risk_flags: job.risk_flags, archived: data.has('archived'), review_confirmed: data.has('review_confirmed') }); saved(); });
-  }}>
-    <Field label="Título"><input name="title" defaultValue={job.title ?? ''} /></Field><Field label="Empresa"><input name="company_name" defaultValue={job.company_name ?? ''} /></Field>
-    <div className="form-grid"><Field label="Localidade"><input name="location" defaultValue={job.location ?? ''} /></Field><Field label="País"><select name="country" defaultValue={job.country ?? ''}><option value="">Desconhecido</option><option value="IE">Irlanda</option><option value="GB">Reino Unido</option><option value="OTHER">Outro</option></select></Field><Field label="Modalidade"><select name="work_mode" defaultValue={job.work_mode ?? ''}><option value="">Desconhecida</option><option value="hybrid">Híbrido</option><option value="onsite">Presencial</option><option value="remote">Remoto</option></select></Field><Field label="Contrato / horário"><input name="employment_type" defaultValue={job.employment_type ?? ''} placeholder="Ex.: full-time" /></Field></div>
-    <Field label="Nível confirmado da vaga"><input name="seniority" defaultValue={job.seniority ?? ''} placeholder="graduate, junior, mid, senior…" /></Field>
-    <fieldset><legend>Salário — deixe vazio se ausente</legend><div className="form-grid"><Field label="Mínimo"><input type="number" min="0" step="any" name="salary_min" defaultValue={job.salary?.minimum ?? ''} /></Field><Field label="Máximo"><input type="number" min="0" step="any" name="salary_max" defaultValue={job.salary?.maximum ?? ''} /></Field><Field label="Moeda"><input name="currency" pattern="[A-Z]{3}" placeholder="EUR" defaultValue={job.salary?.currency ?? ''} /></Field><Field label="Período"><select name="period" defaultValue={job.salary?.period ?? ''}><option value="">Desconhecido</option><option value="year">Ano</option><option value="month">Mês</option><option value="day">Dia</option><option value="hour">Hora</option></select></Field></div></fieldset>
-    <Field label="Sponsorship declarado"><select name="sponsorship" defaultValue={job.sponsorship ?? ''}><option value="">Desconhecido</option><option value="available">Disponível</option><option value="unavailable">Explicitamente indisponível</option><option value="conditional">Condicional</option></select></Field><Field label="Autorização / restrições no anúncio"><textarea name="work_authorisation" defaultValue={job.work_authorisation ?? ''} rows={2} /></Field>
-    <h3>Requisitos</h3><p className="muted">Transcreva os critérios relevantes e onde aparecem no anúncio. Ausência de informação continua desconhecida.</p>
-    {requirements.map((req, index) => <fieldset key={req.id}><legend>Requisito {index + 1}</legend><Field label="Descrição do requisito"><input required value={req.text} onChange={(event) => change(req.id, { text: event.target.value })} /></Field><Field label="Categoria do requisito"><select value={req.category} onChange={(event) => change(req.id, { category: event.target.value as Category })}>{Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></Field><Field label="Importância"><select value={req.importance} onChange={(event) => change(req.id, { importance: event.target.value as Requirement['importance'] })}><option value="required">Obrigatório</option><option value="preferred">Desejável</option></select></Field><Field label="Local no anúncio"><input required value={req.source_locator} onChange={(event) => change(req.id, { source_locator: event.target.value })} /></Field><label className="check"><input type="checkbox" checked={req.is_eliminatory} onChange={(event) => change(req.id, { is_eliminatory: event.target.checked })} />Eliminatório explicitamente confirmado</label>{req.category === 'work_authorisation_hours' && <label className="check"><input type="checkbox" checked={req.future_authorisation} onChange={(event) => change(req.id, { future_authorisation: event.target.checked })} />Possibilidade futura de autorização / sponsorship</label>}<button type="button" onClick={() => setRequirements((items) => items.filter((item) => item.id !== req.id))}>Remover requisito {index + 1}</button></fieldset>)}
-    <button type="button" disabled={requirements.length >= 100} onClick={() => setRequirements((items) => [...items, { id: crypto.randomUUID(), text: '', category: 'technical_skills', importance: 'required', is_eliminatory: false, source_locator: '', future_authorisation: false }])}>Adicionar requisito</button>
-    <label className="check"><input name="archived" type="checkbox" defaultChecked={job.archived} />Arquivar esta oportunidade</label>
-    <label className="check"><input name="review_confirmed" type="checkbox" />Confirmo a revisão dos campos e requisitos acima.</label>{task.feedback}<button className="primary" disabled={task.busy}>Salvar revisão da vaga</button>
-  </form></section><aside className="panel source"><h2>Anúncio original</h2><p>Fonte: {job.source_name}</p>{job.source_url && <a href={job.source_url} target="_blank" rel="noopener noreferrer">Abrir referência externa ↗</a>}<p className="preserve">{job.raw_text}</p><details><summary>Integridade do texto</summary><p className="muted">SHA-256: {job.content_sha256}</p></details></aside></div>;
+  const [requirements, setRequirements] = useState<Requirement[]>(
+    job.requirements,
+  );
+  const task = useTask();
+  function change(id: string, update: Partial<Requirement>) {
+    setRequirements((items) =>
+      items.map((item) => (item.id === id ? { ...item, ...update } : item)),
+    );
+  }
+  return (
+    <div className="split review-layout">
+      <section className="panel">
+        <h2>Campos estruturados</h2>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const data = new FormData(event.currentTarget);
+            const minimum = optional(data, "salary_min");
+            const maximum = optional(data, "salary_max");
+            const currency = optional(data, "currency");
+            const period = optional(data, "period");
+            void task.run(async () => {
+              await api(`/jobs/${job.id}`, "PATCH", {
+                expected_version: job.version,
+                title: optional(data, "title"),
+                company_name: optional(data, "company_name"),
+                location: optional(data, "location"),
+                country: optional(data, "country"),
+                work_mode: optional(data, "work_mode"),
+                employment_type: optional(data, "employment_type"),
+                seniority: optional(data, "seniority"),
+                salary:
+                  minimum || maximum || currency || period
+                    ? {
+                        minimum: minimum ? Number(minimum) : null,
+                        maximum: maximum ? Number(maximum) : null,
+                        currency,
+                        period,
+                      }
+                    : null,
+                sponsorship: optional(data, "sponsorship"),
+                work_authorisation: optional(data, "work_authorisation"),
+                requirements,
+                risk_flags: String(data.get("risk_flags") ?? "")
+                  .split("\n")
+                  .map((flag) => flag.trim())
+                  .filter(Boolean),
+                archived: data.has("archived"),
+                review_confirmed: data.has("review_confirmed"),
+              });
+              saved();
+            });
+          }}
+        >
+          <Field label="Título">
+            <input name="title" defaultValue={job.title ?? ""} />
+          </Field>
+          <Field label="Empresa">
+            <input name="company_name" defaultValue={job.company_name ?? ""} />
+          </Field>
+          <div className="form-grid">
+            <Field label="Localidade">
+              <input name="location" defaultValue={job.location ?? ""} />
+            </Field>
+            <Field label="País">
+              <select name="country" defaultValue={job.country ?? ""}>
+                <option value="">Desconhecido</option>
+                <option value="IE">Irlanda</option>
+                <option value="GB">Reino Unido</option>
+                <option value="OTHER">Outro</option>
+              </select>
+            </Field>
+            <Field label="Modalidade">
+              <select name="work_mode" defaultValue={job.work_mode ?? ""}>
+                <option value="">Desconhecida</option>
+                <option value="hybrid">Híbrido</option>
+                <option value="onsite">Presencial</option>
+                <option value="remote">Remoto</option>
+              </select>
+            </Field>
+            <Field label="Contrato / horário">
+              <input
+                name="employment_type"
+                defaultValue={job.employment_type ?? ""}
+                placeholder="Ex.: full-time"
+              />
+            </Field>
+          </div>
+          <Field label="Nível confirmado da vaga">
+            <input
+              name="seniority"
+              defaultValue={job.seniority ?? ""}
+              placeholder="graduate, junior, mid, senior…"
+            />
+          </Field>
+          <fieldset>
+            <legend>Salário — deixe vazio se ausente</legend>
+            <div className="form-grid">
+              <Field label="Mínimo">
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  name="salary_min"
+                  defaultValue={job.salary?.minimum ?? ""}
+                />
+              </Field>
+              <Field label="Máximo">
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  name="salary_max"
+                  defaultValue={job.salary?.maximum ?? ""}
+                />
+              </Field>
+              <Field label="Moeda">
+                <input
+                  name="currency"
+                  pattern="[A-Z]{3}"
+                  placeholder="EUR"
+                  defaultValue={job.salary?.currency ?? ""}
+                />
+              </Field>
+              <Field label="Período">
+                <select name="period" defaultValue={job.salary?.period ?? ""}>
+                  <option value="">Desconhecido</option>
+                  <option value="year">Ano</option>
+                  <option value="month">Mês</option>
+                  <option value="day">Dia</option>
+                  <option value="hour">Hora</option>
+                </select>
+              </Field>
+            </div>
+          </fieldset>
+          <Field label="Sponsorship declarado">
+            <select name="sponsorship" defaultValue={job.sponsorship ?? ""}>
+              <option value="">Desconhecido</option>
+              <option value="available">Disponível</option>
+              <option value="unavailable">Explicitamente indisponível</option>
+              <option value="conditional">Condicional</option>
+            </select>
+          </Field>
+          <Field label="Autorização / restrições no anúncio">
+            <textarea
+              name="work_authorisation"
+              defaultValue={job.work_authorisation ?? ""}
+              rows={2}
+            />
+          </Field>
+          <Field label="Pontos de revisão (um por linha)">
+            <textarea
+              name="risk_flags"
+              rows={3}
+              defaultValue={job.risk_flags.join("\n")}
+              placeholder="Ex.: título e descrição apresentam funções diferentes"
+            />
+          </Field>
+          <h3>Requisitos</h3>
+          <p className="muted">
+            Transcreva os critérios relevantes e onde aparecem no anúncio.
+            Ausência de informação continua desconhecida.
+          </p>
+          {requirements.map((req, index) => (
+            <fieldset key={req.id}>
+              <legend>Requisito {index + 1}</legend>
+              <Field label="Descrição do requisito">
+                <input
+                  required
+                  value={req.text}
+                  onChange={(event) =>
+                    change(req.id, { text: event.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Categoria do requisito">
+                <select
+                  value={req.category}
+                  onChange={(event) =>
+                    change(req.id, { category: event.target.value as Category })
+                  }
+                >
+                  {Object.entries(categories).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Importância">
+                <select
+                  value={req.importance}
+                  onChange={(event) =>
+                    change(req.id, {
+                      importance: event.target
+                        .value as Requirement["importance"],
+                    })
+                  }
+                >
+                  <option value="required">Obrigatório</option>
+                  <option value="preferred">Desejável</option>
+                </select>
+              </Field>
+              <Field label="Local no anúncio">
+                <input
+                  required
+                  value={req.source_locator}
+                  onChange={(event) =>
+                    change(req.id, { source_locator: event.target.value })
+                  }
+                />
+              </Field>
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={req.is_eliminatory}
+                  onChange={(event) =>
+                    change(req.id, { is_eliminatory: event.target.checked })
+                  }
+                />
+                Eliminatório explicitamente confirmado
+              </label>
+              {req.category === "work_authorisation_hours" && (
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={req.future_authorisation}
+                    onChange={(event) =>
+                      change(req.id, {
+                        future_authorisation: event.target.checked,
+                      })
+                    }
+                  />
+                  Possibilidade futura de autorização / sponsorship
+                </label>
+              )}
+              <button
+                type="button"
+                onClick={() =>
+                  setRequirements((items) =>
+                    items.filter((item) => item.id !== req.id),
+                  )
+                }
+              >
+                Remover requisito {index + 1}
+              </button>
+            </fieldset>
+          ))}
+          <button
+            type="button"
+            disabled={requirements.length >= 100}
+            onClick={() =>
+              setRequirements((items) => [
+                ...items,
+                {
+                  id: crypto.randomUUID(),
+                  text: "",
+                  category: "technical_skills",
+                  importance: "required",
+                  is_eliminatory: false,
+                  source_locator: "",
+                  future_authorisation: false,
+                },
+              ])
+            }
+          >
+            Adicionar requisito
+          </button>
+          <label className="check">
+            <input
+              name="archived"
+              type="checkbox"
+              defaultChecked={job.archived}
+            />
+            Arquivar esta oportunidade
+          </label>
+          <label className="check">
+            <input name="review_confirmed" type="checkbox" />
+            Confirmo a revisão dos campos e requisitos acima.
+          </label>
+          {task.feedback}
+          <button className="primary" disabled={task.busy}>
+            Salvar revisão da vaga
+          </button>
+        </form>
+      </section>
+      <aside className="panel source">
+        <h2>Anúncio original</h2>
+        <p>Fonte: {job.source_name}</p>
+        {job.source_url && (
+          <a href={job.source_url} target="_blank" rel="noopener noreferrer">
+            Abrir referência externa ↗
+          </a>
+        )}
+        <p className="preserve">{job.raw_text}</p>
+        <details>
+          <summary>Integridade do texto</summary>
+          <p className="muted">SHA-256: {job.content_sha256}</p>
+        </details>
+      </aside>
+    </div>
+  );
 }
 
-function AnalysisForm({ job, profile, facts, onResult }: { job: Job; profile: Profile; facts: Fact[]; onResult: (result: Match) => void }) {
-  const task = useTask(); const [assessments, setAssessments] = useState<Assessment[]>(() => job.requirements.map((req) => ({ requirement_id: req.id, status: 'unknown', reason: '', fact_ids: [] })));
-  function change(id: string, update: Partial<Assessment>) { setAssessments((items) => items.map((item) => item.requirement_id === id ? { ...item, ...update } : item)); }
-  if (job.status === 'DISCOVERED' || profile.status !== 'reviewed') return <section className="empty"><h2>Revisão necessária</h2><p>Confirme a revisão da vaga e publique a versão do perfil antes de analisar.</p><a href="#profile">Revisar perfil →</a></section>;
-  return <section className="panel narrow"><h2>Avalie o atendimento de cada requisito</h2><p>Somente fatos verificados e autorizados para matching podem sustentar respostas positivas. Uma avaliação manual não cria experiência profissional.</p><form onSubmit={(event) => { event.preventDefault(); void task.run(async () => { onResult(await api<Match>(`/jobs/${job.id}/analyse`, 'POST', { job_version: job.version, profile_version: profile.version, review_confirmed: true, assessments: assessments.map((a) => ({ ...a, reason: a.reason || 'Informação ainda desconhecida.' })) })); }, 'Análise concluída.'); }}>
-    {!job.requirements.length && <p>Nenhum requisito estruturado: o resultado terá score desconhecido e cobertura zero.</p>}
-    {job.requirements.map((req) => { const entry = assessments.find((a) => a.requirement_id === req.id)!; return <fieldset key={req.id}><legend>{req.text}</legend><p className="muted">{categories[req.category]} · {req.importance === 'required' ? 'Obrigatório' : 'Desejável'}{req.is_eliminatory ? ' · Eliminatório' : ''}</p><Field label={`Atendimento: ${req.text}`}><select value={entry.status} onChange={(event) => change(req.id, { status: event.target.value })}>{Object.entries(outcomes).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></Field><Field label={`Justificativa: ${req.text}`}><textarea rows={2} required={entry.status !== 'unknown'} maxLength={3000} value={entry.reason} onChange={(event) => change(req.id, { reason: event.target.value })} /></Field><fieldset><legend>Fatos que sustentam esta avaliação</legend>{facts.filter((fact) => fact.status === 'verified' && fact.allowed_uses.includes('matching')).map((fact) => <label className="check" key={fact.id}><input type="checkbox" checked={entry.fact_ids.includes(fact.id)} onChange={(event) => change(req.id, { fact_ids: event.target.checked ? [...entry.fact_ids, fact.id] : entry.fact_ids.filter((id) => id !== fact.id) })} />{fact.claim}</label>)}{!facts.some((f) => f.status === 'verified' && f.allowed_uses.includes('matching')) && <p>Nenhum fato verificado disponível.</p>}</fieldset></fieldset>; })}
-    <label className="check"><input type="checkbox" required />Confirmo estas avaliações e a validade das referências selecionadas.</label>{task.feedback}<button className="primary" disabled={task.busy}>Calcular compatibilidade</button>
-  </form></section>;
+function AnalysisForm({
+  job,
+  profile,
+  facts,
+  onResult,
+}: {
+  job: Job;
+  profile: Profile;
+  facts: Fact[];
+  onResult: (result: Match) => void;
+}) {
+  const task = useTask();
+  const [assessments, setAssessments] = useState<Assessment[]>(() =>
+    job.requirements.map((req) => ({
+      requirement_id: req.id,
+      status: "unknown",
+      reason: "",
+      fact_ids: [],
+    })),
+  );
+  function change(id: string, update: Partial<Assessment>) {
+    setAssessments((items) =>
+      items.map((item) =>
+        item.requirement_id === id ? { ...item, ...update } : item,
+      ),
+    );
+  }
+  if (job.status === "DISCOVERED" || profile.status !== "reviewed")
+    return (
+      <section className="empty">
+        <h2>Revisão necessária</h2>
+        <p>
+          Confirme a revisão da vaga e publique a versão do perfil antes de
+          analisar.
+        </p>
+        <a href="#profile">Revisar perfil →</a>
+      </section>
+    );
+  return (
+    <section className="panel narrow">
+      <h2>Avalie o atendimento de cada requisito</h2>
+      <p>
+        Somente fatos verificados e autorizados para matching podem sustentar
+        respostas positivas. Uma avaliação manual não cria experiência
+        profissional.
+      </p>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void task.run(async () => {
+            onResult(
+              await api<Match>(`/jobs/${job.id}/analyse`, "POST", {
+                job_version: job.version,
+                profile_version: profile.version,
+                review_confirmed: true,
+                assessments: assessments.map((a) => ({
+                  ...a,
+                  reason: a.reason || "Informação ainda desconhecida.",
+                })),
+              }),
+            );
+          }, "Análise concluída.");
+        }}
+      >
+        {!job.requirements.length && (
+          <p>
+            Nenhum requisito estruturado: o resultado terá score desconhecido e
+            cobertura zero.
+          </p>
+        )}
+        {job.requirements.map((req) => {
+          const entry = assessments.find((a) => a.requirement_id === req.id)!;
+          return (
+            <fieldset key={req.id}>
+              <legend>{req.text}</legend>
+              <p className="muted">
+                {categories[req.category]} ·{" "}
+                {req.importance === "required" ? "Obrigatório" : "Desejável"}
+                {req.is_eliminatory ? " · Eliminatório" : ""}
+              </p>
+              <Field label={`Atendimento: ${req.text}`}>
+                <select
+                  value={entry.status}
+                  onChange={(event) =>
+                    change(req.id, { status: event.target.value })
+                  }
+                >
+                  {Object.entries(outcomes).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={`Justificativa: ${req.text}`}>
+                <textarea
+                  rows={2}
+                  required={entry.status !== "unknown"}
+                  maxLength={3000}
+                  value={entry.reason}
+                  onChange={(event) =>
+                    change(req.id, { reason: event.target.value })
+                  }
+                />
+              </Field>
+              <fieldset>
+                <legend>Fatos que sustentam esta avaliação</legend>
+                {facts
+                  .filter(
+                    (fact) =>
+                      fact.status === "verified" &&
+                      fact.allowed_uses.includes("matching"),
+                  )
+                  .map((fact) => (
+                    <label className="check" key={fact.id}>
+                      <input
+                        type="checkbox"
+                        checked={entry.fact_ids.includes(fact.id)}
+                        onChange={(event) =>
+                          change(req.id, {
+                            fact_ids: event.target.checked
+                              ? [...entry.fact_ids, fact.id]
+                              : entry.fact_ids.filter((id) => id !== fact.id),
+                          })
+                        }
+                      />
+                      {fact.claim}
+                    </label>
+                  ))}
+                {!facts.some(
+                  (f) =>
+                    f.status === "verified" &&
+                    f.allowed_uses.includes("matching"),
+                ) && <p>Nenhum fato verificado disponível.</p>}
+              </fieldset>
+            </fieldset>
+          );
+        })}
+        <label className="check">
+          <input type="checkbox" required />
+          Confirmo estas avaliações e a validade das referências selecionadas.
+        </label>
+        {task.feedback}
+        <button className="primary" disabled={task.busy}>
+          Calcular compatibilidade
+        </button>
+      </form>
+    </section>
+  );
 }
 
 export function MatchResult({ match }: { match: Match }) {
-  return <section className="match-result">{match.stale && <p role="alert">Análise desatualizada: o perfil, a vaga ou a validade de um fato mudou. Revise e calcule novamente.</p>}<div className="score-grid"><div><span>Compatibilidade</span><strong>{match.score === null ? '—' : `${match.score}%`}</strong><small>{match.score === null ? 'Dados insuficientes' : 'Atendimento dos critérios conhecidos'}</small></div><div><span>Cobertura</span><strong>{Math.round(match.coverage * 100)}%</strong><small>Quanto dos requisitos foi avaliado</small></div><div><span>Recomendação</span><h2>{recommendations[match.recommendation]}</h2><small>{gates[match.employment_gate]}</small></div></div>
-    <section className="panel"><h2>Bloqueios e lacunas</h2>{match.blockers.map((b, i) => <p className="blocker" key={i}>{b.reason}</p>)}{!match.gaps.length && !match.blockers.length && <p>Nenhuma lacuna entre os critérios avaliados.</p>}{match.gaps.map((gap) => <article className="record" key={gap.requirement_id}><h3>{gap.text} · {outcomes[gap.status]}</h3><p>{gap.reason}</p></article>)}{match.review_flags.length > 0 && <p className="muted">Pontos de revisão: {match.review_flags.join(', ')}</p>}</section>
-    <section className="panel"><h2>Como o resultado foi calculado</h2>{match.breakdown.map((category) => <details className="category" key={category.category}><summary>{categories[category.category]} · peso {category.weight} · cobertura {Math.round(category.coverage * 100)}%</summary>{!category.assessments.length && <p>Sem critérios estruturados nesta categoria.</p>}{category.assessments.map((item) => <article key={item.requirement_id} className="record"><p><strong>{outcomes[item.status]}</strong> · {item.reason}</p>{item.fact_ids.map((id) => <p key={id}>Fato: {match.profile_snapshot.facts.find((fact) => fact.id === id)?.claim || id}</p>)}{item.evidence_ids.map((id) => { const evidence = match.profile_snapshot.evidence.find((e) => e.id === id); return evidence ? <details key={id}><summary>Ver evidência: {evidence.source_ref}</summary><p>{evidence.locator}</p><p className="preserve">{evidence.content}</p><p className="muted">Versão {evidence.version} preservada nesta análise.</p></details> : null; })}</article>)}</details>)}</section>
-    <ShortlistButton match={match} />
-  </section>;
+  return (
+    <section className="match-result">
+      {match.stale && (
+        <p role="alert">
+          Análise desatualizada: o perfil, a vaga ou a validade de um fato
+          mudou. Revise e calcule novamente.
+        </p>
+      )}
+      <div className="score-grid">
+        <div>
+          <span>Compatibilidade</span>
+          <strong>{match.score === null ? "—" : `${match.score}%`}</strong>
+          <small>
+            {match.score === null
+              ? "Dados insuficientes"
+              : "Atendimento dos critérios conhecidos"}
+          </small>
+        </div>
+        <div>
+          <span>Cobertura</span>
+          <strong>{Math.round(match.coverage * 100)}%</strong>
+          <small>Quanto dos requisitos foi avaliado</small>
+        </div>
+        <div>
+          <span>Recomendação</span>
+          <h2>{recommendations[match.recommendation]}</h2>
+          <small>{gates[match.employment_gate]}</small>
+        </div>
+      </div>
+      <section className="panel">
+        <h2>Bloqueios e lacunas</h2>
+        {match.blockers.map((b, i) => (
+          <p className="blocker" key={i}>
+            {b.reason}
+          </p>
+        ))}
+        {!match.gaps.length && !match.blockers.length && (
+          <p>Nenhuma lacuna entre os critérios avaliados.</p>
+        )}
+        {match.gaps.map((gap) => (
+          <article className="record" key={gap.requirement_id}>
+            <h3>
+              {gap.text} · {outcomes[gap.status]}
+            </h3>
+            <p>{gap.reason}</p>
+          </article>
+        ))}
+        {match.review_flags.length > 0 && (
+          <p className="muted">
+            Pontos de revisão:{" "}
+            {match.review_flags
+              .map((flag) => reviewFlags[flag] ?? flag)
+              .join(", ")}
+          </p>
+        )}
+      </section>
+      <section className="panel">
+        <h2>Como o resultado foi calculado</h2>
+        {match.breakdown.map((category) => (
+          <details className="category" key={category.category}>
+            <summary>
+              {categories[category.category]} · peso {category.weight} ·
+              cobertura {Math.round(category.coverage * 100)}%
+            </summary>
+            {!category.assessments.length && (
+              <p>Sem critérios estruturados nesta categoria.</p>
+            )}
+            {category.assessments.map((item) => (
+              <article key={item.requirement_id} className="record">
+                <p>
+                  <strong>{outcomes[item.status]}</strong> · {item.reason}
+                </p>
+                {item.fact_ids.map((id) => (
+                  <p key={id}>
+                    Fato:{" "}
+                    {match.profile_snapshot.facts.find((fact) => fact.id === id)
+                      ?.claim || id}
+                  </p>
+                ))}
+                {item.evidence_ids.map((id) => {
+                  const evidence = match.profile_snapshot.evidence.find(
+                    (e) => e.id === id,
+                  );
+                  return evidence ? (
+                    <details key={id}>
+                      <summary>Ver evidência: {evidence.source_ref}</summary>
+                      <p>{evidence.locator}</p>
+                      <p className="preserve">{evidence.content}</p>
+                      <p className="muted">
+                        Versão {evidence.version} preservada nesta análise.
+                      </p>
+                    </details>
+                  ) : null;
+                })}
+              </article>
+            ))}
+          </details>
+        ))}
+      </section>
+      <ShortlistButton match={match} />
+    </section>
+  );
 }

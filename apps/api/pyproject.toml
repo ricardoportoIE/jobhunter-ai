@@ -30,6 +30,9 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["jobhunter_api"]
+
 [tool.mypy]
 python_version = "3.13"
 plugins = ["pydantic.mypy"]

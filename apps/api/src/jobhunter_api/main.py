@@ -48,8 +48,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     application = FastAPI(
         title="JobHunter AI API",
-        version="0.1.0",
-        description="P1-01: local environment health checks. No personal-data endpoints yet.",
+        version="1.0.0",
+        description="Reviewed evidence, deterministic matching and manual application tracking.",
         docs_url="/api/docs",
         redoc_url=None,
         openapi_url="/api/openapi.json",

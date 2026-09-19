@@ -1,5 +1,7 @@
 # Dataset inicial e revisão
 
+Atualização da fase 1: [baseline executado nos 20 casos e divergências](../phase-1/evaluation-results.md). O texto abaixo registra a preparação original da fase 0; não foi convertido retroativamente em gold humano.
+
 Vinte anúncios reais foram lidos por GET na API pública Job Board do Greenhouse durante esta fase. A cópia versionável contém reformulações curtas e aliases de empregadores; originais, URLs, IDs externos, timestamps e SHA-256 ficam no manifesto privado `.private/evaluation/provenance.json`. Não foram coletados dados de candidatos nem enviados formulários.
 
 O [dataset](../../data/evals/real-cases.json) contém 12 casos de desenvolvimento e 8 de avaliação. Rótulos foram elaborados pelo assistente após leitura documental: **não são um gold set validado por humanos nem resultados de execução do algoritmo**. Essa distinção permite terminar a preparação de dados na fase 0 e medir/calibrar na fase 1.

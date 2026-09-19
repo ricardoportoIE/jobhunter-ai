@@ -1,0 +1,663 @@
+{
+  "dataset_version": "0.1.0",
+  "dataset_sha256": "15cf7f86b6d501ccef90d3f776e25ca9359f019e0036af1ad4467ae243cca68c",
+  "algorithm_version": "deterministic-manual-0.2.0",
+  "evaluation_at": "2026-09-19T00:00:00+00:00",
+  "scope": "Public conservative baseline without candidate profile or semantic parser; not a fit benchmark.",
+  "human_gold": false,
+  "triage_mapping_for_comparison": {
+    "BLOCK": "BLOCKED",
+    "REVIEW": "REVIEW",
+    "PURSUE_WITH_REVIEW": "APPLY_AFTER_REVIEW",
+    "DEPRIORITISE": "TRACK_OR_ARCHIVE",
+    "SECONDARY": "TRACK_OR_ARCHIVE"
+  },
+  "summary": {
+    "cases_executed": 20,
+    "conservative_invariants_passed": 20,
+    "mapped_recommendation_agreement": 12,
+    "cases_with_review_differences": 18,
+    "by_split": {
+      "development": 12,
+      "evaluation": 8
+    }
+  },
+  "cases": [
+    {
+      "case_id": "REAL-01",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:f68f7927a7047c484ca4fb5cb4b27c7d1a87ac1e1c8a3086e063a9b0014d233d"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "GRADUATE_EXPERIENCE_DEFINITION"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-02",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:a0b4905fe42679550e86650dde1ec7ec81571fd7112aa8ebeb8632fef5b2df82"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "GRADUATE_EXPERIENCE_DEFINITION"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-03",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:fb69fdfccb7296c12d8ac35ae7feb3236515ed5e855efcd22523c52600a4ab72"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "SCHEDULE_UNKNOWN",
+        "STUDENT_STATUS_REQUIRED"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-04",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:d2885fe5942a6a5c0f5e3b5c895147fdda51212c731bd97cf9289c09e8161faa"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "SCHEDULE_UNKNOWN",
+        "STUDENT_STATUS_REQUIRED"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-05",
+      "split": "evaluation",
+      "expected_triage": "DEPRIORITISE",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:79b6c35ddb607daad537db454549db36d80f7ad8e50d8aeefb2b8e4d87e0e98b"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "COMMERCIAL_SWE_EXPERIENCE_UNSUPPORTED"
+      ],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile",
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-06",
+      "split": "evaluation",
+      "expected_triage": "DEPRIORITISE",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:9eefc59d17d1e160b96c44a88808db422238801146fdec1d424f86bbda9a01c5"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "COMMERCIAL_SWE_EXPERIENCE_UNSUPPORTED"
+      ],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile",
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-07",
+      "split": "evaluation",
+      "expected_triage": "DEPRIORITISE",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:c4d810a1124f2d980ed9f50a8c035dd6ab573eca910a0ec36673dd4f5dcb41d2"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "COMMERCIAL_SWE_EXPERIENCE_UNSUPPORTED",
+        "LOCATION_DETAIL_UNKNOWN"
+      ],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile",
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-08",
+      "split": "evaluation",
+      "expected_triage": "BLOCK",
+      "actual": {
+        "recommendation": "BLOCKED",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": true,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SENIORITY_EXCLUDED",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:985b6c6da1ddad3fff4c21a2740ec66e8131d49094393b8363a2f0840adca200"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [],
+      "differences": [],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-09",
+      "split": "evaluation",
+      "expected_triage": "BLOCK",
+      "actual": {
+        "recommendation": "BLOCKED",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": true,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SENIORITY_EXCLUDED",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:10e285e0a911521c2d64889d91dc08510063d331bf45b546731e841e2800f756"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [],
+      "differences": [],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-10",
+      "split": "development",
+      "expected_triage": "PURSUE_WITH_REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:54c4eb8de171dc638c7a979756d2aa3a2d4df5d8fa79803095ec187e00ab0792"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-11",
+      "split": "development",
+      "expected_triage": "SECONDARY",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:d2c5871deb9c706286c3dc938e69abf48bd02d268d4114683ede36c4242a6e20"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": "REAL-13",
+      "missing_expected_flags": [
+        "ROLE_OUTSIDE_PRIMARY_TARGET",
+        "SALARY_UNKNOWN"
+      ],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile",
+        "semantic_flags_require_manual_review",
+        "duplicate_not_proven_by_public_paraphrase_identity"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-12",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:2424781200e6c424b49d7505061496855f7679192e64a518d7b3f5469a1d3fea"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "DUPLICATE_CANDIDATE",
+        "TITLE_DESCRIPTION_CONFLICT"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-13",
+      "split": "development",
+      "expected_triage": "SECONDARY",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:28374e6209d24f4dc40049e14529a2bbde06ebd6e312e53919c02aabf130470a"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": "REAL-11",
+      "missing_expected_flags": [
+        "DUPLICATE_CONFIRMED",
+        "ROLE_OUTSIDE_PRIMARY_TARGET"
+      ],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile",
+        "semantic_flags_require_manual_review",
+        "duplicate_not_proven_by_public_paraphrase_identity"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-14",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:acfa73f35619f6525b098f2f0c9acde006da850fd196ba82da6451dfe620fe79"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "FUTURE_START",
+        "UNREAL_EVIDENCE_MISSING"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-15",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:a10f6f19150ea30ed191b4611b336d76077cbd9929ba48c223a520bb38a0a59c"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "CLEARANCE_REVIEW"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-16",
+      "split": "evaluation",
+      "expected_triage": "SECONDARY",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:73b3d55a7accf5e6248cb58c0470ad52e5742831818b0459cbcb1c7120c66f90"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "B2B_EXPERIENCE_UNCONFIRMED",
+        "ROLE_OUTSIDE_PRIMARY_TARGET"
+      ],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile",
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-17",
+      "split": "development",
+      "expected_triage": "REVIEW",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:90a6dd5834908274977ed70c1334bbd25c411c39d28fe903f8da03f4b44eb947"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "DATE_CONFLICT",
+        "SPONSORSHIP_CONDITIONAL",
+        "STUDENT_STATUS_REQUIRED"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-18",
+      "split": "development",
+      "expected_triage": "DEPRIORITISE",
+      "actual": {
+        "recommendation": "REVIEW",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": false,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:175cf5fe8bf856edfcb9f8b690ad25ff97fc215627d46e25d45e1c880770defb"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "GRADUATION_WINDOW_MISMATCH",
+        "MSC_NOT_EVIDENCED",
+        "RESEARCH_NOT_EVIDENCED"
+      ],
+      "differences": [
+        "triage_taxonomy_or_missing_reviewed_profile",
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-19",
+      "split": "evaluation",
+      "expected_triage": "BLOCK",
+      "actual": {
+        "recommendation": "BLOCKED",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": true,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SENIORITY_EXCLUDED",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:965f24dee1864d76ed41e5e5f521b7471b1484ff913700be54869631b855e842"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "OUTSIDE_TARGET_MARKETS",
+        "SPONSORSHIP_UNAVAILABLE"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    },
+    {
+      "case_id": "REAL-20",
+      "split": "evaluation",
+      "expected_triage": "BLOCK",
+      "actual": {
+        "recommendation": "BLOCKED",
+        "score": null,
+        "coverage": 0.0,
+        "hard_block": true,
+        "employment_gate": "REVIEW_BEFORE_START",
+        "flags": [
+          "SENIORITY_EXCLUDED",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "identity_keys": [
+          "content_location:e94340c8acfb41af508ae2c1d9bea24ccef04a518411e27056aa58b94d3063a2"
+        ]
+      },
+      "detected_duplicates": [],
+      "expected_duplicate": null,
+      "missing_expected_flags": [
+        "ADVANCED_COMMERCIAL_EXPERIENCE"
+      ],
+      "differences": [
+        "semantic_flags_require_manual_review"
+      ],
+      "conservative_invariants_passed": true,
+      "human_review": {
+        "status": "pending",
+        "decision": null
+      }
+    }
+  ]
+}

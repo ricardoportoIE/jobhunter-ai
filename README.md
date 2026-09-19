@@ -2,21 +2,23 @@
 
 Plataforma de inteligência de carreira que compara vagas com um perfil baseado em evidências e prepara candidaturas para revisão humana.
 
-**Estado: fase 0 e P1-01 concluídos.** Estrutura local com React/TypeScript, FastAPI e PostgreSQL, healthchecks, testes e workflow de CI. O baseline é local, com teto de €25/mês para uso futuro de AWS e IA e demonstrações cloud temporárias. Autenticação, perfil e vagas entram nas próximas entregas.
+**Estado: núcleo da fase 1 implementado.** Login local, perfil e evidências versionados, revisão de vagas, matching determinístico, Inbox e tracker manual. A avaliação pública foi executada e tem divergências documentadas para revisão humana. O baseline continua local; IA e AWS pertencem às fases seguintes, com teto futuro de €25/mês.
 
 ## Iniciar localmente
 
-Com Docker Desktop em modo Linux e Python 3.13 ou superior, execute na raiz:
+Com Docker Desktop em modo Linux, Python e uv 0.12.7, execute na raiz:
 
 ```powershell
 python scripts/init_env.py
 docker compose up --build --detach --wait --wait-timeout 120
+uv sync --project apps/api --locked
+uv run --project apps/api --env-file .env python -m jobhunter_api.manage bootstrap
 python scripts/smoke_local.py
 ```
 
-Abra [a aplicação](http://127.0.0.1:5173) ou [a documentação da API](http://127.0.0.1:5173/api/docs). A senha local é gerada em `.env`, sem sobrescrever arquivo existente. Para parar e preservar o banco: `docker compose down`.
+Abra [a aplicação](http://127.0.0.1:5173). O utilizador é `local`; a senha inicial de login está em `.private/local-login.txt`. As credenciais do banco ficam em `.env`. Ambos são ignorados pelo Git. Para parar e preservar o banco: `docker compose down`.
 
-Veja [desenvolvimento local e comandos de verificação](docs/local-development.md) e [evidências de conclusão do P1-01](docs/phase-1/p1-01-validation.md).
+Veja [desenvolvimento e testes](docs/local-development.md), [entregas por etapa](docs/phase-1/progress.md), [contratos de runtime](docs/phase-1/runtime-contracts.md), [avaliação dos 20 casos](docs/phase-1/evaluation-results.md) e [privacidade e eliminação](docs/phase-1/security-and-data.md).
 
 ## Começar pela fase 0
 
@@ -40,7 +42,7 @@ Veja [desenvolvimento local e comandos de verificação](docs/local-development.
 - [ADR-003: evidências, scoring e aprovação](docs/adr/0003-evidence-and-approval.md)
 - [ADR-004: orçamento e AWS temporária](docs/adr/0004-local-first-budget.md)
 
-Primeira entrega funcional planejada: importar texto de uma vaga, confirmar requisitos estruturados, comparar com fatos verificados e visualizar score, lacunas e evidências. Parsing livre por IA entra na fase 2.
+Fluxo implementado: registrar evidências e fatos, publicar o perfil, importar texto de uma vaga, confirmar requisitos, avaliar atendimento, visualizar score/cobertura/lacunas e acompanhar candidatura manual. Parsing livre por IA entra na fase 2.
 
 ## Dados e validação
 
@@ -55,4 +57,4 @@ python -m venv .venv
 .venv\Scripts\python scripts/validate_phase0.py --private
 ```
 
-O comando com `--private` valida também os dados privados nesta máquina e não se aplica a clones sem `.private/`. Esses comandos validam artefatos de design; os testes da aplicação estão no guia de desenvolvimento. Não há deploy cloud, recursos AWS, integração de email ou submissão configurados. O próximo passo é P1-02: sessão autenticada para utilizador único.
+O comando com `--private` valida também os dados privados nesta máquina e não se aplica a clones sem `.private/`. Os testes da aplicação estão no guia de desenvolvimento. Não há deploy cloud, recursos AWS, integração de email ou envio de candidatura configurados. O piloto humano e a preparação da fase 2 são os próximos passos.

@@ -1,6 +1,6 @@
 # Threat model inicial
 
-Estado: design consolidado na fase 0, controles de runtime ainda não implementados. Responsável inicial por validação: mantenedor do projeto. Prioridades P0 antes do fluxo afetado, P1 antes do deploy temporário. Dados reais já separados em `.private/`; só exemplos fictícios e dados derivados sem contatos são versionáveis. Ver [fronteiras de confiança](../architecture/overview.md).
+Estado: controles locais da fase 1 implementados e testados; controles de IA, conectores, renderer e cloud seguem nas fases correspondentes. Ver [segurança e dados de runtime](../phase-1/security-and-data.md). Responsável inicial por validação: mantenedor do projeto. Dados reais permanecem separados em `.private/`; só exemplos fictícios e dados derivados sem contatos são versionáveis. Ver [fronteiras de confiança](../architecture/overview.md).
 
 Ativos: perfil factual, dados pessoais, documentos, credenciais de fontes/providers, aprovações, histórico e orçamento. Atacantes possíveis: fonte maliciosa, arquivo submetido, sessão não autorizada ou dependência comprometida.
 

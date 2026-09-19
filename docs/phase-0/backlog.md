@@ -2,7 +2,7 @@
 
 Escopo: núcleo local sem LLM. IDs são referências locais, não issues publicadas. Prioridade P0 = primeiro fluxo; P1 = completar a fase. Tamanho S/M/L é relativo, não estimativa de dias.
 
-**P1-01 concluído localmente.** [Implementação e validação](../phase-1/p1-01-validation.md). Workflow de CI preparado; execução remota depende de hospedar o repositório no GitHub. Próxima entrega: P1-02.
+**P1-01 a P1-10 implementados localmente, com commits por etapa.** [Registro das entregas](../phase-1/progress.md) e [avaliação executada](../phase-1/evaluation-results.md). A revisão humana das divergências continua separada da validação técnica. O workflow de CI está configurado; execução no GitHub depende de hospedar o repositório.
 
 | ID / prioridade / tamanho | História e entrega | Depende de | Critérios de aceitação |
 |---|---|---|---|
