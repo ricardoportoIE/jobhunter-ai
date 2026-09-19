@@ -1,0 +1,1607 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobHunter AI domain contracts v0.2.0",
+  "description": "Proposed phase-0 shapes; cross-record business invariants also require domain validation.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Job"
+    },
+    {
+      "$ref": "#/$defs/CandidateFact"
+    },
+    {
+      "$ref": "#/$defs/Evidence"
+    },
+    {
+      "$ref": "#/$defs/MatchResult"
+    },
+    {
+      "$ref": "#/$defs/Application"
+    },
+    {
+      "$ref": "#/$defs/CandidateProfile"
+    }
+  ],
+  "$defs": {
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "source_type",
+        "source_ref",
+        "locator",
+        "content_sha256",
+        "sensitivity",
+        "captured_at",
+        "reviewed_at",
+        "reviewed_by"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "0.2.0"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "candidate_attestation",
+            "cv",
+            "repository",
+            "certificate",
+            "employment_record",
+            "other"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sensitivity": {
+          "type": "string",
+          "enum": [
+            "public",
+            "private",
+            "sensitive"
+          ]
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "reviewed_at": {
+                "type": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reviewed_by": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reviewed_by": {
+                "type": "string"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reviewed_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CandidateFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "candidate_id",
+        "revision",
+        "claim",
+        "category",
+        "status",
+        "evidence_ids",
+        "sensitivity",
+        "valid_from",
+        "valid_until",
+        "allowed_uses",
+        "reviewed_at",
+        "reviewed_by"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "0.2.0"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "candidate_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "claim": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "skill",
+            "experience",
+            "education",
+            "project",
+            "certification",
+            "achievement",
+            "preference",
+            "constraint"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "unverified",
+            "verified",
+            "expired",
+            "revoked"
+          ]
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "sensitivity": {
+          "type": "string",
+          "enum": [
+            "public",
+            "private",
+            "sensitive"
+          ]
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid_until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "allowed_uses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "matching",
+              "cv",
+              "cover_letter",
+              "application_form"
+            ]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "verified"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence_ids": {
+                "minItems": 1
+              },
+              "reviewed_at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              "reviewed_by": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "allowed_uses": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CandidateProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "display_name",
+        "target_roles",
+        "markets",
+        "locations",
+        "work_modes",
+        "fact_ids",
+        "private_constraints_ref",
+        "master_cv_ref",
+        "status",
+        "created_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "0.2.0"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "markets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "IE",
+              "GB"
+            ]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "work_modes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "remote",
+              "hybrid",
+              "onsite"
+            ]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "fact_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "private_constraints_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "master_cv_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "reviewed"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        }
+      }
+    },
+    "Extraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field_path",
+        "source_locator",
+        "confidence",
+        "method",
+        "reviewed"
+      ],
+      "properties": {
+        "field_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "llm",
+            "connector"
+          ]
+        },
+        "reviewed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "text",
+        "category",
+        "importance",
+        "is_eliminatory",
+        "source_locator"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "technical_skills",
+            "seniority_experience",
+            "portfolio",
+            "education",
+            "location_work_mode",
+            "salary",
+            "work_authorisation_hours",
+            "career_value"
+          ]
+        },
+        "importance": {
+          "type": "string",
+          "enum": [
+            "required",
+            "preferred"
+          ]
+        },
+        "is_eliminatory": {
+          "type": "boolean"
+        },
+        "source_locator": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Job": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "title",
+        "company_name",
+        "location",
+        "country",
+        "work_mode",
+        "employment_type",
+        "seniority",
+        "salary",
+        "work_authorisation",
+        "sponsorship",
+        "deadline",
+        "source",
+        "requirements",
+        "extractions",
+        "risk_flags",
+        "status",
+        "archived"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "0.2.0"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "company_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "country": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "IE",
+                "GB",
+                "OTHER"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "work_mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "remote",
+                "hybrid",
+                "onsite"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "employment_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "seniority": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "salary": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "minimum",
+                "maximum",
+                "currency",
+                "period"
+              ],
+              "properties": {
+                "minimum": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "maximum": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "period": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "hour",
+                        "day",
+                        "month",
+                        "year"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "work_authorisation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sponsorship": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "available",
+                "unavailable",
+                "conditional"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "source_id",
+            "canonical_url",
+            "external_id",
+            "captured_at",
+            "access_decision",
+            "policy_review_ref",
+            "raw_content_ref",
+            "content_sha256"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "manual_text",
+                "manual_file",
+                "email",
+                "api",
+                "career_page"
+              ]
+            },
+            "source_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "canonical_url": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https://"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "external_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "captured_at": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$"
+            },
+            "access_decision": {
+              "type": "string",
+              "enum": [
+                "manual_user_provided",
+                "enabled"
+              ]
+            },
+            "policy_review_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "raw_content_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "content_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "extractions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Extraction"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "risk_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "DISCOVERED",
+            "PARSED",
+            "SCORED"
+          ]
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "email",
+                      "api",
+                      "career_page"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "access_decision": {
+                    "const": "enabled"
+                  },
+                  "policy_review_ref": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CriterionAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_id",
+        "status",
+        "fact_ids",
+        "evidence_ids",
+        "reason"
+      ],
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "met",
+            "partial",
+            "unmet",
+            "unknown"
+          ]
+        },
+        "fact_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "CategoryBreakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "weight",
+        "attainment",
+        "coverage",
+        "assessments"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "technical_skills",
+            "seniority_experience",
+            "portfolio",
+            "education",
+            "location_work_mode",
+            "salary",
+            "work_authorisation_hours",
+            "career_value"
+          ]
+        },
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "attainment": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "assessments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CriterionAssessment"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      }
+    },
+    "Blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_id",
+        "status",
+        "reason",
+        "evidence_ids"
+      ],
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "unknown"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      }
+    },
+    "MatchResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "job_id",
+        "job_version",
+        "candidate_id",
+        "profile_version",
+        "algorithm_version",
+        "weights_version",
+        "score",
+        "coverage",
+        "recommendation",
+        "breakdown",
+        "blockers",
+        "created_at",
+        "explanation",
+        "employment_gate",
+        "review_flags"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "0.2.0"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "job_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "job_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidate_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "profile_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "algorithm_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weights_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "PRIORITISE",
+            "APPLY_AFTER_REVIEW",
+            "REVIEW",
+            "TRACK_OR_ARCHIVE",
+            "BLOCKED"
+          ]
+        },
+        "breakdown": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CategoryBreakdown"
+          },
+          "minItems": 8,
+          "uniqueItems": true,
+          "maxItems": 8
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Blocker"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "employment_gate": {
+          "type": "string",
+          "enum": [
+            "READY_WITHIN_CONFIRMED_LIMITS",
+            "REVIEW_BEFORE_START",
+            "BLOCKED"
+          ]
+        },
+        "review_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "employment_gate": {
+                "const": "REVIEW_BEFORE_START"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "review_flags": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope",
+        "actor_id",
+        "decision",
+        "profile_version",
+        "job_version",
+        "package_sha256",
+        "channel",
+        "destination",
+        "decided_at",
+        "expires_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "package",
+            "submission"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "rejected",
+            "changes_requested"
+          ]
+        },
+        "profile_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "job_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "package_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "channel": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "destination": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "scope": {
+                "const": "submission"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "channel": {
+                "type": "string",
+                "minLength": 1
+              },
+              "destination": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ApplicationEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "event_type",
+        "actor_id",
+        "occurred_at",
+        "from_status",
+        "to_status",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "shortlisted",
+            "state_changed",
+            "manual_submission_recorded",
+            "note",
+            "approval_invalidated"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "from_status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "to_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "id",
+        "candidate_id",
+        "job_id",
+        "version",
+        "status",
+        "match_id",
+        "package_sha256",
+        "approvals",
+        "submission",
+        "events",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "0.2.0"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "candidate_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "job_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SHORTLISTED",
+            "RESEARCHED",
+            "PACKAGE_GENERATED",
+            "NEEDS_REVIEW",
+            "APPROVED",
+            "SUBMITTED",
+            "INTERVIEWING",
+            "OFFERED",
+            "REJECTED",
+            "WITHDRAWN",
+            "EXPIRED"
+          ]
+        },
+        "match_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "package_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Approval"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "submission": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "origin",
+                "channel",
+                "submitted_at",
+                "receipt_ref",
+                "approval_id"
+              ],
+              "properties": {
+                "origin": {
+                  "type": "string",
+                  "enum": [
+                    "manual_record",
+                    "authorised_adapter"
+                  ]
+                },
+                "channel": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "submitted_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "Z$"
+                },
+                "receipt_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "approval_id": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "origin": {
+                        "const": "authorised_adapter"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "approval_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ApplicationEvent"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "SUBMITTED",
+                  "INTERVIEWING",
+                  "OFFERED",
+                  "REJECTED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "submission": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "APPROVED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "package_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "approvals": {
+                "minItems": 1,
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "scope": {
+                      "const": "package"
+                    },
+                    "decision": {
+                      "const": "approved"
+                    }
+                  },
+                  "required": [
+                    "scope",
+                    "decision"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

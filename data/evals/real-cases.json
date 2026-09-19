@@ -1,0 +1,563 @@
+{
+  "dataset_version": "0.1.0",
+  "kind": "real_source_derived",
+  "created_on": "2026-09-19",
+  "label_author": "assistant_document_review",
+  "human_gold": false,
+  "description": "Twenty real public job snapshots, paraphrased and employer-pseudonymised. Expected outcomes are design labels, not an executed model benchmark. Provenance and originals are private.",
+  "cases": [
+    {
+      "case_id": "REAL-01",
+      "source_ref": "REAL-01",
+      "employer_alias": "EMP-A",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Graduate software engineer",
+      "description": "Programming projects and a relevant degree completed by summer 2027; previous collaborative development; a maximum of 18 months of professional experience is stated.",
+      "mentioned_skills": [
+        "Java",
+        "JavaScript"
+      ],
+      "seniority": "graduate",
+      "split": "development",
+      "leakage_group": "stripe-newgrad",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "GRADUATE_EXPERIENCE_DEFINITION",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-02",
+      "source_ref": "REAL-02",
+      "employer_alias": "EMP-A",
+      "location": "London",
+      "country": "GB",
+      "title": "Graduate software engineer",
+      "description": "Same graduate requirements as another office; the job location is London rather than Dublin.",
+      "mentioned_skills": [
+        "Java",
+        "JavaScript"
+      ],
+      "seniority": "graduate",
+      "split": "development",
+      "leakage_group": "stripe-newgrad",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "GRADUATE_EXPERIENCE_DEFINITION",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-03",
+      "source_ref": "REAL-03",
+      "employer_alias": "EMP-A",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Software engineering intern",
+      "description": "Degree studies in progress and collaborative programming projects; internship work contributes to production systems.",
+      "mentioned_skills": [
+        "Java",
+        "JavaScript"
+      ],
+      "seniority": "intern",
+      "split": "development",
+      "leakage_group": "stripe-intern",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "STUDENT_STATUS_REQUIRED",
+          "SCHEDULE_UNKNOWN",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-04",
+      "source_ref": "REAL-04",
+      "employer_alias": "EMP-A",
+      "location": "London",
+      "country": "GB",
+      "title": "Software engineering intern",
+      "description": "Internship at a different office with equivalent study and collaborative development requirements.",
+      "mentioned_skills": [
+        "Java",
+        "JavaScript"
+      ],
+      "seniority": "intern",
+      "split": "development",
+      "leakage_group": "stripe-intern",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "STUDENT_STATUS_REQUIRED",
+          "SCHEDULE_UNKNOWN",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-05",
+      "source_ref": "REAL-05",
+      "employer_alias": "EMP-A",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Software engineer in payments",
+      "description": "Requires at least two years of industry software engineering, excluding internships. Builds APIs and user-facing products.",
+      "mentioned_skills": [],
+      "seniority": null,
+      "split": "evaluation",
+      "leakage_group": "payments",
+      "expected": {
+        "triage": "DEPRIORITISE",
+        "flags": [
+          "COMMERCIAL_SWE_EXPERIENCE_UNSUPPORTED",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-06",
+      "source_ref": "REAL-06",
+      "employer_alias": "EMP-A",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Software engineer in tax systems",
+      "description": "Minimum two years of industry software engineering, with independent delivery and production debugging; language-agnostic coding requirement.",
+      "mentioned_skills": [],
+      "seniority": null,
+      "split": "evaluation",
+      "leakage_group": "tax",
+      "expected": {
+        "triage": "DEPRIORITISE",
+        "flags": [
+          "COMMERCIAL_SWE_EXPERIENCE_UNSUPPORTED",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-07",
+      "source_ref": "REAL-07",
+      "employer_alias": "EMP-A",
+      "location": "United Kingdom",
+      "country": "GB",
+      "title": "Backend API engineer",
+      "description": "Minimum two years of industry software engineering; large financial APIs, distributed collaboration and production support.",
+      "mentioned_skills": [
+        "Docker",
+        "Kubernetes",
+        "AWS"
+      ],
+      "seniority": null,
+      "split": "evaluation",
+      "leakage_group": "money",
+      "expected": {
+        "triage": "DEPRIORITISE",
+        "flags": [
+          "COMMERCIAL_SWE_EXPERIENCE_UNSUPPORTED",
+          "LOCATION_DETAIL_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-08",
+      "source_ref": "REAL-08",
+      "employer_alias": "EMP-A",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Staff backend platform engineer",
+      "description": "Ten years of technical experience and five in strategic technical leadership; infrastructure architecture and mentoring.",
+      "mentioned_skills": [
+        "Java",
+        "Python"
+      ],
+      "seniority": "staff",
+      "split": "evaluation",
+      "leakage_group": "staff-api",
+      "expected": {
+        "triage": "BLOCK",
+        "flags": [
+          "SENIORITY_EXCLUDED"
+        ],
+        "hard_block": true,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-09",
+      "source_ref": "REAL-09",
+      "employer_alias": "EMP-A",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Staff backend CI engineer",
+      "description": "Ten years of professional software development; distributed systems, developer tools and mentoring senior engineers.",
+      "mentioned_skills": [],
+      "seniority": "staff",
+      "split": "evaluation",
+      "leakage_group": "staff-ci",
+      "expected": {
+        "triage": "BLOCK",
+        "flags": [
+          "SENIORITY_EXCLUDED"
+        ],
+        "hard_block": true,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-10",
+      "source_ref": "REAL-10",
+      "employer_alias": "EMP-B",
+      "location": "London",
+      "country": "GB",
+      "title": "Junior software engineer",
+      "description": "Accepts projects or placements as experience. Builds frontend features and Python APIs with database access; automated testing and cloud familiarity are desirable.",
+      "mentioned_skills": [
+        "React",
+        "Next.js",
+        "Python",
+        "SQL",
+        "TypeScript",
+        "AWS"
+      ],
+      "seniority": "junior",
+      "split": "development",
+      "leakage_group": "fospha-cluster",
+      "expected": {
+        "triage": "PURSUE_WITH_REVIEW",
+        "flags": [
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-11",
+      "source_ref": "REAL-11",
+      "employer_alias": "EMP-B",
+      "location": "London",
+      "country": "GB",
+      "title": "Graduate data engineer",
+      "description": "Python and SQL required; dbt desirable. Graduate data-pipeline role accepts relevant degree or project experience. Salary described without numeric amount.",
+      "mentioned_skills": [
+        "Python",
+        "SQL",
+        "dbt"
+      ],
+      "seniority": "graduate",
+      "split": "development",
+      "leakage_group": "fospha-cluster",
+      "expected": {
+        "triage": "SECONDARY",
+        "flags": [
+          "ROLE_OUTSIDE_PRIMARY_TARGET",
+          "SALARY_UNKNOWN",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": "REAL-13",
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-12",
+      "source_ref": "REAL-12",
+      "employer_alias": "EMP-B",
+      "location": "London",
+      "country": "GB",
+      "title": "Junior software engineer with conflicting body",
+      "description": "Title describes software engineering, but the body describes graduate data engineering and duplicates another listing's body.",
+      "mentioned_skills": [
+        "Python",
+        "SQL",
+        "dbt"
+      ],
+      "seniority": "junior",
+      "split": "development",
+      "leakage_group": "fospha-cluster",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "TITLE_DESCRIPTION_CONFLICT",
+          "DUPLICATE_CANDIDATE"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-13",
+      "source_ref": "REAL-13",
+      "employer_alias": "EMP-B",
+      "location": "London",
+      "country": "GB",
+      "title": "Graduate data engineer alternate board",
+      "description": "Same employer, role, location and data-pipeline description as another board; added recruitment privacy boilerplate.",
+      "mentioned_skills": [
+        "Python",
+        "SQL",
+        "dbt"
+      ],
+      "seniority": "graduate",
+      "split": "development",
+      "leakage_group": "fospha-cluster",
+      "expected": {
+        "triage": "SECONDARY",
+        "flags": [
+          "DUPLICATE_CONFIRMED",
+          "ROLE_OUTSIDE_PRIMARY_TARGET"
+        ],
+        "hard_block": false,
+        "duplicate_of": "REAL-11",
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-14",
+      "source_ref": "REAL-14",
+      "employer_alias": "EMP-C",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Game engineering graduate",
+      "description": "Programme begins July 2027. Graduation window is January 2025 to July 2027; Python is accepted, but Unreal Engine experience is assessed.",
+      "mentioned_skills": [
+        "C++",
+        "C#",
+        "Python",
+        "Unreal Engine"
+      ],
+      "seniority": "graduate",
+      "split": "development",
+      "leakage_group": "games",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "UNREAL_EVIDENCE_MISSING",
+          "FUTURE_START",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-15",
+      "source_ref": "REAL-15",
+      "employer_alias": "EMP-D",
+      "location": "London",
+      "country": "GB",
+      "title": "Software engineer across levels",
+      "description": "Python and infrastructure work across multiple levels. Baseline security checks are mandatory; additional clearance preferred. The advert allows exceptions to ordinary nationality criteria.",
+      "mentioned_skills": [
+        "Python",
+        "AWS",
+        "Terraform",
+        "Docker"
+      ],
+      "seniority": "mixed",
+      "split": "development",
+      "leakage_group": "ai-security",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "CLEARANCE_REVIEW",
+          "SPONSORSHIP_UNKNOWN"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-16",
+      "source_ref": "REAL-16",
+      "employer_alias": "EMP-A",
+      "location": "Dublin",
+      "country": "IE",
+      "title": "Technical support engineer",
+      "description": "Requires two years in B2B technical support or engineering, API scripts, SQL and customer debugging. Internal support experience does not automatically prove B2B experience.",
+      "mentioned_skills": [
+        "SQL",
+        "Python",
+        "TypeScript"
+      ],
+      "seniority": null,
+      "split": "evaluation",
+      "leakage_group": "support",
+      "expected": {
+        "triage": "SECONDARY",
+        "flags": [
+          "B2B_EXPERIENCE_UNCONFIRMED",
+          "ROLE_OUTSIDE_PRIMARY_TARGET"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-17",
+      "source_ref": "REAL-17",
+      "employer_alias": "EMP-E",
+      "location": "London",
+      "country": "GB",
+      "title": "Graduate infrastructure engineer",
+      "description": "Final-year degree students; Linux or networking training, automation and observability. Sponsorship is available only for selected roles. Deadline and start-date ordering needs review.",
+      "mentioned_skills": [
+        "Linux",
+        "Python",
+        "Ansible",
+        "Prometheus"
+      ],
+      "seniority": "graduate",
+      "split": "development",
+      "leakage_group": "infra-grad",
+      "expected": {
+        "triage": "REVIEW",
+        "flags": [
+          "STUDENT_STATUS_REQUIRED",
+          "SPONSORSHIP_CONDITIONAL",
+          "DATE_CONFLICT"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-18",
+      "source_ref": "REAL-18",
+      "employer_alias": "EMP-F",
+      "location": "London",
+      "country": "GB",
+      "title": "Graduate machine learning researcher",
+      "description": "Requires a relevant MSc, research track record and graduation in 2027. Postgraduate diploma must not be relabelled as an MSc.",
+      "mentioned_skills": [
+        "Python",
+        "PyTorch"
+      ],
+      "seniority": "graduate",
+      "split": "development",
+      "leakage_group": "research",
+      "expected": {
+        "triage": "DEPRIORITISE",
+        "flags": [
+          "MSC_NOT_EVIDENCED",
+          "RESEARCH_NOT_EVIDENCED",
+          "GRADUATION_WINDOW_MISMATCH"
+        ],
+        "hard_block": false,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-19",
+      "source_ref": "REAL-19",
+      "employer_alias": "EMP-G",
+      "location": "Ontario",
+      "country": "OTHER",
+      "title": "Senior software engineer outside target markets",
+      "description": "Senior role in Canada requiring five years of production coding. Existing Canadian work rights are required and sponsorship is explicitly unavailable.",
+      "mentioned_skills": [
+        "Ruby",
+        "Java",
+        "Python",
+        "React"
+      ],
+      "seniority": "senior",
+      "split": "evaluation",
+      "leakage_group": "outside-market",
+      "expected": {
+        "triage": "BLOCK",
+        "flags": [
+          "OUTSIDE_TARGET_MARKETS",
+          "SENIORITY_EXCLUDED",
+          "SPONSORSHIP_UNAVAILABLE"
+        ],
+        "hard_block": true,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    },
+    {
+      "case_id": "REAL-20",
+      "source_ref": "REAL-20",
+      "employer_alias": "EMP-H",
+      "location": "London",
+      "country": "GB",
+      "title": "Senior backend Java engineer",
+      "description": "Advanced commercial Java, Spring Boot and Kafka; leading complex multi-engineer projects. Hybrid attendance twice weekly.",
+      "mentioned_skills": [
+        "Java",
+        "Spring Boot",
+        "Kafka"
+      ],
+      "seniority": "senior",
+      "split": "evaluation",
+      "leakage_group": "senior-java",
+      "expected": {
+        "triage": "BLOCK",
+        "flags": [
+          "SENIORITY_EXCLUDED",
+          "ADVANCED_COMMERCIAL_EXPERIENCE"
+        ],
+        "hard_block": true,
+        "duplicate_of": null,
+        "score": null,
+        "review_before_start": true
+      }
+    }
+  ]
+}

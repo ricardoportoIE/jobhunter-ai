@@ -1,0 +1,72 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Annotated, Literal
+
+from fastapi import Depends, FastAPI, Request, Response
+from pydantic import BaseModel
+
+from jobhunter_api.database import check_database
+from jobhunter_api.settings import Settings
+
+
+class LiveStatus(BaseModel):
+    status: Literal["ok"] = "ok"
+    service: Literal["jobhunter-api"] = "jobhunter-api"
+
+
+class DatabaseStatus(BaseModel):
+    database: Literal["ok", "unavailable"]
+
+
+class ReadyStatus(BaseModel):
+    status: Literal["ready", "not_ready"]
+    checks: DatabaseStatus
+
+
+def get_settings(request: Request) -> Settings:
+    settings: Settings = request.app.state.settings
+    return settings
+
+
+def database_is_ready(settings: Annotated[Settings, Depends(get_settings)]) -> bool:
+    return check_database(settings)
+
+
+def create_app(settings: Settings | None = None) -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+        application.state.settings = settings if settings is not None else Settings()
+        yield
+
+    application = FastAPI(
+        title="JobHunter AI API",
+        version="0.1.0",
+        description="P1-01: local environment health checks. No personal-data endpoints yet.",
+        docs_url="/api/docs",
+        redoc_url=None,
+        openapi_url="/api/openapi.json",
+        lifespan=lifespan,
+    )
+
+    @application.get("/api/health/live", tags=["health"])
+    def live() -> LiveStatus:
+        return LiveStatus()
+
+    @application.get(
+        "/api/health/ready",
+        tags=["health"],
+        responses={503: {"model": ReadyStatus, "description": "Database unavailable"}},
+    )
+    def ready(
+        response: Response, database_ready: Annotated[bool, Depends(database_is_ready)]
+    ) -> ReadyStatus:
+        response.headers["Cache-Control"] = "no-store"
+        if not database_ready:
+            response.status_code = 503
+            return ReadyStatus(status="not_ready", checks=DatabaseStatus(database="unavailable"))
+        return ReadyStatus(status="ready", checks=DatabaseStatus(database="ok"))
+
+    return application
+
+
+app = create_app()

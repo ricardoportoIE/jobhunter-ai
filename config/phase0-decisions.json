@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "deployment_mode": "local_with_ephemeral_aws_validation",
+  "aws_region": "eu-west-1",
+  "budget": {
+    "currency": "EUR",
+    "monthly_combined": 25,
+    "monthly_aws": 15,
+    "monthly_inference": 10,
+    "alert_percentages": [50, 80, 100],
+    "ephemeral_session_hours_max": 8,
+    "ephemeral_session_reservation_eur": 5,
+    "planned_sessions_per_month_max": 2,
+    "aws_residual_reserve_eur": 5,
+    "reserve_includes_tax_fx_and_retry_margin": true,
+    "block_on_unknown_spend": true,
+    "block_new_paid_work_at_limit": true,
+    "allow_cost_stopping_cleanup_at_limit": true
+  },
+  "initial_ingestion": "manual_text",
+  "first_api_pilot": "greenhouse_fosphamarketing_read_only_after_source_review",
+  "email_provider": "gmail",
+  "email_integration_phase": 4,
+  "automatic_submission": false,
+  "ai_in_phase_1": false,
+  "provider_selection": "bedrock_preferred_for_aws_benchmark_before_adoption",
+  "agentcore_in_baseline": false,
+  "metrics": {
+    "analysis_time_median_reduction_target": 0.5,
+    "human_agreement_target": 0.8,
+    "factual_evidence_coverage_required": 1,
+    "unauthorised_submissions_allowed": 0,
+    "baseline_status": "to_be_measured_during_pilot"
+  }
+}

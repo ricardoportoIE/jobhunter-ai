@@ -1,0 +1,2 @@
+# Apenas validação de contratos; não são dependências da futura aplicação.
+jsonschema[format-nongpl]==4.26.0

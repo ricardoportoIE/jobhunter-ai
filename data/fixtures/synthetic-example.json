@@ -1,0 +1,221 @@
+{
+  "synthetic": true,
+  "description": "Entirely fictional; not evidence about the real user. Hashes are illustrative placeholders.",
+  "CandidateProfile": {
+    "schema_version": "0.2.0",
+    "id": "00000000-0000-4000-8000-000000000001",
+    "version": 1,
+    "display_name": "Fictional Candidate",
+    "target_roles": [],
+    "markets": [],
+    "locations": [],
+    "work_modes": [],
+    "fact_ids": [
+      "00000000-0000-4000-8000-000000000003"
+    ],
+    "private_constraints_ref": null,
+    "master_cv_ref": null,
+    "status": "reviewed",
+    "created_at": "2026-09-19T12:00:00Z"
+  },
+  "Evidence": {
+    "schema_version": "0.2.0",
+    "id": "00000000-0000-4000-8000-000000000002",
+    "source_type": "candidate_attestation",
+    "source_ref": "fixture://synthetic-attestation",
+    "locator": "Statement 1 (fictional)",
+    "content_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sensitivity": "private",
+    "captured_at": "2026-09-19T12:00:00Z",
+    "reviewed_at": "2026-09-19T12:00:00Z",
+    "reviewed_by": "00000000-0000-4000-8000-000000000001"
+  },
+  "CandidateFact": {
+    "schema_version": "0.2.0",
+    "id": "00000000-0000-4000-8000-000000000003",
+    "candidate_id": "00000000-0000-4000-8000-000000000001",
+    "revision": 1,
+    "claim": "Fictional candidate has built a small Python API.",
+    "category": "skill",
+    "status": "verified",
+    "evidence_ids": [
+      "00000000-0000-4000-8000-000000000002"
+    ],
+    "sensitivity": "private",
+    "valid_from": "2026-09-19T12:00:00Z",
+    "valid_until": null,
+    "allowed_uses": [
+      "matching",
+      "cv"
+    ],
+    "reviewed_at": "2026-09-19T12:00:00Z",
+    "reviewed_by": "00000000-0000-4000-8000-000000000001"
+  },
+  "Job": {
+    "schema_version": "0.2.0",
+    "id": "00000000-0000-4000-8000-000000000004",
+    "version": 1,
+    "title": "Junior Python Developer (fictional)",
+    "company_name": "Example Company",
+    "location": null,
+    "country": "IE",
+    "work_mode": null,
+    "employment_type": null,
+    "seniority": "junior",
+    "salary": null,
+    "work_authorisation": null,
+    "sponsorship": null,
+    "deadline": null,
+    "source": {
+      "kind": "manual_text",
+      "source_id": "00000000-0000-4000-8000-000000000005",
+      "canonical_url": "https://example.org/jobs/fictional",
+      "external_id": null,
+      "captured_at": "2026-09-19T12:00:00Z",
+      "access_decision": "manual_user_provided",
+      "policy_review_ref": null,
+      "raw_content_ref": "fixture://synthetic-job",
+      "content_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "requirements": [
+      {
+        "id": "00000000-0000-4000-8000-000000000006",
+        "text": "Build APIs with Python.",
+        "category": "technical_skills",
+        "importance": "required",
+        "is_eliminatory": false,
+        "source_locator": "Requirement 1"
+      }
+    ],
+    "extractions": [
+      {
+        "field_path": "title",
+        "source_locator": "Title",
+        "confidence": null,
+        "method": "manual",
+        "reviewed": true
+      }
+    ],
+    "risk_flags": [
+      "UNKNOWN_WORK_AUTHORISATION",
+      "UNKNOWN_SALARY"
+    ],
+    "status": "SCORED",
+    "archived": false
+  },
+  "MatchResult": {
+    "schema_version": "0.2.0",
+    "id": "00000000-0000-4000-8000-000000000007",
+    "job_id": "00000000-0000-4000-8000-000000000004",
+    "job_version": 1,
+    "candidate_id": "00000000-0000-4000-8000-000000000001",
+    "profile_version": 1,
+    "algorithm_version": "0.2.0",
+    "weights_version": "0.1.0",
+    "score": 100,
+    "coverage": 0.3,
+    "recommendation": "REVIEW",
+    "breakdown": [
+      {
+        "category": "technical_skills",
+        "weight": 30,
+        "attainment": 1,
+        "coverage": 1,
+        "assessments": [
+          {
+            "requirement_id": "00000000-0000-4000-8000-000000000006",
+            "status": "met",
+            "fact_ids": [
+              "00000000-0000-4000-8000-000000000003"
+            ],
+            "evidence_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ],
+            "reason": "Synthetic approved attestation supports this criterion."
+          }
+        ]
+      },
+      {
+        "category": "seniority_experience",
+        "weight": 20,
+        "attainment": null,
+        "coverage": 0,
+        "assessments": []
+      },
+      {
+        "category": "portfolio",
+        "weight": 15,
+        "attainment": null,
+        "coverage": 0,
+        "assessments": []
+      },
+      {
+        "category": "education",
+        "weight": 10,
+        "attainment": null,
+        "coverage": 0,
+        "assessments": []
+      },
+      {
+        "category": "location_work_mode",
+        "weight": 10,
+        "attainment": null,
+        "coverage": 0,
+        "assessments": []
+      },
+      {
+        "category": "salary",
+        "weight": 5,
+        "attainment": null,
+        "coverage": 0,
+        "assessments": []
+      },
+      {
+        "category": "work_authorisation_hours",
+        "weight": 5,
+        "attainment": null,
+        "coverage": 0,
+        "assessments": []
+      },
+      {
+        "category": "career_value",
+        "weight": 5,
+        "attainment": null,
+        "coverage": 0,
+        "assessments": []
+      }
+    ],
+    "blockers": [],
+    "created_at": "2026-09-19T12:00:00Z",
+    "explanation": "Only technical skills were assessed; coverage is too low to recommend applying.",
+    "employment_gate": "REVIEW_BEFORE_START",
+    "review_flags": [
+      "WORK_AUTHORISATION_UNKNOWN"
+    ]
+  },
+  "Application": {
+    "schema_version": "0.2.0",
+    "id": "00000000-0000-4000-8000-000000000008",
+    "candidate_id": "00000000-0000-4000-8000-000000000001",
+    "job_id": "00000000-0000-4000-8000-000000000004",
+    "version": 1,
+    "status": "SHORTLISTED",
+    "match_id": "00000000-0000-4000-8000-000000000007",
+    "package_sha256": null,
+    "approvals": [],
+    "submission": null,
+    "events": [
+      {
+        "id": "00000000-0000-4000-8000-000000000009",
+        "event_type": "shortlisted",
+        "actor_id": "00000000-0000-4000-8000-000000000001",
+        "occurred_at": "2026-09-19T12:00:00Z",
+        "from_status": null,
+        "to_status": "SHORTLISTED",
+        "reason": "Fictional user chose to review later."
+      }
+    ],
+    "created_at": "2026-09-19T12:00:00Z",
+    "updated_at": "2026-09-19T12:00:00Z"
+  }
+}
