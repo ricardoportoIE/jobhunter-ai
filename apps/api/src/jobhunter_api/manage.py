@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from argon2 import PasswordHasher
 
+from jobhunter_api.seed import seed
 from jobhunter_api.settings import Settings
 from jobhunter_api.store import connect
 
@@ -53,13 +54,15 @@ def bootstrap(settings: Settings, destination: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["migrate", "bootstrap"])
+    parser.add_argument("command", choices=["migrate", "bootstrap", "seed"])
     parser.add_argument("--credentials-file", type=Path, default=Path(".private/local-login.txt"))
     args = parser.parse_args()
     settings = Settings()
     migrate(settings)
     if args.command == "bootstrap":
         bootstrap(settings, args.credentials_file)
+    elif args.command == "seed":
+        seed(settings)
     print("Database migrations applied.")
 
 

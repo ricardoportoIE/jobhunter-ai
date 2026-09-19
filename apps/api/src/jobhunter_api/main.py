@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from jobhunter_api.auth import router as session_router
 from jobhunter_api.database import check_database
 from jobhunter_api.errors import install_errors
+from jobhunter_api.profile import router as profile_router
 from jobhunter_api.settings import Settings
 
 
@@ -51,6 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     install_errors(application)
     application.include_router(session_router)
+    application.include_router(profile_router)
 
     @application.get("/api/health/live", tags=["health"])
     def live() -> LiveStatus:
