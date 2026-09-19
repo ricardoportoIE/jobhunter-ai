@@ -1,4 +1,5 @@
 import { useTask } from "./useTask";
+import { AiJobTools } from "./AiTools";
 import { optional } from "./forms";
 import { useEffect, useState } from "react";
 import ShortlistButton from "./ShortlistButton";
@@ -96,6 +97,9 @@ export default function JobDetail({
           3. Resultado e evidências
         </button>
       </nav>
+      {tab === "review" && (
+        <AiJobTools job={job} saved={() => setRefresh(refresh + 1)} />
+      )}
       {tab === "review" && (
         <JobReview
           key={job.version}

@@ -5,6 +5,7 @@ import JobDetail from "./JobDetail";
 import ProfilePage from "./ProfilePage";
 import Tracker from "./Tracker";
 import Privacy from "./Privacy";
+import { AiActivity } from "./AiTools";
 import type { Evidence, Fact, Profile } from "./types";
 import { ErrorState, Loading } from "./ui";
 
@@ -105,11 +106,14 @@ export default function Workspace() {
           >
             Privacidade
           </a>
+          <a href="#ai" aria-current={route === "ai" ? "page" : undefined}>
+            Atividade de IA
+          </a>
         </nav>
         <p className="sidebar-note">
           Você decide cada passo.
           <br />
-          Dados no ambiente local.
+          Dados locais; IA sob seu comando.
         </p>
       </aside>
       <main id="workspace-main" tabIndex={-1} className="app-main">
@@ -126,6 +130,8 @@ export default function Workspace() {
           <ProfilePage {...data} refresh={refresh} />
         ) : route === "privacy" ? (
           <Privacy />
+        ) : route === "ai" ? (
+          <AiActivity />
         ) : route === "tracker" ? (
           <Tracker />
         ) : route === "import" ? (

@@ -1,7 +1,7 @@
 """Untrusted vacancy text becomes a cited draft, never a reviewed job."""
 
 from typing import Literal
-from uuid import UUID
+from uuid import UUID, uuid5
 
 from fastapi import APIRouter, Request
 from pydantic import Field
@@ -12,7 +12,7 @@ from jobhunter_api.errors import Problem
 from jobhunter_api.inference import OpenAIInference, StructuredInference
 from jobhunter_api.jobs import Category, JobEdit
 from jobhunter_api.profile import Input, Text, Version
-from jobhunter_api.records import get_record
+from jobhunter_api.records import get_record, owner_lock, public, update
 from jobhunter_api.settings import Settings
 from jobhunter_api.store import Row, connect
 
@@ -99,6 +99,17 @@ def validate_extraction(data: Row, raw: str) -> Row:
             citations[name] = citation(raw, item["quote"], item["confidence"])
         elif item["quote"] is not None or item["confidence"] != 0:
             raise ValueError("Missing values must have no evidence or confidence")
+    if fields["seniority"] is not None:
+        level = fields["seniority"].strip().casefold()
+        fields["seniority"] = {
+            "entry level": "junior",
+            "entry-level": "junior",
+            "jr": "junior",
+            "jr.": "junior",
+            "sr": "senior",
+            "sr.": "senior",
+            "mid-level": "mid",
+        }.get(level, level)
     # Existing domain enums, amount ranges and text bounds remain authoritative.
     JobEdit(expected_version=1, **fields)
     requirements = []
@@ -123,6 +134,62 @@ def get_provider(settings: Settings) -> StructuredInference:
     if not settings.openai_api_key or not settings.openai_api_key.get_secret_value():
         raise Problem(409, "AI_NOT_CONFIGURED", "Configure a chave de IA no backend local.")
     return OpenAIInference(settings)
+
+
+class ApplyDraft(Version):
+    run_id: UUID
+
+
+@router.post("/jobs/{job_id}/draft")
+def apply_draft(job_id: UUID, data: ApplyDraft, actor: Actor, request: Request) -> Row:
+    with connect(settings_for(request)) as db:
+        owner_lock(db, actor.id)
+        job = get_record(db, actor.id, "job", job_id)
+        run = db.execute(
+            "SELECT result FROM ai_calls WHERE id=%s AND owner_id=%s "
+            "AND operation='parse' AND status='succeeded'",
+            (data.run_id, actor.id),
+        ).fetchone()
+        if not run or run["result"]["job_id"] != str(job_id):
+            raise Problem(404, "NOT_FOUND", "Extração não encontrada para esta vaga.")
+        if (
+            job["data"].get("ai_provenance", {}).get("run_id") == str(data.run_id)
+            and job["version"] == data.expected_version + 1
+        ):
+            return public(job)
+        result = run["result"]
+        if job["version"] != data.expected_version or result["job_version"] != job["version"]:
+            raise Problem(
+                409, "VERSION_CONFLICT", "A extração está desatualizada. Atualize a vaga."
+            )
+        requirements, citations = [], {}
+        for index, item in enumerate(result["requirements"]):
+            identity = str(uuid5(data.run_id, str(index)))
+            requirements.append(
+                {"id": identity, **{k: v for k, v in item.items() if k != "citation"}}
+            )
+            citations[identity] = item["citation"]
+        fields = JobEdit(
+            expected_version=job["version"],
+            **result["fields"],
+            requirements=requirements,
+            risk_flags=result["risk_flags"],
+            archived=job["data"]["archived"],
+        ).model_dump(mode="json", exclude={"expected_version", "review_confirmed"})
+        payload = {
+            **job["data"],
+            **fields,
+            "status": "DISCOVERED",
+            "reviewed_at": None,
+            "reviewed_by": None,
+            "ai_provenance": {
+                "run_id": str(data.run_id),
+                "citations": result["citations"],
+                "requirement_citations": citations,
+                "source_job_version": result["job_version"],
+            },
+        }
+        return public(update(db, job, data.expected_version, payload))
 
 
 def parse_vacancy(

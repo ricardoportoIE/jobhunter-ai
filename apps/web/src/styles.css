@@ -750,3 +750,24 @@ summary {
     padding: 8px 18px;
   }
 }
+
+.ai-panel {
+  margin-bottom: 1.5rem;
+  border-top: 3px solid var(--accent, #426b56);
+}
+.ai-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+}
+.ai-panel blockquote {
+  margin: 0.5rem 0;
+  padding-left: 0.8rem;
+  border-left: 2px solid #a0b5a5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ai-panel article {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e3e7e2;
+}

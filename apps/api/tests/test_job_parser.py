@@ -78,3 +78,20 @@ def test_parser_is_idempotent_and_never_publishes(signed_client: TestClient) -> 
     assert latest["run_id"] == response.json()["run_id"] and not latest["stale"]
     history = client.get("/api/v1/ai/runs").json()
     assert len(history) == 1 and "raw_text" not in history[0]
+    payload = {"expected_version": job["version"], "run_id": latest["run_id"]}
+    draft = client.post(f"/api/v1/ai/jobs/{job['id']}/draft", json=payload)
+    assert draft.status_code == 200, draft.text
+    assert draft.json()["title"] == "Junior Python Developer"
+    assert draft.json()["status"] == "DISCOVERED"
+    assert draft.json()["reviewed_by"] is None
+    repeated = client.post(f"/api/v1/ai/jobs/{job['id']}/draft", json=payload)
+    assert repeated.json()["version"] == draft.json()["version"]
+    client.patch(
+        f"/api/v1/jobs/{job['id']}",
+        json={
+            "expected_version": draft.json()["version"],
+            "title": "Human correction",
+            "review_confirmed": True,
+        },
+    )
+    assert client.post(f"/api/v1/ai/jobs/{job['id']}/draft", json=payload).status_code == 409
