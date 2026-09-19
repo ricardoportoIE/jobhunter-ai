@@ -9,7 +9,8 @@ from jobhunter_api.store import Connection, Row
 
 
 def owner_lock(db: Connection, owner: UUID) -> None:
-    if not db.execute("SELECT id FROM users WHERE id=%s FOR UPDATE", (owner,)).fetchone():
+    db.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (str(owner),))
+    if not db.execute("SELECT id FROM users WHERE id=%s", (owner,)).fetchone():
         raise Problem(401, "AUTH_REQUIRED", "A conta não está disponível.")
 
 

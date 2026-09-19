@@ -12,6 +12,7 @@ Cada etapa tem commit local próprio. Sem publicação remota.
 | P1-06 | Matching determinístico v0.2, score/cobertura separados, fatos válidos e snapshots reproduzíveis | Exemplo ADR 68/0,50; half-up; pesos; blockers; autorização futura desconhecida; fatos revogados/vencidos e análise obsoleta |
 | P1-07 | Login, perfil, fatos/evidências, Inbox com filtros/paginação, importação, revisão, avaliação e detalhe com fontes | TypeScript/ESLint/build; componentes com falha/retry/vazio, XSS como texto, versão otimista, score/cobertura juntos e alerta de análise obsoleta |
 | P1-08 | Shortlist única por vaga, tracker com linha do tempo e transições autorizadas; envio somente como registro manual confirmado | Integração: duplicata, replay de evento, conflito de payload, estados terminais, data futura e confirmação/comprovante obrigatórios |
+| P1-09 | Papel runtime separado, auditoria e snapshots append-only, exportação privada e eliminação administrativa explícita | SQL UPDATE/DELETE/TRUNCATE negado; falha de auditoria reverte escrita; respostas/logs sem payload; export sem credenciais e erasure revoga sessões |
 
 Credenciais iniciais são geradas por `uv run --project apps/api --env-file .env python -m jobhunter_api.manage bootstrap` e guardadas em `.private/local-login.txt`, nunca no Git. O comando não redefine uma conta existente. Migrations têm checksum e lock transacional. Testes de integração exigem `JOBHUNTER_TEST_DB_NAME` começando por `jobhunter_test`, separado do banco da aplicação.
 

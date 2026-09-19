@@ -15,3 +15,12 @@ class Settings(BaseSettings):
     allowed_origins: list[str] = ["http://127.0.0.1:5173", "http://localhost:5173"]
     session_seconds: int = Field(default=28800, ge=60, le=86400)
     cookie_secure: bool = False
+    app_db_user: str = "jobhunter_app"
+    app_db_password: SecretStr | None = None
+
+    def runtime(self) -> "Settings":
+        if self.app_db_password:
+            return self.model_copy(
+                update={"db_user": self.app_db_user, "db_password": self.app_db_password}
+            )
+        return self

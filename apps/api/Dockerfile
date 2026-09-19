@@ -15,4 +15,4 @@ WORKDIR /app
 COPY --from=build --chown=app:app /app/.venv /app/.venv
 USER 10001:10001
 EXPOSE 8000
-CMD ["uvicorn", "jobhunter_api.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-server-header"]
+CMD ["uvicorn", "jobhunter_api.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-server-header", "--no-access-log"]

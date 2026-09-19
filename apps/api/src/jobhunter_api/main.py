@@ -12,6 +12,7 @@ from jobhunter_api.errors import install_errors
 from jobhunter_api.jobs import router as jobs_router
 from jobhunter_api.matching import router as matching_router
 from jobhunter_api.middleware import RequestBoundary
+from jobhunter_api.privacy import router as privacy_router
 from jobhunter_api.profile import router as profile_router
 from jobhunter_api.settings import Settings
 
@@ -42,7 +43,7 @@ def database_is_ready(settings: Annotated[Settings, Depends(get_settings)]) -> b
 def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
-        application.state.settings = settings if settings is not None else Settings()
+        application.state.settings = (settings if settings is not None else Settings()).runtime()
         yield
 
     application = FastAPI(
@@ -61,6 +62,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(jobs_router)
     application.include_router(matching_router)
     application.include_router(applications_router)
+    application.include_router(privacy_router)
 
     @application.get("/api/health/live", tags=["health"])
     def live() -> LiveStatus:

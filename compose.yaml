@@ -19,6 +19,26 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  migrate:
+    build:
+      context: ./apps/api
+    command: ["python", "-m", "jobhunter_api.manage", "provision"]
+    environment:
+      JOBHUNTER_DB_HOST: db
+      JOBHUNTER_DB_PORT: "5432"
+      JOBHUNTER_DB_NAME: ${JOBHUNTER_DB_NAME:-jobhunter}
+      JOBHUNTER_DB_USER: ${JOBHUNTER_DB_USER:-jobhunter}
+      JOBHUNTER_DB_PASSWORD: ${JOBHUNTER_DB_PASSWORD:?Run python scripts/init_env.py first}
+      JOBHUNTER_APP_DB_USER: ${JOBHUNTER_APP_DB_USER:-jobhunter_app}
+      JOBHUNTER_APP_DB_PASSWORD: ${JOBHUNTER_APP_DB_PASSWORD:?Run python scripts/init_env.py first}
+    depends_on:
+      db:
+        condition: service_healthy
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
   api:
     build:
       context: ./apps/api
@@ -26,13 +46,16 @@ services:
       JOBHUNTER_DB_HOST: db
       JOBHUNTER_DB_PORT: "5432"
       JOBHUNTER_DB_NAME: ${JOBHUNTER_DB_NAME:-jobhunter}
-      JOBHUNTER_DB_USER: ${JOBHUNTER_DB_USER:-jobhunter}
-      JOBHUNTER_DB_PASSWORD: ${JOBHUNTER_DB_PASSWORD:?Run python scripts/init_env.py first}
+      JOBHUNTER_DB_USER: ${JOBHUNTER_APP_DB_USER:-jobhunter_app}
+      JOBHUNTER_DB_PASSWORD: ${JOBHUNTER_APP_DB_PASSWORD:?Run python scripts/init_env.py first}
+      JOBHUNTER_ALLOWED_ORIGINS: '["http://127.0.0.1:${WEB_PORT:-5173}","http://localhost:${WEB_PORT:-5173}"]'
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=5)"]
       interval: 5s

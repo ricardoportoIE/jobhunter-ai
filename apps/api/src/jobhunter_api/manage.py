@@ -7,7 +7,9 @@ from pathlib import Path
 from uuid import uuid4
 
 from argon2 import PasswordHasher
+from psycopg import sql
 
+from jobhunter_api.records import owner_lock
 from jobhunter_api.seed import seed
 from jobhunter_api.settings import Settings
 from jobhunter_api.store import connect
@@ -52,9 +54,67 @@ def bootstrap(settings: Settings, destination: Path) -> None:
     print("Local account created; credentials saved in the private file.")
 
 
+def provision(settings: Settings) -> None:
+    if not settings.app_db_password:
+        raise RuntimeError("Run scripts/init_env.py to configure JOBHUNTER_APP_DB_PASSWORD")
+    role = sql.Identifier(settings.app_db_user)
+    with connect(settings) as db:
+        if not db.execute(
+            "SELECT 1 FROM pg_roles WHERE rolname=%s", (settings.app_db_user,)
+        ).fetchone():
+            db.execute(
+                sql.SQL("CREATE ROLE {} LOGIN PASSWORD {}").format(
+                    role, sql.Literal(settings.app_db_password.get_secret_value())
+                )
+            )
+        db.execute(
+            sql.SQL(
+                "ALTER ROLE {} NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS"
+            ).format(role)
+        )
+        db.execute("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
+        db.execute(sql.SQL("GRANT USAGE ON SCHEMA public TO {}").format(role))
+        db.execute(sql.SQL("REVOKE ALL ON ALL TABLES IN SCHEMA public FROM {}").format(role))
+        db.execute(sql.SQL("GRANT SELECT ON users TO {}").format(role))
+        db.execute(sql.SQL("GRANT SELECT,INSERT,DELETE ON sessions TO {}").format(role))
+        db.execute(
+            sql.SQL(
+                "GRANT SELECT,INSERT,UPDATE,DELETE ON "
+                "records,login_limits,idempotency,job_keys TO {}"
+            ).format(role)
+        )
+        db.execute(sql.SQL("GRANT SELECT,INSERT ON audit_events,snapshots TO {}").format(role))
+    print(
+        "Restricted application role configured; audit and snapshots are append-only for runtime."
+    )
+
+
+def erase(settings: Settings, confirmation: str) -> None:
+    if confirmation != "DELETE_LOCAL_APPLICATION_DATA":
+        raise ValueError("Erasure requires --confirm DELETE_LOCAL_APPLICATION_DATA")
+    with connect(settings) as db:
+        user = db.execute("SELECT id FROM users WHERE username='local'").fetchone()
+        if user:
+            owner_lock(db, user["id"])
+            for table in (
+                "job_keys",
+                "idempotency",
+                "snapshots",
+                "records",
+                "sessions",
+                "audit_events",
+            ):
+                db.execute(
+                    sql.SQL("DELETE FROM {} WHERE owner_id=%s").format(sql.Identifier(table)),
+                    (user["id"],),
+                )
+    print("Local application data erased; sessions revoked. Account and source files preserved.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["migrate", "bootstrap", "seed"])
+    parser.add_argument("command", choices=["migrate", "bootstrap", "seed", "provision", "erase"])
+    parser.add_argument("--confirm", default="")
     parser.add_argument("--credentials-file", type=Path, default=Path(".private/local-login.txt"))
     args = parser.parse_args()
     settings = Settings()
@@ -63,6 +123,10 @@ def main() -> None:
         bootstrap(settings, args.credentials_file)
     elif args.command == "seed":
         seed(settings)
+    elif args.command == "provision":
+        provision(settings)
+    elif args.command == "erase":
+        erase(settings, args.confirm)
     print("Database migrations applied.")
 
 

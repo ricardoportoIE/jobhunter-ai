@@ -1,5 +1,6 @@
 """Bound request bytes before JSON parsing; private API responses never enter caches."""
 
+import logging
 from uuid import uuid4
 
 from starlette.responses import JSONResponse
@@ -38,6 +39,7 @@ class RequestBoundary:
             if not message.get("more_body", False):
                 break
         sent = False
+        started = False
 
         async def replay() -> Message:
             nonlocal sent
@@ -47,7 +49,9 @@ class RequestBoundary:
             return await receive()
 
         async def headers(message: Message) -> None:
+            nonlocal started
             if message["type"] == "http.response.start":
+                started = True
                 values = list(message.get("headers", []))
                 values = [(k, v) for k, v in values if k not in {b"cache-control", b"x-request-id"}]
                 values.extend(
@@ -60,4 +64,21 @@ class RequestBoundary:
                 message["headers"] = values
             await send(message)
 
-        await self.app(scope, replay, headers)
+        try:
+            await self.app(scope, replay, headers)
+        except Exception as error:
+            logging.getLogger(__name__).error(
+                "request_failed correlation=%s type=%s", correlation, type(error).__name__
+            )
+            if not started:
+                response = JSONResponse(
+                    status_code=500,
+                    content={
+                        "error": {
+                            "code": "INTERNAL_ERROR",
+                            "message": "Não foi possível concluir a operação.",
+                            "correlation_id": correlation,
+                        }
+                    },
+                )
+                await response(scope, replay, headers)
