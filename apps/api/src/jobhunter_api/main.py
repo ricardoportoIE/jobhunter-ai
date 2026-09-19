@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from fastapi import Depends, FastAPI, Request, Response
 from pydantic import BaseModel
 
+from jobhunter_api.ai_routes import router as ai_router
 from jobhunter_api.applications import router as applications_router
 from jobhunter_api.auth import router as session_router
 from jobhunter_api.database import check_database
@@ -63,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(matching_router)
     application.include_router(applications_router)
     application.include_router(privacy_router)
+    application.include_router(ai_router)
 
     @application.get("/api/health/live", tags=["health"])
     def live() -> LiveStatus:

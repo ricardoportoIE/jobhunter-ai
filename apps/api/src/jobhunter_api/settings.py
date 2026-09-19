@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     combined_monthly_eur: Decimal = Field(default=Decimal("25"), gt=0, le=25)
     # Conservative accounting allowance, NOT a live exchange-rate quote.
     ai_eur_per_usd: Decimal = Field(default=Decimal("1.25"), ge=1, le=5)
-    ai_prices_reviewed: date = date(2026, 9, 20)
+    ai_prices_reviewed: date = date(2026, 9, 19)
     ai_timeout_seconds: float = Field(default=40, ge=1, le=45)
 
     def runtime(self) -> "Settings":

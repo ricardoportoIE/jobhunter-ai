@@ -84,6 +84,7 @@ def provision(settings: Settings) -> None:
             ).format(role)
         )
         db.execute(sql.SQL("GRANT SELECT,INSERT ON audit_events,snapshots TO {}").format(role))
+        db.execute(sql.SQL("GRANT SELECT,INSERT,UPDATE ON ai_calls TO {}").format(role))
     print(
         "Restricted application role configured; audit and snapshots are append-only for runtime."
     )
@@ -96,6 +97,12 @@ def erase(settings: Settings, confirmation: str) -> None:
         user = db.execute("SELECT id FROM users WHERE username='local'").fetchone()
         if user:
             owner_lock(db, user["id"])
+            # Keep non-personal monthly charges so erasure cannot reset the budget.
+            db.execute(
+                "UPDATE ai_calls SET owner_id=NULL,result=NULL,request_key='',payload_hash='',"
+                "provider_request_id=NULL WHERE owner_id=%s",
+                (user["id"],),
+            )
             for table in (
                 "job_keys",
                 "idempotency",

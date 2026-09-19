@@ -29,10 +29,17 @@ def export(actor: Actor, request: Request, response: Response) -> Row:
             (actor.id,),
         ).fetchall()
         response.headers["Content-Disposition"] = 'attachment; filename="jobhunter-export.json"'
+        runs = db.execute(
+            "SELECT id,operation,model,prompt_version,price_snapshot,status,actual_eur,"
+            "reserved_eur,input_tokens,output_tokens,latency_ms,error_code,result,created_at "
+            "FROM ai_calls WHERE owner_id=%s ORDER BY created_at",
+            (actor.id,),
+        ).fetchall()
         return {
             "format_version": "1.0",
             "exported_at": datetime.now(UTC).isoformat(),
             "records": [{**public(r), "kind": r["kind"], "deleted": r["deleted"]} for r in records],
             "snapshots": snapshots,
             "audit_events": events,
+            "ai_runs": runs,
         }

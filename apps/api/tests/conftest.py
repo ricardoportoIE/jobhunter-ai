@@ -2,6 +2,7 @@
 
 import os
 from collections.abc import Iterator
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import psycopg
@@ -39,7 +40,13 @@ def database_settings() -> Settings:
     ) as admin:
         if not admin.execute("SELECT 1 FROM pg_database WHERE datname=%s", (name,)).fetchone():
             admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
-    test_settings = settings.model_copy(update={"db_name": name})
+    test_settings = settings.model_copy(
+        update={
+            "db_name": name,
+            "openai_api_key": None,
+            "ai_prices_reviewed": datetime.now(UTC).date(),
+        }
+    )
     if not test_settings.app_db_password:
         test_settings.app_db_password = SecretStr("ci-synthetic-runtime-only")
     migrate(test_settings)
@@ -50,7 +57,7 @@ def database_settings() -> Settings:
 @pytest.fixture
 def db_settings(database_settings: Settings) -> Settings:
     with connect(database_settings) as db:
-        db.execute("TRUNCATE users,login_limits,audit_events CASCADE")
+        db.execute("TRUNCATE users,login_limits,audit_events,ai_calls CASCADE")
         db.execute(
             "INSERT INTO users (id,username,password_hash) VALUES (%s,'local',%s)",
             (uuid4(), PasswordHasher().hash(TEST_PASSWORD)),
