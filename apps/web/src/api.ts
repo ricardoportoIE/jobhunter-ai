@@ -13,6 +13,7 @@ export async function api<T>(path: string, method = 'GET', data?: unknown, extra
     body: data === undefined ? undefined : JSON.stringify(data),
   });
   if (!response.ok) {
+    if (response.status === 401 && path !== '/session') window.dispatchEvent(new Event('session-expired'));
     const body: unknown = await response.json().catch(() => null);
     const message = body && typeof body === 'object' && 'error' in body
       ? (body as { error: { message?: string } }).error.message : undefined;

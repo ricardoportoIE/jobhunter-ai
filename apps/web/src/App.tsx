@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import Foundation from './Foundation';
+import Workspace from './Workspace';
 import { api, ApiError, setSession, type Session } from './api';
 
 export default function App() {
@@ -7,6 +7,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const expired = () => { setSession(null); updateSession(null); setError('Sessão expirada. Entre novamente.'); };
+    window.addEventListener('session-expired', expired);
+    return () => window.removeEventListener('session-expired', expired);
+  }, []);
   useEffect(() => {
     api<Session>('/session').then((value) => { setSession(value); updateSession(value); })
       .catch((reason: unknown) => {
@@ -36,5 +41,5 @@ export default function App() {
   </main>;
   return <><div className="session-bar"><span>Sessão local ativa</span><button onClick={() => {
     void api('/session', 'DELETE').then(() => { setSession(null); updateSession(null); }).catch(() => setError('Não foi possível sair. Tente novamente.'));
-  }}>Sair</button>{error && <span role="alert">{error}</span>}</div><Foundation /></>;
+  }}>Sair</button>{error && <span role="alert">{error}</span>}</div><Workspace /></>;
 }

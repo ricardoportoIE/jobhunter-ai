@@ -10,6 +10,7 @@ Cada etapa tem commit local próprio. Sem publicação remota.
 | P1-04 | Importação de texto com SHA-256, referência sem fetch, requisitos manuais e confirmação antes de PARSED | Integração: texto preservado, desconhecidos null, filtros, limites 50.000 caracteres/128 KiB, payload XSS armazenado como texto |
 | P1-05 | Identidade por fonte+ID, URL canônica e hash+localidade; idempotência vinculada ao ator e payload | Repetição, conflito 409, importações concorrentes e texto igual em cidades diferentes; duplicata nunca sobrescreve vaga revisada |
 | P1-06 | Matching determinístico v0.2, score/cobertura separados, fatos válidos e snapshots reproduzíveis | Exemplo ADR 68/0,50; half-up; pesos; blockers; autorização futura desconhecida; fatos revogados/vencidos e análise obsoleta |
+| P1-07 | Login, perfil, fatos/evidências, Inbox com filtros/paginação, importação, revisão, avaliação e detalhe com fontes | TypeScript/ESLint/build; componentes com falha/retry/vazio, XSS como texto, versão otimista, score/cobertura juntos e alerta de análise obsoleta |
 
 Credenciais iniciais são geradas por `uv run --project apps/api --env-file .env python -m jobhunter_api.manage bootstrap` e guardadas em `.private/local-login.txt`, nunca no Git. O comando não redefine uma conta existente. Migrations têm checksum e lock transacional. Testes de integração exigem `JOBHUNTER_TEST_DB_NAME` começando por `jobhunter_test`, separado do banco da aplicação.
 
