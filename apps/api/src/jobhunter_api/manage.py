@@ -85,6 +85,7 @@ def provision(settings: Settings) -> None:
         )
         db.execute(sql.SQL("GRANT SELECT,INSERT ON audit_events,snapshots TO {}").format(role))
         db.execute(sql.SQL("GRANT SELECT,INSERT,UPDATE ON ai_calls TO {}").format(role))
+        db.execute(sql.SQL("GRANT SELECT,INSERT,DELETE ON ai_embeddings TO {}").format(role))
     print(
         "Restricted application role configured; audit and snapshots are append-only for runtime."
     )
@@ -104,6 +105,7 @@ def erase(settings: Settings, confirmation: str) -> None:
                 (user["id"],),
             )
             for table in (
+                "ai_embeddings",
                 "job_keys",
                 "idempotency",
                 "snapshots",

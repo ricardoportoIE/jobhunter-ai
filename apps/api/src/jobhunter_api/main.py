@@ -16,6 +16,7 @@ from jobhunter_api.matching import router as matching_router
 from jobhunter_api.middleware import RequestBoundary
 from jobhunter_api.privacy import router as privacy_router
 from jobhunter_api.profile import router as profile_router
+from jobhunter_api.semantic import router as semantic_router
 from jobhunter_api.settings import Settings
 
 
@@ -67,6 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(privacy_router)
     application.include_router(parser_router)
     application.include_router(ai_router)
+    application.include_router(semantic_router)
 
     @application.get("/api/health/live", tags=["health"])
     def live() -> LiveStatus:

@@ -33,6 +33,10 @@ class StructuredInference(Protocol):
     ) -> Completion: ...
 
 
+class EmbeddingInference(Protocol):
+    def embed(self, texts: list[str]) -> Completion: ...
+
+
 def strict_schema(schema: dict[str, Any]) -> dict[str, Any]:
     """All response fields are required; absence is represented with null."""
     if schema.get("type") == "object":
@@ -60,6 +64,39 @@ class OpenAIInference:
             timeout=settings.ai_timeout_seconds,
         )
 
+    def embed(self, texts: list[str]) -> Completion:
+        import json
+
+        start = monotonic()
+        try:
+            response = self.client.embeddings.create(
+                model="text-embedding-3-small",
+                input=texts,
+                dimensions=256,
+                encoding_format="float",
+            )
+        except APIStatusError as exc:
+            detail = exc.body.get("error", exc.body) if isinstance(exc.body, dict) else {}
+            code = (
+                "PROVIDER_INSUFFICIENT_QUOTA"
+                if isinstance(detail, dict) and detail.get("code") == "insufficient_quota"
+                else f"PROVIDER_HTTP_{exc.status_code}"
+            )
+            raise ProviderFailure(code, charge_unknown=exc.status_code >= 500) from None
+        except Exception:
+            raise ProviderFailure("PROVIDER_UNAVAILABLE", charge_unknown=True) from None
+        ordered = sorted(response.data, key=lambda item: item.index)
+        if [item.index for item in ordered] != list(range(len(texts))):
+            raise ProviderFailure("EMBEDDINGS_MISSING", charge_unknown=True)
+        return Completion(
+            json.dumps({"vectors": [item.embedding for item in ordered]}),
+            response.usage.prompt_tokens,
+            0,
+            response._request_id,
+            round((monotonic() - start) * 1000),
+            "completed",
+        )
+
     def complete(
         self, model: str, prompt: str, data: str, schema: type[BaseModel], max_output: int
     ) -> Completion:
@@ -83,9 +120,11 @@ class OpenAIInference:
             )
         except APIStatusError as exc:
             # Do not propagate headers, request bodies, credentials or provider error text.
-            raise ProviderFailure(
-                f"PROVIDER_HTTP_{exc.status_code}", charge_unknown=exc.status_code >= 500
-            ) from None
+            code = f"PROVIDER_HTTP_{exc.status_code}"
+            detail = exc.body.get("error", exc.body) if isinstance(exc.body, dict) else {}
+            if isinstance(detail, dict) and detail.get("code") == "insufficient_quota":
+                code = "PROVIDER_INSUFFICIENT_QUOTA"
+            raise ProviderFailure(code, charge_unknown=exc.status_code >= 500) from None
         except Exception:
             raise ProviderFailure("PROVIDER_UNAVAILABLE", charge_unknown=True) from None
         if response.usage is None:

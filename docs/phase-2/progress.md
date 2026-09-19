@@ -8,7 +8,7 @@ Implementação local autorizada em 2026-09-20. Um commit por etapa; nenhum push
 | P2-02 | Reservas atômicas, custos, limites e tracing | Implementado |
 | P2-03 | Parser com saída estruturada e citações verificadas | Implementado |
 | P2-04 | Normalização, confiança e revisão na interface | Implementado |
-| P2-05 | Embeddings e busca semântica | Pendente |
+| P2-05 | Embeddings e busca semântica | Implementado |
 | P2-06 | Possíveis duplicados por similaridade | Pendente |
 | P2-07 | Sugestões de matching com evidências | Pendente |
 | P2-08 | Benchmark, segurança, E2E e documentação | Pendente |

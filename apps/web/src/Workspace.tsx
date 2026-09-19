@@ -6,6 +6,7 @@ import ProfilePage from "./ProfilePage";
 import Tracker from "./Tracker";
 import Privacy from "./Privacy";
 import { AiActivity } from "./AiTools";
+import SemanticSearch from "./SemanticSearch";
 import type { Evidence, Fact, Profile } from "./types";
 import { ErrorState, Loading } from "./ui";
 
@@ -106,6 +107,12 @@ export default function Workspace() {
           >
             Privacidade
           </a>
+          <a
+            href="#search"
+            aria-current={route === "search" ? "page" : undefined}
+          >
+            Busca semântica
+          </a>
           <a href="#ai" aria-current={route === "ai" ? "page" : undefined}>
             Atividade de IA
           </a>
@@ -132,6 +139,8 @@ export default function Workspace() {
           <Privacy />
         ) : route === "ai" ? (
           <AiActivity />
+        ) : route === "search" ? (
+          <SemanticSearch facts={data.facts} />
         ) : route === "tracker" ? (
           <Tracker />
         ) : route === "import" ? (
