@@ -1,5 +1,9 @@
 """Explicit environment configuration; credentials have no fallback."""
 
+from datetime import date
+from decimal import Decimal
+from typing import Literal
+
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -17,6 +21,16 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     app_db_user: str = "jobhunter_app"
     app_db_password: SecretStr | None = None
+    openai_api_key: SecretStr | None = None
+    ai_model: Literal["gpt-4.1-mini-2025-04-14", "gpt-4.1-nano-2025-04-14"] = (
+        "gpt-4.1-mini-2025-04-14"
+    )
+    ai_monthly_eur: Decimal = Field(default=Decimal("10"), gt=0, le=10)
+    combined_monthly_eur: Decimal = Field(default=Decimal("25"), gt=0, le=25)
+    # Conservative accounting allowance, NOT a live exchange-rate quote.
+    ai_eur_per_usd: Decimal = Field(default=Decimal("1.25"), ge=1, le=5)
+    ai_prices_reviewed: date = date(2026, 9, 20)
+    ai_timeout_seconds: float = Field(default=40, ge=1, le=45)
 
     def runtime(self) -> "Settings":
         if self.app_db_password:
