@@ -7,10 +7,12 @@ from typing import Annotated, Literal
 from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query, Request, Response
+from psycopg.types.json import Jsonb
 from pydantic import ConfigDict, Field, model_validator
 
 from jobhunter_api.auth import Actor, settings_for
+from jobhunter_api.deduplication import fingerprint, identity_keys, normalized
 from jobhunter_api.errors import Problem
 from jobhunter_api.profile import Input, Text, Version
 from jobhunter_api.records import get_record, insert, owner_lock, public, update
@@ -99,9 +101,51 @@ class JobEdit(Version):
 
 
 @router.post("/import", status_code=201)
-def import_job(data: JobImport, actor: Actor, request: Request) -> Row:
+def import_job(data: JobImport, actor: Actor, request: Request, response: Response) -> Row:
     with connect(settings_for(request)) as db:
         owner_lock(db, actor.id)
+        payload_hash = fingerprint(data.model_dump())
+        key = request.headers.get("idempotency-key", "implicit:" + payload_hash)
+        if not key.strip() or len(key) > 200:
+            raise Problem(422, "INVALID_KEY", "Chave de idempotência inválida.")
+        previous = db.execute(
+            "SELECT payload_hash,response FROM idempotency "
+            "WHERE owner_id=%s AND operation='import' AND key=%s",
+            (actor.id, key),
+        ).fetchone()
+        if previous:
+            if previous["payload_hash"] != payload_hash:
+                raise Problem(
+                    409, "IDEMPOTENCY_CONFLICT", "A chave já foi usada com outro conteúdo."
+                )
+            response.status_code = 200
+            return dict(previous["response"])
+        keys = identity_keys(data.model_dump())
+        duplicates = db.execute(
+            "SELECT DISTINCT job_id FROM job_keys WHERE owner_id=%s AND key=ANY(%s)",
+            (actor.id, keys),
+        ).fetchall()
+        if len(duplicates) > 1:
+            raise Problem(
+                409, "DUPLICATE_CONFLICT", "As referências apontam para vagas diferentes."
+            )
+        if duplicates:
+            existing = get_record(db, actor.id, "job", duplicates[0]["job_id"])
+            old_location = existing["data"].get("location_hint")
+            if (
+                old_location
+                and data.location_hint
+                and normalized(old_location) != normalized(data.location_hint)
+            ):
+                raise Problem(
+                    409,
+                    "LOCATION_CONFLICT",
+                    "Mesma referência com localidades diferentes; revise a origem.",
+                )
+            result = public(existing)
+            response.status_code = 200
+        else:
+            result = None
         payload = JobEdit(expected_version=1).model_dump(
             mode="json", exclude={"expected_version", "review_confirmed"}
         )
@@ -112,7 +156,18 @@ def import_job(data: JobImport, actor: Actor, request: Request) -> Row:
             reviewed_by=None,
             reviewed_at=None,
         )
-        return public(insert(db, actor.id, "job", payload))
+        if result is None:
+            result = public(insert(db, actor.id, "job", payload))
+        for identity in keys:
+            db.execute(
+                "INSERT INTO job_keys VALUES (%s,%s,%s) ON CONFLICT DO NOTHING",
+                (actor.id, identity, result["id"]),
+            )
+        db.execute(
+            "INSERT INTO idempotency VALUES (%s,'import',%s,%s,%s)",
+            (actor.id, key, payload_hash, Jsonb(result)),
+        )
+        return result
 
 
 @router.get("")
