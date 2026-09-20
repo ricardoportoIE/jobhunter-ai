@@ -174,6 +174,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
     job.requirements,
   );
   const task = useTask();
+  const [reviewError, setReviewError] = useState(false);
   function change(id: string, update: Partial<Requirement>) {
     setRequirements((items) =>
       items.map((item) => (item.id === id ? { ...item, ...update } : item)),
@@ -187,6 +188,13 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
           onSubmit={(event) => {
             event.preventDefault();
             const data = new FormData(event.currentTarget);
+            if (!data.has("review_confirmed")) {
+              setReviewError(true);
+              event.currentTarget
+                .querySelector<HTMLInputElement>("[name=review_confirmed]")
+                ?.focus();
+              return;
+            }
             const minimum = optional(data, "salary_min");
             const maximum = optional(data, "salary_max");
             const currency = optional(data, "currency");
@@ -443,13 +451,37 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
               name="archived"
               type="checkbox"
               defaultChecked={job.archived}
+              aria-describedby="archive-help"
             />
             Arquivar esta oportunidade
           </label>
+          <details className="help-disclosure" id="archive-help">
+            <summary>
+              <span aria-hidden="true">ⓘ</span> What does archiving do?
+            </summary>
+            <p>
+              Archiving hides this opportunity from the active Inbox. It keeps
+              the job, evidence and application history. Find it with the
+              archived filter and clear this checkbox to restore it.
+            </p>
+          </details>
           <label className="check">
-            <input name="review_confirmed" type="checkbox" />
+            <input
+              name="review_confirmed"
+              type="checkbox"
+              required
+              aria-invalid={reviewError}
+              aria-describedby="job-review-help"
+              onInvalid={() => setReviewError(true)}
+              onChange={() => setReviewError(false)}
+            />
             Confirmo a revisão dos campos e requisitos acima.
           </label>
+          <p id="job-review-help" role={reviewError ? "alert" : undefined}>
+            {reviewError
+              ? "Confirm the review checkbox before saving the job review."
+              : "Review confirmation is required to save. Check the fields and requirements, then tick the confirmation box."}
+          </p>
           {task.feedback}
           <button className="primary" disabled={task.busy}>
             Salvar revisão da vaga
