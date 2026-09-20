@@ -9,7 +9,7 @@ local commit after its checks; the complete phase is pushed only after final rev
 | P4-01 | Owned source registry, access reviews and persistence contracts | Implemented |
 | P4-02 | Greenhouse reader, synchronisation, revisions and deduplication | Implemented |
 | P4-03 | Gmail OAuth, dedicated-label reader and configuration guide | Implemented; live connection awaits credentials |
-| P4-04 | Discovery interface, preference hints and company research hand-off | Pending |
+| P4-04 | Discovery interface, preference hints and company research hand-off | Implemented |
 | P4-05 | End-to-end validation, security review and operational documentation | Pending |
 
 ## Source controls
@@ -59,3 +59,27 @@ configuration, PKCE, consent, state replay/expiry, rejected scopes, encrypted st
 export exclusions, disconnect, token refresh, label boundaries, malicious HTML and
 attachment/body limits. Ruff and mypy passed. See [Gmail setup](gmail-setup.md) for the
 operator steps and the explicit distinction between synthetic and live validation.
+
+## P4-04 behaviour
+
+**Discover opportunities** sits within Opportunities, retaining the three main
+navigation destinations. Source administration is collapsed during normal browsing.
+The feed supports source/text filters, unseen updates, dismissal and restoration.
+Saving a vacancy opens its existing review flow; email links populate the import form
+without opening the destination or starting AI extraction.
+
+Preference hints are literal, case-insensitive mentions of target roles in the title
+and preferred locations in the supplied location. They are neither a score nor a
+model recommendation. Unknown information stays unknown. Company research offers an
+editable question, then requires official domains and the existing explicit AI consent.
+
+Changed saved adverts show a comparison action. Applying an update requires both
+current versions and explicit confirmation, preserves the previous advert in a snapshot,
+clears extracted fields and returns the job to review. Pending content changes block
+new matching/strategy work and make prior matches/packages stale. A missing listing
+is reported as uncertainty, not a confirmed closure or automatic disqualifier.
+
+Component tests cover explicit actions, errors, email boundaries, permission review,
+OAuth query removal and confirmed replacement. The browser journey covers activation,
+synchronisation, filtering, dismissal/restoration, review hand-off, Portuguese, axe
+checks and a 320-pixel viewport on desktop and mobile. Screenshots were visually reviewed.

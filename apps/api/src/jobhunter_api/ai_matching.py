@@ -12,7 +12,13 @@ from jobhunter_api.deduplication import fingerprint
 from jobhunter_api.errors import Problem
 from jobhunter_api.job_parser import get_provider
 from jobhunter_api.profile import Input, Text
-from jobhunter_api.records import get_record, owner_lock, profile
+from jobhunter_api.records import (
+    get_record,
+    owner_lock,
+    profile,
+    require_current_source,
+    source_update_pending,
+)
 from jobhunter_api.semantic import permitted_facts
 from jobhunter_api.store import Row, connect
 
@@ -170,6 +176,7 @@ def suggest(job_id: UUID, data: SuggestInput, actor: Actor, request: Request) ->
     with connect(settings) as db:
         owner_lock(db, actor.id)
         job, candidate = get_record(db, actor.id, "job", job_id), profile(db, actor.id)
+        require_current_source(db, actor.id, job_id)
         if job["version"] != data.job_version or candidate["version"] != data.profile_version:
             raise Problem(409, "VERSION_CONFLICT", "Update the job and profile before using AI.")
         if job["data"]["status"] == "DISCOVERED" or candidate["data"]["status"] != "reviewed":
@@ -253,5 +260,6 @@ def suggest(job_id: UUID, data: SuggestInput, actor: Actor, request: Request) ->
             current_job["version"] != data.job_version
             or current_profile["version"] != data.profile_version
             or not set(ids).issubset(permitted_facts(db, actor.id))
+            or source_update_pending(db, actor.id, job_id)
         )
     return {**result, "stale": stale}

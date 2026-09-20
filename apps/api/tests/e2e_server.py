@@ -13,6 +13,7 @@ from argon2 import PasswordHasher
 from psycopg import sql
 from pydantic import SecretStr
 
+from jobhunter_api.greenhouse import DiscoveredItem, DiscoveryBatch
 from jobhunter_api.main import create_app
 from jobhunter_api.manage import migrate, provision
 from jobhunter_api.settings import Settings
@@ -81,7 +82,22 @@ def main() -> None:
         patch("jobhunter_api.semantic.embedding_provider", return_value=fixture),
         patch("jobhunter_api.research.search", return_value=fixture.research()),
     ):
-        uvicorn.run(create_app(settings), host="127.0.0.1", port=8001, access_log=False)
+        app = create_app(settings)
+        app.state.discovery_reader = lambda source: DiscoveryBatch(
+            items=[
+                DiscoveredItem(
+                    external_id="fixture-1",
+                    title="Junior Python Developer",
+                    company="Discovery Labs",
+                    location="Dublin",
+                    url=f"https://example.com/{source['data']['reference']}/1",
+                    raw_text="Junior Python Developer. Python projects required. Dublin office. "
+                    "This synthetic advert is used only for browser testing.",
+                )
+            ],
+            complete=True,
+        )
+        uvicorn.run(app, host="127.0.0.1", port=8001, access_log=False)
 
 
 if __name__ == "__main__":

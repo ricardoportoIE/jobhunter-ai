@@ -1287,3 +1287,63 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+
+/* Discovery keeps source administration behind a single disclosure. */
+.discovery-grid,
+.source-list {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.discovery-card,
+.source-card,
+.discovery-settings {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.discovery-card h3,
+.source-card h3 {
+  margin: 12px 0 8px;
+}
+.discovery-card .actions,
+.source-card .actions {
+  flex-wrap: wrap;
+}
+.discovery-settings > summary {
+  font-weight: 650;
+}
+.discovery-settings > .source-list {
+  margin-top: 16px;
+}
+.source-warning {
+  border-left: 3px solid #b36b16;
+  padding: 10px 14px;
+  background: #fff8ec;
+  color: #68400d;
+}
+.preference-hint {
+  color: #255840;
+  background: #eff8f2;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+.preference-hint small {
+  display: block;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.email-link {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+.email-link span {
+  flex: 1 1 200px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.gmail-connection {
+  margin-top: 18px;
+}

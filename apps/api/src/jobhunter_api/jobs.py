@@ -15,7 +15,14 @@ from jobhunter_api.auth import Actor, settings_for
 from jobhunter_api.deduplication import fingerprint, identity_keys, normalized
 from jobhunter_api.errors import Problem
 from jobhunter_api.profile import Input, Text, Version
-from jobhunter_api.records import get_record, insert, owner_lock, public, update
+from jobhunter_api.records import (
+    get_record,
+    insert,
+    owner_lock,
+    public,
+    source_update_pending,
+    update,
+)
 from jobhunter_api.store import Connection, Row, connect
 
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
@@ -113,7 +120,7 @@ def import_record(
 ) -> Row:
     owner_lock(db, owner)
     payload_hash = fingerprint(data.model_dump())
-    key = key or "implicit:" + payload_hash
+    key = "implicit:" + payload_hash if key is None else key
     if not key.strip() or len(key) > 200:
         raise Problem(422, "INVALID_KEY", "Invalid idempotency key.")
     previous = db.execute(
@@ -242,7 +249,10 @@ def jobs(
 @router.get("/{job_id}")
 def job(job_id: UUID, actor: Actor, request: Request) -> Row:
     with connect(settings_for(request)) as db:
-        return public(get_record(db, actor.id, "job", job_id))
+        result = public(get_record(db, actor.id, "job", job_id))
+        if source_update_pending(db, actor.id, job_id, include_missing=True):
+            result["source_update_pending"] = True
+        return result
 
 
 @router.patch("/{job_id}")

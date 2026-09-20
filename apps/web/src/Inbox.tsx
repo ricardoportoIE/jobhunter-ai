@@ -6,7 +6,7 @@ import { api } from "./api";
 import type { Job } from "./types";
 import { Field } from "./ui";
 export { default as Inbox } from "./Opportunities";
-export function ImportJob() {
+export function ImportJob({ initialUrl = "" }: { initialUrl?: string }) {
   const task = useTask();
   const [key] = useState(() => crypto.randomUUID());
   const [mode, setMode] = useState<"text" | "url">("url");
@@ -66,6 +66,7 @@ export function ImportJob() {
             <Field label={t("Public vacancy link")}>
               <input
                 name="url"
+                defaultValue={initialUrl}
                 type="url"
                 required
                 maxLength={2000}

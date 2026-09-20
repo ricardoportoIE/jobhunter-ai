@@ -9,7 +9,7 @@ from pydantic import Field
 
 from jobhunter_api.errors import Problem
 from jobhunter_api.profile import Input, Text, Version
-from jobhunter_api.records import get_record, list_records, profile, public
+from jobhunter_api.records import get_record, list_records, profile, public, require_current_source
 from jobhunter_api.scoring import eligible
 from jobhunter_api.store import Connection, Row
 
@@ -89,6 +89,7 @@ def allowed(db: Connection, owner: UUID) -> tuple[list[Row], list[Row]]:
 
 def capture(db: Connection, owner: UUID, job_id: UUID, data: StrategyRequest) -> Row:
     job, candidate = public(get_record(db, owner, "job", job_id)), public(profile(db, owner))
+    require_current_source(db, owner, job_id)
     if job["version"] != data.job_version or candidate["version"] != data.profile_version:
         raise Problem(409, "VERSION_CONFLICT", "Update the job and profile.")
     if job["status"] == "DISCOVERED" or job["archived"] or candidate["status"] != "reviewed":

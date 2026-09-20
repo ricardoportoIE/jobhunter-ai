@@ -11,7 +11,16 @@ from jobhunter_api.auth import Actor, settings_for
 from jobhunter_api.clarifications import Resolution, apply_gate, collect
 from jobhunter_api.errors import Problem
 from jobhunter_api.profile import Input, Text
-from jobhunter_api.records import audit, get_record, insert, owner_lock, profile, public
+from jobhunter_api.records import (
+    audit,
+    get_record,
+    insert,
+    owner_lock,
+    profile,
+    public,
+    require_current_source,
+    source_update_pending,
+)
 from jobhunter_api.scoring import eligible, evaluate
 from jobhunter_api.store import Row, connect
 
@@ -60,6 +69,7 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
     with connect(settings_for(request)) as db:
         owner_lock(db, actor.id)
         job, candidate = get_record(db, actor.id, "job", job_id), profile(db, actor.id)
+        require_current_source(db, actor.id, job_id)
         if job["version"] != data.job_version or candidate["version"] != data.profile_version:
             raise Problem(409, "VERSION_CONFLICT", "Update the job and profile before analysing.")
         if job["data"]["status"] == "DISCOVERED" or candidate["data"]["status"] != "reviewed":
@@ -133,6 +143,7 @@ def match(match_id: UUID, actor: Actor, request: Request) -> Row:
         stale = (
             candidate["version"] != row["data"]["profile_version"]
             or job["version"] != row["data"]["job_version"]
+            or source_update_pending(db, actor.id, job["id"])
         )
         snapshot = row["data"]["profile_snapshot"]
         evidence = {e["id"]: e for e in snapshot["evidence"]}

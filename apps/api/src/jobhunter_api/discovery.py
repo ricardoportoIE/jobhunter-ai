@@ -214,7 +214,16 @@ def items(
             sql.SQL("SELECT count(*) AS count FROM records WHERE " + condition), params
         ).fetchone()
         return {
-            "items": [public(row) for row in rows],
+            "items": [
+                {
+                    **public(row),
+                    "update_pending": bool(
+                        row["data"]["job_id"]
+                        and row["data"].get("saved_hash") != row["data"]["content_hash"]
+                    ),
+                }
+                for row in rows
+            ],
             "total": total["count"] if total else 0,
             "limit": limit,
             "offset": offset,
@@ -290,5 +299,81 @@ def save_item(item_id: UUID, data: Version, actor: Actor, request: Request) -> R
                     },
                 )
             )
-        update(db, item, item["version"], {**value, "job_id": result["id"], "seen": True})
+        update(
+            db,
+            item,
+            item["version"],
+            {
+                **value,
+                "job_id": result["id"],
+                "seen": True,
+                "saved_hash": value["content_hash"]
+                if result["raw_text"] == value["raw_text"]
+                else None,
+            },
+        )
         return result
+
+
+class ApplySourceUpdate(Version):
+    expected_job_version: int = Field(ge=1)
+    replacement_confirmed: bool = False
+
+
+@router.post("/items/{item_id}/apply-update")
+def apply_source_update(
+    item_id: UUID, data: ApplySourceUpdate, actor: Actor, request: Request
+) -> Row:
+    import hashlib
+
+    from jobhunter_api.discovery_sync import snapshot_item
+    from jobhunter_api.jobs import JobEdit
+
+    if not data.replacement_confirmed:
+        raise Problem(
+            422, "SOURCE_REVIEW_REQUIRED", "Confirm replacing the advert and reviewing it again."
+        )
+    with connect(settings_for(request)) as db:
+        owner_lock(db, actor.id)
+        item = get_record(db, actor.id, "discovery_item", item_id)
+        value = item["data"]
+        if item["version"] != data.expected_version:
+            raise Problem(409, "VERSION_CONFLICT", "The source changed. Review its latest text.")
+        if (
+            not value["job_id"]
+            or value["item_type"] != "vacancy"
+            or value["availability"] != "listed"
+        ):
+            raise Problem(409, "SOURCE_NOT_LISTED", "An available, saved vacancy is required.")
+        job = get_record(db, actor.id, "job", UUID(value["job_id"]))
+        if job["version"] != data.expected_job_version:
+            raise Problem(409, "VERSION_CONFLICT", "The saved review changed. Compare it again.")
+        # Existing assessment and package version checks invalidate approvals automatically.
+        snapshot_item(db, {**job, "kind": "job"})
+        fields = JobEdit(expected_version=job["version"]).model_dump(
+            mode="json", exclude={"expected_version", "review_confirmed"}
+        )
+        changed = update(
+            db,
+            job,
+            job["version"],
+            {
+                **job["data"],
+                **fields,
+                "raw_text": value["raw_text"],
+                "content_sha256": hashlib.sha256(value["raw_text"].encode()).hexdigest(),
+                "title": value["title"],
+                "company_name": value["company"],
+                "location": value["location"],
+                "location_hint": (value["location"] or "")[:200] or None,
+                "source_url": value["url"],
+                "reviewed_by": None,
+                "reviewed_at": None,
+                "status": "DISCOVERED",
+                "archived": job["data"]["archived"],
+            },
+        )
+        update(
+            db, item, item["version"], {**value, "saved_hash": value["content_hash"], "seen": True}
+        )
+        return public(changed)

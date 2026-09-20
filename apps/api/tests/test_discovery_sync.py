@@ -60,7 +60,20 @@ def test_sync_revisions_promotion_and_absence(
     assert client.post(endpoint).json()["counts"]["changed"] == 1
     changed = client.get("/api/v1/discovery/items?unread=true").json()["items"][0]
     assert changed["notice"] == "changed"
-    assert client.get(f"/api/v1/jobs/{job['id']}").json() == job
+    current = client.get(f"/api/v1/jobs/{job['id']}").json()
+    assert current == {**job, "source_update_pending": True}
+    assert (
+        client.post(
+            f"/api/v1/jobs/{job['id']}/analyse",
+            json={
+                "job_version": job["version"],
+                "profile_version": 1,
+                "review_confirmed": True,
+                "assessments": [],
+            },
+        ).json()["error"]["code"]
+        == "SOURCE_UPDATE_PENDING"
+    )
     assert (
         client.post(
             f"/api/v1/discovery/items/{found['id']}/save",
@@ -75,11 +88,19 @@ def test_sync_revisions_promotion_and_absence(
         ).json()["id"]
         == job["id"]
     )
+    replacement = {"expected_version": changed["version"], "expected_job_version": job["version"]}
+    path = f"/api/v1/discovery/items/{changed['id']}/apply-update"
+    assert client.post(path, json=replacement).status_code == 422
+    updated = client.post(path, json={**replacement, "replacement_confirmed": True})
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["title"] == "Senior developer"
+    assert updated.json()["status"] == "DISCOVERED" and updated.json()["requirements"] == []
+    assert "source_update_pending" not in client.get(f"/api/v1/jobs/{job['id']}").json()
     due(db_settings, source)
     reader(client, lambda _: DiscoveryBatch(complete=True))
     assert client.post(endpoint).json()["counts"]["missing"] == 1
     assert client.get("/api/v1/discovery/items").json()["items"][0]["availability"] == "not_listed"
-    assert len(client.get("/api/v1/candidate/export").json()["snapshots"]) == 2
+    assert len(client.get("/api/v1/candidate/export").json()["snapshots"]) == 3
 
 
 def test_conditional_reads_failures_and_pause(

@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./styles.css";
 import { getLocale } from "./i18n";
+import { captureOAuthReturn } from "./oauthReturn";
+
+captureOAuthReturn();
 
 document.documentElement.lang = getLocale();
 

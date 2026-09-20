@@ -91,8 +91,8 @@ def capture(db: Connection, owner: UUID, source: Row, batch: DiscoveryBatch) -> 
 def snapshot_item(db: Connection, row: Row) -> None:
     db.execute(
         "INSERT INTO snapshots (id,owner_id,kind,source_id,version,data) "
-        "VALUES (%s,%s,'discovery_item',%s,%s,%s) ON CONFLICT DO NOTHING",
-        (uuid4(), row["owner_id"], row["id"], row["version"], Jsonb(row["data"])),
+        "VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
+        (uuid4(), row["owner_id"], row["kind"], row["id"], row["version"], Jsonb(row["data"])),
     )
 
 

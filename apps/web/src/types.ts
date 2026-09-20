@@ -51,6 +51,7 @@ export type Requirement = {
   future_authorisation: boolean;
 };
 export type Job = Entity & {
+  source_update_pending?: boolean;
   title: string | null;
   company_name: string | null;
   location: string | null;

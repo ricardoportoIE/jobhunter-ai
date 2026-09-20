@@ -98,3 +98,27 @@ def profile(db: Connection, owner: UUID) -> Row:
 def invalidate_profile(db: Connection, owner: UUID) -> None:
     current = profile(db, owner)
     update(db, current, current["version"], {**current["data"], "status": "draft"})
+
+
+def source_update_pending(
+    db: Connection, owner: UUID, job_id: UUID, *, include_missing: bool = False
+) -> bool:
+    return (
+        db.execute(
+            "SELECT 1 FROM records WHERE owner_id=%s AND kind='discovery_item' AND NOT deleted "
+            "AND data->>'job_id'=%s AND (data->>'content_hash' "
+            "IS DISTINCT FROM data->>'saved_hash' "
+            "OR (%s AND data->>'availability'='not_listed')) LIMIT 1",
+            (owner, str(job_id), include_missing),
+        ).fetchone()
+        is not None
+    )
+
+
+def require_current_source(db: Connection, owner: UUID, job_id: UUID) -> None:
+    if source_update_pending(db, owner, job_id):
+        raise Problem(
+            409,
+            "SOURCE_UPDATE_PENDING",
+            "The advert changed. Compare and apply its source update before continuing.",
+        )

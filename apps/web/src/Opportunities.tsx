@@ -63,10 +63,10 @@ export default function Opportunities({ profile }: { profile?: Profile }) {
           <h1>{t("Your opportunities")}</h1>
           <p>{t("Find a role that fits the life you want to build.")}</p>
         </div>
-        <span className="quiet-label">
+        <a className="button primary" href="#discover">
           <Icon name="sparkle" />
-          {t("Made for your next move")}
-        </span>
+          {t("Discover opportunities")}
+        </a>
       </header>
       {profile && !ready && (
         <section className="welcome-card" aria-labelledby="welcome-heading">

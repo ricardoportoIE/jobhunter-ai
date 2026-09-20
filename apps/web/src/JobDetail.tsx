@@ -84,6 +84,16 @@ export default function JobDetail({
       <a className="back" href="#inbox">
         {t("\u2190 Back to Inbox")}
       </a>
+      {job.source_update_pending && (
+        <div className="source-warning" role="status">
+          <p>
+            {t(
+              "The connected source has changed or no longer lists this vacancy. Check the update before relying on the saved review.",
+            )}
+          </p>
+          <a href="#discover">{t("Review source updates")}</a>
+        </div>
+      )}
       <div className="page-heading">
         <div>
           <p className="eyebrow">

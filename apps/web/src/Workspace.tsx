@@ -11,6 +11,7 @@ import SemanticSearch from "./SemanticSearch";
 import type { Evidence, Fact, Profile } from "./types";
 import { ErrorState, Loading } from "./ui";
 import Icon from "./Icon";
+import Discovery from "./Discovery";
 async function loadProfile() {
   const [profile, facts, evidence] = await Promise.all([
     api<Profile>("/candidate/profile"),
@@ -82,7 +83,8 @@ export default function Workspace() {
             aria-current={
               route === "inbox" ||
               route.startsWith("job/") ||
-              route === "import"
+              route.startsWith("import") ||
+              route === "discover"
                 ? "page"
                 : undefined
             }
@@ -157,8 +159,15 @@ export default function Workspace() {
           <SemanticSearch facts={data.facts} />
         ) : route === "tracker" ? (
           <Tracker />
-        ) : route === "import" ? (
-          <ImportJob />
+        ) : route === "discover" ? (
+          <Discovery profile={data.profile} />
+        ) : route.startsWith("import") ? (
+          <ImportJob
+            key={route}
+            initialUrl={
+              new URLSearchParams(route.split("?")[1] ?? "").get("url") ?? ""
+            }
+          />
         ) : route.startsWith("job/") ? (
           <JobDetail
             key={route}

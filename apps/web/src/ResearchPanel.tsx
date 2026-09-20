@@ -80,6 +80,29 @@ export default function ResearchPanel({ job }: { job: Job }) {
           "Send only one public question, without personal data. The search uses the indicated domains and returns sources for your checking. Profile facts and compatibility remain subject to review.",
         )}
       </p>
+      <button
+        type="button"
+        onClick={() => {
+          setQuestion(
+            t(
+              "What does {0} do, and what does its official careers site say about the team behind {1}? Cite current sources and separate facts from uncertainty.",
+              [
+                job.company_name ?? t("this employer"),
+                job.title ?? t("this vacancy"),
+              ],
+            ),
+          );
+          setDomains("");
+          setConsent(false);
+        }}
+      >
+        {t("Prepare a company research question")}
+      </button>
+      <p className="muted">
+        {t(
+          "Add the employer's official domain before searching. Preparing a question does not call AI.",
+        )}
+      </p>
       <label>
         {t("Public question")}
         <textarea
