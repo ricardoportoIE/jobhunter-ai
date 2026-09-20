@@ -5,13 +5,14 @@ from difflib import unified_diff
 from typing import Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query, Request, Response
 from psycopg.types.json import Jsonb
 from pydantic import Field
 
 from jobhunter_api.ai_budget import structured
 from jobhunter_api.auth import Actor, settings_for
 from jobhunter_api.deduplication import fingerprint
+from jobhunter_api.document_rendering import artifact
 from jobhunter_api.errors import Problem
 from jobhunter_api.job_parser import get_provider
 from jobhunter_api.package_domain import (
@@ -32,6 +33,48 @@ from jobhunter_api.records import get_record, insert, owner_lock, public, update
 from jobhunter_api.store import Connection, Row, connect
 
 router = APIRouter(prefix="/api/v1", tags=["application packages"])
+
+
+@router.get("/packages/{package_id}/download/{filename}")
+def download(
+    package_id: UUID,
+    filename: Literal[
+        "cv.docx",
+        "cv.pdf",
+        "cover-letter.docx",
+        "cover-letter.pdf",
+        "answers.json",
+        "package.json",
+        "bundle.zip",
+    ],
+    actor: Actor,
+    request: Request,
+    expected_version: int = Query(ge=1),
+) -> Response:
+    import hashlib
+
+    with connect(settings_for(request)) as db:
+        owner_lock(db, actor.id)
+        row = get_record(db, actor.id, "package", package_id)
+        payload = row["data"]
+        check_current(db, actor.id, payload["snapshot"])
+        if row["version"] != expected_version or payload["status"] != "APPROVED":
+            raise Problem(
+                409, "APPROVAL_REQUIRED", "Aprove a versão atual do pacote antes de baixar."
+            )
+        if payload["review"]["content_hash"] != fingerprint(payload["content"]):
+            raise Problem(409, "CONTENT_CHANGED", "Conteúdo diferente da revisão aprovada.")
+        content, media = artifact(public(row), filename)
+    return Response(
+        content,
+        media_type=media,
+        headers={
+            "Content-Disposition": f'attachment; filename="package-v{expected_version}-{filename}"',
+            "Cache-Control": "no-store",
+            "X-Content-Type-Options": "nosniff",
+            "X-Document-SHA256": hashlib.sha256(content).hexdigest(),
+        },
+    )
 
 
 def checkpoint(db: Connection, row: Row) -> None:
