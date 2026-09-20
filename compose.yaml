@@ -94,6 +94,25 @@ services:
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
 
+  discovery:
+    build:
+      context: ./apps/api
+    command: ["python", "-m", "jobhunter_api.discovery_worker"]
+    environment:
+      JOBHUNTER_DB_HOST: db
+      JOBHUNTER_DB_PORT: "5432"
+      JOBHUNTER_DB_NAME: ${JOBHUNTER_DB_NAME:-jobhunter}
+      JOBHUNTER_DB_USER: ${JOBHUNTER_APP_DB_USER:-jobhunter_app}
+      JOBHUNTER_DB_PASSWORD: ${JOBHUNTER_APP_DB_PASSWORD:?Run python scripts/init_env.py first}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+
   web:
     build:
       context: ./apps/web

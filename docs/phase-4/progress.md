@@ -7,7 +7,7 @@ local commit after its checks; the complete phase is pushed only after final rev
 | Stage | Scope | Status |
 |---|---|---|
 | P4-01 | Owned source registry, access reviews and persistence contracts | Implemented |
-| P4-02 | Greenhouse reader, synchronisation, revisions and deduplication | Pending |
+| P4-02 | Greenhouse reader, synchronisation, revisions and deduplication | Implemented |
 | P4-03 | Gmail OAuth, dedicated-label reader and configuration guide | Pending |
 | P4-04 | Discovery interface, preference hints and company research hand-off | Pending |
 | P4-05 | End-to-end validation, security review and operational documentation | Pending |
@@ -29,3 +29,25 @@ account erasure removes them. Migration 007 is additive and leaves existing data
 The user has no Google OAuth client yet. Implement and test the complete integration
 with synthetic responses, document setup and report live Gmail validation separately.
 No mailbox connection or live Gmail test is claimed without that configuration.
+
+## P4-02 checks
+
+Sixteen focused API tests passed, covering source reviews, synchronisation, conditional
+reads, throttling, pause races, access denial, isolated ownership, incomplete results,
+promotion and existing manual deduplication. Ruff and mypy passed.
+
+On 20 September 2026 a single public Greenhouse read of `fosphamarketing` returned
+12 vacancies, a complete response and cache validators. No scheduled source was
+enabled and no original advert content was added to the repository. The public API
+contract was checked against the [official reference](https://docs.greenhouse.io/job-board.html).
+The generic platform terms page did not load during review; it is not treated as
+permission for recurring collection. Activation still requires the operator's
+applicable employer/platform permission reference and expiry.
+
+The worker checks one due source each minute. Successful reads are cached for a day;
+failed reads wait at least 15 minutes and honour longer Retry-After values. Access
+denial disables the source. A database lock serialises provider reads, and a five-minute
+lease records interrupted work. Each complete response is saved atomically. Partial
+responses and failures never imply that a vacancy has closed. Missing posts are labelled
+**not listed**, while reviewed jobs remain untouched. New and changed versions retain
+provenance; older changed versions are retained in the private export.
