@@ -2,7 +2,7 @@
 
 Plataforma de inteligência de carreira que compara vagas com um perfil baseado em evidências e prepara candidaturas para revisão humana.
 
-**Estado: P1, P2 e P3 concluídos para uso local com revisão humana.** Extração com IA e citações, embeddings, busca semântica, matching assistido e pacotes de candidatura com estratégia, CV/carta DOCX/PDF, respostas, evidências, histórico e aprovação. Testes reais OpenAI executados com GPT-4.1 mini; as avaliações e seus limites estão documentados por fase. Teto do projeto: €10/mês de IA e €25 combinados.
+**Estado: P1, P2 e P3 concluídos para uso local com revisão humana.** Extração com IA e citações, embeddings, busca semântica, matching assistido e pacotes de candidatura com estratégia, CV/carta DOCX/PDF, respostas, evidências, histórico e aprovação. Matching com Luna high, esclarecimentos e pesquisa pública citada; testes reais com GPT-4.1 mini e Luna, com resultados e limitações documentados. Teto do projeto: €10/mês de IA e €25 combinados.
 
 ## Iniciar localmente
 
@@ -30,6 +30,8 @@ Veja [operação de P3](docs/phase-3/operations.md), [etapas e commits](docs/pha
 e [testes reais e verificação visual](docs/phase-3/validation.md).
 
 Seleção por confiabilidade: [comparação real GPT-4.1 mini × GPT-5.6 Luna](docs/evals/model-comparison.md).
+Matching local agora usa **Luna high**, com esclarecimentos, segunda avaliação e pesquisa pública
+citada. Veja [implementação, novos testes reais, rótulos seus e limitações](docs/evals/luna-migration.md).
 
 ## Começar pela fase 0
 

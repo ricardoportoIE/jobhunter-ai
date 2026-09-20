@@ -23,7 +23,10 @@ O arquivo original em Downloads foi preservado.
 |---|---|
 | `JOBHUNTER_OPENAI_API_KEY` | Segredo exclusivo do backend |
 | `JOBHUNTER_AI_MODEL` | `gpt-4.1-mini-2025-04-14`, escolhido no benchmark para uso revisado |
-| Segundo modelo permitido | `gpt-4.1-nano-2025-04-14` |
+| Modelos adicionais permitidos | `gpt-4.1-nano-2025-04-14`, `gpt-5.6-luna` |
+| Matching / segunda avaliação | `JOBHUNTER_AI_MATCHING_MODEL` / `JOBHUNTER_AI_REVIEW_MODEL`: Luna high |
+| Extração / estratégia | `JOBHUNTER_AI_PARSING_MODEL` / `JOBHUNTER_AI_STRATEGY_MODEL`: mini |
+| Pesquisa pública | `JOBHUNTER_AI_RESEARCH_MODEL`: Luna high, até 3 buscas por chamada |
 | Embeddings | `text-embedding-3-small`, 256 dimensões |
 | `JOBHUNTER_AI_MONTHLY_EUR` | €10; pode reduzir |
 | `JOBHUNTER_COMBINED_MONTHLY_EUR` | €25; reserva integral de €15 para AWS |
@@ -51,7 +54,10 @@ e ajuste `PRICES` se necessário. Cada execução preserva preço e margem utili
    precisam ser corrigidos primeiro. Similaridade nunca faz merge automático.
 7. **Atividade de IA:** mostra estado, tokens, duração, custos, reservas e alertas de uso.
 
-Não há chamadas de IA em segundo plano. URLs são referências, nunca fetch automático.
+Não há chamadas de IA em segundo plano. URLs de anúncios são referências, sem fetch automático.
+**Consultar informação pública atualizada** permite busca explícita nos domínios escolhidos,
+com citações e conferência humana. **Solicitar segunda avaliação** preserva as divergências.
+Configuração por tarefa, prompts e evidências em [migração Luna](../evals/luna-migration.md).
 Nenhuma candidatura ou mensagem é enviada.
 
 ## Custos, repetição e recuperação
@@ -105,16 +111,19 @@ vaga antes do score. Não existe aprovação humana de gold set implícita nesse
 
 ## Privacidade e limites
 
-- Responses utiliza `store=false`, sem ferramentas ou fallback. Isso não equivale a Zero Data
+- Responses utiliza `store=false`, sem fallback. Ferramentas são exclusivas da pesquisa pública
+  explícita; extração, matching e estratégia não navegam. Isso não equivale a Zero Data
   Retention. Os [controles oficiais](https://developers.openai.com/api/docs/guides/your-data)
   descrevem possível retenção em logs de abuso por até 30 dias. Não presumimos residência europeia.
-- Matching envia fatos escolhidos e trechos, sem nome de apresentação ou referências/caminhos
+- Matching envia título/texto/requisitos da vaga, fatos escolhidos e trechos, sem nome de apresentação ou referências/caminhos
   de documentos. PDFs/DOCX não são enviados automaticamente. Sugestões e snapshots ficam locais.
 - Exportação inclui execuções e índice. Eliminação administrativa remove textos, resultados,
   vetores e vínculos pessoais, preservando custos sem proprietário. Uma resposta em andamento
   não pode restaurar o resultado após eliminação. Arquivos e retenção do provedor são separados.
-- Entrada limitada conservadoramente por bytes a 120.000 tokens; saída até 5.000 tokens;
-  timeout de rede de 40s e Nginx de 55s. Nenhum loop de agente.
+- Entrada estruturada limitada conservadoramente por bytes a 200.000 tokens. Mini: até 5.000
+  tokens de saída; Luna: 8.000 por padrão, configurável até 16.000, incluindo raciocínio.
+  Timeout de rede de 180s e Nginx de 240s. Pesquisa reserva entrada de 200.000 tokens e até
+  três buscas; uso acima do limite exige reconciliação. Nenhum loop automático de agente.
 - Embeddings usam trechos de 1.000 caracteres. Busca suporta 5.000 trechos atuais e até 10
   resultados, excluindo registros editados, arquivados, revogados ou sem evidência válida.
 - Duplicados comparam até 500 vagas ativas e mostram 20 candidatos. Jaccard ≥0,65 ou cosseno
