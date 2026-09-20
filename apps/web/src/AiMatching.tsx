@@ -30,15 +30,18 @@ export default function AiMatching({
   profile,
   facts,
   apply,
+  changed,
 }: {
   job: Job;
   profile: Profile;
   facts: Fact[];
   apply: (assessments: Assessment[], run: string | null) => void;
+  changed?: () => void;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [consent, setConsent] = useState(false);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
+  const [previous, setPrevious] = useState<Suggestion | null>(null);
   const task = useAiTask(consent);
   const available = facts.filter(
     (f) =>
@@ -51,9 +54,9 @@ export default function AiMatching({
       <h3>Sugestões com evidências</h3>
       <p>
         Selecione os fatos que a IA pode avaliar. Serão enviados à OpenAI os
-        requisitos, as afirmações selecionadas e os trechos das suas evidências.
-        Dados marcados como sensíveis são excluídos; nomes de arquivos e
-        referências locais permanecem aqui.
+        título, texto da vaga, requisitos, afirmações selecionadas e trechos das
+        suas evidências. Dados marcados como sensíveis são excluídos; nomes de
+        arquivos e referências locais permanecem aqui.
       </p>
       <fieldset>
         <legend>Fatos autorizados para esta consulta</legend>
@@ -66,13 +69,14 @@ export default function AiMatching({
                 task.busy ||
                 (!selected.includes(fact.id) && selected.length >= 20)
               }
-              onChange={(event) =>
+              onChange={(event) => {
+                setConsent(false);
                 setSelected((previous) =>
                   event.target.checked
                     ? [...previous, fact.id]
                     : previous.filter((id) => id !== fact.id),
-                )
-              }
+                );
+              }}
             />
             {fact.claim}
           </label>
@@ -90,13 +94,14 @@ export default function AiMatching({
           checked={consent}
           onChange={(event) => setConsent(event.target.checked)}
         />
-        Autorizo o envio dos fatos selecionados e seus trechos de evidência à
-        OpenAI.
+        Autorizo o envio da vaga, dos fatos selecionados e seus trechos de
+        evidência à OpenAI.
       </label>
       <button
         disabled={task.busy || !consent}
         onClick={() =>
           void task.run(async (headers) => {
+            setPrevious(suggestion);
             setSuggestion(
               await api<Suggestion>(
                 `/ai/jobs/${job.id}/suggest`,
@@ -110,12 +115,47 @@ export default function AiMatching({
                 headers,
               ),
             );
+            changed?.();
           }, "Sugestões prontas para revisão.")
         }
       >
         {task.busy ? "Avaliando…" : "Sugerir avaliações com IA"}
       </button>
+      <button
+        disabled={task.busy || !consent || !suggestion}
+        onClick={() =>
+          void task.run(async (headers) => {
+            const value = await api<Suggestion>(
+              `/ai/jobs/${job.id}/suggest`,
+              "POST",
+              {
+                job_version: job.version,
+                profile_version: profile.version,
+                fact_ids: selected,
+                external_processing_confirmed: true,
+                independent_review: true,
+              },
+              headers,
+            );
+            setPrevious(suggestion);
+            setSuggestion(value);
+            changed?.();
+          }, "Segunda avaliação disponível. Confira as divergências antes de decidir.")
+        }
+      >
+        Solicitar segunda avaliação
+      </button>
       {task.feedback}
+      {previous && (
+        <details>
+          <summary>Avaliação anterior preservada</summary>
+          {previous.result.assessments.map((item) => (
+            <p key={item.requirement_id}>
+              <strong>{outcomes[item.status]}</strong> · {item.reason}
+            </p>
+          ))}
+        </details>
+      )}
       {suggestion && (
         <>
           {suggestion.stale && (

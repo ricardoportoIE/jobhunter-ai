@@ -8,6 +8,7 @@ from fastapi import APIRouter, Request
 from pydantic import Field
 
 from jobhunter_api.auth import Actor, settings_for
+from jobhunter_api.clarifications import Resolution, apply_gate, collect
 from jobhunter_api.errors import Problem
 from jobhunter_api.profile import Input, Text
 from jobhunter_api.records import audit, get_record, insert, owner_lock, profile, public
@@ -30,6 +31,28 @@ class Analysis(Input):
     review_confirmed: Literal[True]
     assessments: list[Assessment] = Field(default_factory=list, max_length=100)
     ai_run_id: UUID | None = None
+    clarification_resolutions: list[Resolution] = Field(default_factory=list, max_length=50)
+
+
+class Preview(Input):
+    job_version: int = Field(ge=1)
+    profile_version: int = Field(ge=1)
+    assessments: list[Assessment] = Field(default_factory=list, max_length=100)
+
+
+@router.post("/jobs/{job_id}/clarifications/preview")
+def preview(job_id: UUID, data: Preview, actor: Actor, request: Request) -> list[Row]:
+    with connect(settings_for(request)) as db:
+        job, candidate = get_record(db, actor.id, "job", job_id), profile(db, actor.id)
+        if job["version"] != data.job_version or candidate["version"] != data.profile_version:
+            raise Problem(409, "VERSION_CONFLICT", "Atualize a vaga e o perfil.")
+        return collect(
+            db,
+            actor.id,
+            public(job),
+            public(candidate),
+            [a.model_dump(mode="json") for a in data.assessments],
+        )
 
 
 @router.post("/jobs/{job_id}/analyse", status_code=201)
@@ -54,7 +77,7 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
         if data.ai_run_id:
             suggestion = db.execute(
                 "SELECT result FROM ai_calls WHERE id=%s AND owner_id=%s "
-                "AND operation='suggest' AND status='succeeded'",
+                "AND operation IN ('suggest','suggest_review') AND status='succeeded'",
                 (data.ai_run_id, actor.id),
             ).fetchone()
             if (
@@ -67,6 +90,8 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
         at = datetime.now(UTC)
         try:
             result = evaluate(public(job), stored["data"], assessments, at)
+            issues = collect(db, actor.id, public(job), public(candidate), assessments)
+            apply_gate(result, issues, data.clarification_resolutions, actor.id)
         except ValueError:
             raise Problem(
                 422, "INVALID_ASSESSMENT", "Confira requisitos e referências de fatos."
@@ -117,6 +142,18 @@ def match(match_id: UUID, actor: Actor, request: Request) -> Row:
             for fact in snapshot["facts"]
             if fact["id"] in used
         )
+        current_issues = collect(
+            db, actor.id, public(job), public(candidate), row["data"]["input_assessments"]
+        )
+        known = {
+            i["key"]
+            for field in ("clarifications", "clarification_resolutions")
+            for i in row["data"].get(field, [])
+        }
+        new_issues = [i for i in current_issues if i["key"] not in known]
+        if new_issues:
+            stale = True
+            row["data"]["clarifications"] = [*row["data"].get("clarifications", []), *new_issues]
         return {**public(row), "stale": stale}
 
 

@@ -2,6 +2,11 @@ import { useTask } from "./useTask";
 import { AiJobTools } from "./AiTools";
 import DuplicateReview from "./DuplicateReview";
 import AiMatching from "./AiMatching";
+import Clarifications, {
+  ClarificationList,
+  type Resolution,
+} from "./Clarifications";
+import ResearchPanel from "./ResearchPanel";
 import PackagePanel from "./PackagePanel";
 import { optional } from "./forms";
 import { useEffect, useState } from "react";
@@ -118,6 +123,9 @@ export default function JobDetail({
       )}
       {tab === "review" && (
         <AiJobTools job={job} saved={() => setRefresh(refresh + 1)} />
+      )}
+      {tab === "review" && (
+        <ResearchPanel key={`${job.id}:${job.version}`} job={job} />
       )}
       {tab === "review" && (
         <DuplicateReview
@@ -479,6 +487,8 @@ function AnalysisForm({
 }) {
   const task = useTask();
   const [aiRun, setAiRun] = useState<string | null>(null);
+  const [revision, setRevision] = useState(0);
+  const [resolutions, setResolutions] = useState<Resolution[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [assessments, setAssessments] = useState<Assessment[]>(() =>
     job.requirements.map((req) => ({
@@ -514,9 +524,25 @@ function AnalysisForm({
         job={job}
         profile={profile}
         facts={facts}
+        changed={() => {
+          setRevision((value) => value + 1);
+          setResolutions([]);
+          setConfirmed(false);
+        }}
         apply={(items, run) => {
           setAssessments(items);
           setAiRun(run);
+          setConfirmed(false);
+        }}
+      />
+      <Clarifications
+        job={job}
+        profile={profile}
+        assessments={assessments}
+        revision={revision}
+        resolutions={resolutions}
+        change={(value) => {
+          setResolutions(value);
           setConfirmed(false);
         }}
       />
@@ -535,6 +561,11 @@ function AnalysisForm({
                 profile_version: profile.version,
                 review_confirmed: true,
                 ai_run_id: aiRun,
+                clarification_resolutions: resolutions.filter(
+                  (r) =>
+                    r.note.trim().length >= 20 &&
+                    r.source_reference.trim().length >= 5,
+                ),
                 assessments: assessments.map((a) => ({
                   ...a,
                   reason: a.reason || "Informação ainda desconhecida.",
@@ -668,6 +699,13 @@ export function MatchResult({ match }: { match: Match }) {
       </div>
       <section className="panel">
         <h2>Bloqueios e lacunas</h2>
+        <ClarificationList issues={match.clarifications ?? []} />
+        {match.clarification_resolutions?.map((item) => (
+          <p key={item.key}>
+            Esclarecimento registrado: {item.note} · Fonte:{" "}
+            {item.source_reference}
+          </p>
+        ))}
         {match.blockers.map((b, i) => (
           <p className="blocker" key={i}>
             {b.reason}

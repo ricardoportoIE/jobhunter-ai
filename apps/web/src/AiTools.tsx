@@ -7,6 +7,7 @@ import { ErrorState, Loading } from "./ui";
 export type AiStatus = {
   configured: boolean;
   model: string;
+  tasks?: Record<string, { model: string; effort: string | null }>;
   budget: {
     spent_eur: string;
     reserved_eur: string;
@@ -175,6 +176,8 @@ type Run = {
   error_code: string | null;
 };
 const operations: Record<string, string> = {
+  suggest_review: "Segunda avaliação",
+  research: "Pesquisa pública",
   strategy: "Estratégia de candidatura",
   parse: "Extração",
   suggest: "Sugestão de matching",
@@ -225,6 +228,16 @@ export function AiActivity() {
           · {status.model}
         </p>
         <h2>Orçamento mensal</h2>
+        {status.tasks && (
+          <ul>
+            {Object.entries(status.tasks).map(([task, policy]) => (
+              <li key={task}>
+                {operations[task] ?? task}: {policy.model}
+                {policy.effort ? ` · ${policy.effort}` : ""}
+              </li>
+            ))}
+          </ul>
+        )}
         <p>
           Consumo contabilizado: €{Number(status.budget.spent_eur).toFixed(4)} ·
           Reservado: €{Number(status.budget.reserved_eur).toFixed(4)} · Limite:

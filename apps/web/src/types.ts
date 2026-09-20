@@ -78,6 +78,8 @@ export type Assessment = {
   fact_ids: string[];
 };
 export type Match = Entity & {
+  clarifications?: import("./Clarifications").Clarification[];
+  clarification_resolutions?: import("./Clarifications").Resolution[];
   job_id: string;
   score: number | null;
   coverage: number;
@@ -122,6 +124,7 @@ export const outcomes: Record<string, string> = {
 };
 
 export const reviewFlags: Record<string, string> = {
+  CLARIFICATION_REQUIRED: "Esclarecimento necessário antes de priorizar",
   SPONSORSHIP_UNKNOWN: "Sponsorship não informado",
   FACT_NOT_ELIGIBLE: "Há fatos sem validade ou autorização para esta análise",
   SENIORITY_EXCLUDED: "Nível da vaga fora do alvo confirmado",
