@@ -1,0 +1,27 @@
+{
+  "dataset_version": "0.1.0",
+  "prompt_version": "job-parser-1.0",
+  "human_gold": false,
+  "case_count": 20,
+  "models": [
+    "gpt-4.1-mini-2025-04-14",
+    "gpt-4.1-nano-2025-04-14"
+  ],
+  "status": "not_run_billing_required",
+  "results": [],
+  "model_selection": null,
+  "human_review": "pending",
+  "gates": {
+    "valid_output_rate": 0.95,
+    "field_accuracy": 0.95,
+    "quoted_spans_valid": 1.0,
+    "human_entailment_review": "required"
+  },
+  "limitations": [
+    "Public paraphrases, not complete original adverts.",
+    "Labels are design annotations, not human gold.",
+    "No candidate data; this benchmark cannot establish matching accuracy.",
+    "Confidence scores are not calibrated probabilities."
+  ],
+  "blocked_reason": "API returned HTTP 429 twice; user confirmed billing is not configured."
+}

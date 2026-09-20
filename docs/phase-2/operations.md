@@ -1,0 +1,127 @@
+# Operação local de P2
+
+## Estado e configuração
+
+OpenAI foi escolhido pelo utilizador. A chave fornecida foi importada para `.env`, ignorado
+pelo Git, sem ser exibida. Somente a API recebe a chave; ela não entra no frontend ou nas imagens.
+As duas verificações iniciais receberam HTTP 429. O utilizador confirmou que o faturamento da
+API ainda não está configurado. Não houve nova chamada externa depois dessa confirmação.
+
+Para configurar/substituir a chave, execute na raiz:
+
+```powershell
+python scripts/configure_openai.py C:\caminho\privado\openai-key.txt
+docker compose up --detach --wait api
+```
+
+O importador aceita exatamente uma chave, não imprime seu valor e preserva as outras opções.
+Use `docker compose config --quiet` para validar configuração sem imprimir segredos.
+O arquivo original em Downloads foi preservado.
+
+| Configuração em `.env` | Padrão / limite |
+|---|---|
+| `JOBHUNTER_OPENAI_API_KEY` | Segredo exclusivo do backend |
+| `JOBHUNTER_AI_MODEL` | `gpt-4.1-mini-2025-04-14`, provisório |
+| Segundo modelo permitido | `gpt-4.1-nano-2025-04-14` |
+| Embeddings | `text-embedding-3-small`, 256 dimensões |
+| `JOBHUNTER_AI_MONTHLY_EUR` | €10; pode reduzir |
+| `JOBHUNTER_COMBINED_MONTHLY_EUR` | €25; reserva integral de €15 para AWS |
+| `JOBHUNTER_AI_EUR_PER_USD` | 1,25: margem contábil, não cotação cambial |
+| `JOBHUNTER_AI_PRICES_REVIEWED` | 2026-09-19 UTC / 2026-09-20 em Londres; expira em 30 dias |
+
+Antes de atualizar a data de revisão, confira as fontes oficiais no [registro da fase](progress.md)
+e ajuste `PRICES` se necessário. Cada execução preserva preço e margem utilizados.
+
+## Fluxo na interface
+
+1. **Importar vaga → Extrair com IA:** envia apenas o anúncio e apresenta campos/requisitos
+   com citações literais e confiança declarada, ainda não calibrada.
+2. **Preencher rascunho para revisão:** transfere os campos sem publicar. Corrija-os e confirme
+   a revisão. Uma citação confirma a origem do texto, não a interpretação correta.
+3. **Avaliar requisitos:** escolha até 20 fatos para enviar junto de seus trechos de evidência.
+   Fatos sensíveis, revogados, expirados ou sem revisão/evidência válida são excluídos.
+   Sem fatos selecionados, retorna desconhecidos sem chamar a API.
+4. Confira as sugestões, preencha as avaliações e confirme-as para calcular. A IA não produz
+   o score; o motor determinístico do P1 preserva os snapshots e o vínculo à sugestão.
+5. **Busca semântica:** indexe um registro por vez, depois pesquise. Envia a afirmação de um
+   fato ou o texto da vaga; a consulta também gera um vetor. Os vetores e a pesquisa ficam locais.
+6. **Possíveis duplicados:** usa texto e vetores existentes, sem chamada externa. Confirmar
+   arquiva a vaga atual e preserva a principal e os históricos. Local/empresa conflitantes
+   precisam ser corrigidos primeiro. Similaridade nunca faz merge automático.
+7. **Atividade de IA:** mostra estado, tokens, duração, custos, reservas e alertas de uso.
+
+Não há chamadas de IA em segundo plano. URLs são referências, nunca fetch automático.
+Nenhuma candidatura ou mensagem é enviada.
+
+## Custos, repetição e recuperação
+
+Reservas são confirmadas no PostgreSQL antes da chamada externa. Conteúdo/modelo/prompt/schema
+identificam a operação. Repetir um sucesso reutiliza o resultado; concorrência da mesma entrada
+é bloqueada. O SDK não repete chamadas automaticamente. Depois de corrigir a causa de uma falha,
+use **Tentar novamente após corrigir a causa**. O limite é duas tentativas por conteúdo em 24h.
+
+Timeout, falha de transporte, HTTP 408/5xx ou uso desconhecido mantêm a reserva. Execução
+`running` com mais de cinco minutos também bloqueia novas alocações. Após conferir o uso no
+provedor, reconcilie administrativamente, sem presumir custo zero:
+
+```powershell
+uv run --project apps/api --env-file .env python -m jobhunter_api.ai_admin ID_DA_EXECUCAO --confirmed-eur VALOR_CONFIRMADO --billing-checked
+```
+
+Respostas inválidas/recusas com tokens são contabilizadas. Reservas atravessam a virada do mês.
+Os limites protegem esta aplicação, não outros usos da chave/conta, impostos ou alterações não
+revisadas do preço. A reserva de €15 não cria AWS nem consulta seu faturamento. Totais locais
+não são uma fatura. Eliminação de dados não reinicia o orçamento.
+
+## Benchmark depois de ativar faturamento
+
+Na raiz, para executar os 20 casos públicos com os dois candidatos:
+
+```powershell
+uv run --project apps/api --env-file .env python scripts/evaluate_phase2.py --live --max-additional-eur 1
+```
+
+Sem `--live`, não há chamadas. Limite adicional: €1, sempre dentro do teto mensal. Relatório:
+`data/evals/phase2-benchmark.json`. Salva cada resultado, reusa sucessos, interrompe em bloqueios
+e não promove modelo automaticamente. Para uma falha já corrigida, `--attempt 2` permite a
+segunda tentativa dentro do limite diário. Nenhum documento privado participa desse dataset.
+
+Gates propostos: ≥95% de saídas válidas e ≥95% de campos básicos corretos; citações inexistentes
+são rejeitadas. A revisão humana deve avaliar interpretação de requisitos, desconhecidos,
+recusas, falsos duplicados e matching. Dados reformulados/pseudonimizados não são gold humano.
+Esse benchmark de parsing não mede a precisão de matching do candidato.
+
+## Privacidade e limites
+
+- Responses utiliza `store=false`, sem ferramentas ou fallback. Isso não equivale a Zero Data
+  Retention. Os [controles oficiais](https://developers.openai.com/api/docs/guides/your-data)
+  descrevem possível retenção em logs de abuso por até 30 dias. Não presumimos residência europeia.
+- Matching envia fatos escolhidos e trechos, sem nome de apresentação ou referências/caminhos
+  de documentos. PDFs/DOCX não são enviados automaticamente. Sugestões e snapshots ficam locais.
+- Exportação inclui execuções e índice. Eliminação administrativa remove textos, resultados,
+  vetores e vínculos pessoais, preservando custos sem proprietário. Uma resposta em andamento
+  não pode restaurar o resultado após eliminação. Arquivos e retenção do provedor são separados.
+- Entrada limitada conservadoramente por bytes a 120.000 tokens; saída até 5.000 tokens;
+  timeout de rede de 40s e Nginx de 55s. Nenhum loop de agente.
+- Embeddings usam trechos de 1.000 caracteres. Busca suporta 5.000 trechos atuais e até 10
+  resultados, excluindo registros editados, arquivados, revogados ou sem evidência válida.
+- Duplicados comparam até 500 vagas ativas e mostram 20 candidatos. Jaccard ≥0,65 ou cosseno
+  ≥0,90 são limiares heurísticos ainda sem calibração real.
+- Projetos/cursos não sustentam automaticamente experiência profissional. Estratégia de
+  carreira permanece desconhecida nas sugestões automáticas.
+
+## Testes sem cobrança
+
+Na pasta `apps/api`:
+
+```powershell
+$env:JOBHUNTER_TEST_DB_NAME = 'jobhunter_test'
+uv run --locked --env-file ../../.env pytest
+uv run --locked mypy
+uv run --locked ruff check . ../../scripts/evaluate_phase2.py ../../scripts/configure_openai.py
+uv run --locked python ../../scripts/evaluate_phase2.py --check
+```
+
+Na pasta `apps/web`: `npm run lint`, `npm test`, `npm run build`, `npm run test:e2e`.
+No Windows validado, defina `$env:PLAYWRIGHT_CHANNEL='msedge'` para E2E. Fixtures ficam apenas
+em `apps/api/tests`, fora da imagem de produção, sem chave real e sem chamadas pagas.

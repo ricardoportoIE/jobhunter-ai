@@ -1,4 +1,4 @@
-name: Local foundation
+name: Local application and AI contracts
 
 on:
   push:
@@ -41,11 +41,12 @@ jobs:
           enable-cache: true
           cache-dependency-glob: apps/api/uv.lock
       - run: uv sync --locked
-      - run: uv run --locked ruff check . ../../scripts/init_env.py ../../scripts/smoke_local.py ../../scripts/evaluate_phase1.py
-      - run: uv run --locked ruff format --check . ../../scripts/init_env.py ../../scripts/smoke_local.py ../../scripts/evaluate_phase1.py
+      - run: uv run --locked ruff check . ../../scripts/init_env.py ../../scripts/smoke_local.py ../../scripts/evaluate_phase1.py ../../scripts/evaluate_phase2.py ../../scripts/configure_openai.py
+      - run: uv run --locked ruff format --check . ../../scripts/init_env.py ../../scripts/smoke_local.py ../../scripts/evaluate_phase1.py ../../scripts/evaluate_phase2.py ../../scripts/configure_openai.py
       - run: uv run --locked mypy
       - run: uv run --locked pytest
       - run: uv run --locked python ../../scripts/evaluate_phase1.py --check
+      - run: uv run --locked python ../../scripts/evaluate_phase2.py --check
       - run: uv build
 
   web:

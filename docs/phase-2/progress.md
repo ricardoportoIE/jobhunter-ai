@@ -11,9 +11,13 @@ Implementação local autorizada em 2026-09-20. Um commit por etapa; nenhum push
 | P2-05 | Embeddings e busca semântica | Implementado |
 | P2-06 | Possíveis duplicados por similaridade | Implementado |
 | P2-07 | Sugestões de matching com evidências | Implementado |
-| P2-08 | Benchmark, segurança, E2E e documentação | Pendente |
+| P2-08 | Benchmark, segurança, E2E e documentação | Implementado; benchmark real pendente de faturamento |
 
 Consultar `git log --oneline --grep=P2-` para os commits correspondentes.
+
+Commits: P2-01 `4b8b424`, P2-02 `5eb0363`, P2-03 `1a177d9`, P2-04 `e403608`,
+P2-05 `f2716cc`, P2-06 `831a780`, P2-07 `cb1f95d`. P2-08 é identificado pelo comando acima.
+Veja [validação](validation.md) e [operação](operations.md). A chave real permanece fora do Git.
 
 ## Fontes verificadas em 2026-09-20
 

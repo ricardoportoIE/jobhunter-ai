@@ -7,7 +7,7 @@ import {
   type Job,
   type Profile,
 } from "./types";
-import { useTask } from "./useTask";
+import { useAiTask } from "./useAiTask";
 
 type Suggestion = {
   run_id: string | null;
@@ -39,7 +39,7 @@ export default function AiMatching({
   const [selected, setSelected] = useState<string[]>([]);
   const [consent, setConsent] = useState(false);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
-  const task = useTask();
+  const task = useAiTask(consent);
   const available = facts.filter(
     (f) =>
       f.status === "verified" &&
@@ -96,14 +96,19 @@ export default function AiMatching({
       <button
         disabled={task.busy || !consent}
         onClick={() =>
-          void task.run(async () => {
+          void task.run(async (headers) => {
             setSuggestion(
-              await api<Suggestion>(`/ai/jobs/${job.id}/suggest`, "POST", {
-                job_version: job.version,
-                profile_version: profile.version,
-                fact_ids: selected,
-                external_processing_confirmed: true,
-              }),
+              await api<Suggestion>(
+                `/ai/jobs/${job.id}/suggest`,
+                "POST",
+                {
+                  job_version: job.version,
+                  profile_version: profile.version,
+                  fact_ids: selected,
+                  external_processing_confirmed: true,
+                },
+                headers,
+              ),
             );
           }, "Sugestões prontas para revisão.")
         }

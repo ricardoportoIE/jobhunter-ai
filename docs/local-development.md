@@ -1,6 +1,9 @@
-# Desenvolvimento local — fase 1
+# Desenvolvimento local — P1 e P2
 
-O núcleo implementado inclui login, perfil factual, evidências, revisão de vagas, matching determinístico, Inbox, tracker manual e exportação. Não usa LLM, AWS nem canais de envio.
+O núcleo inclui login, perfil factual, evidências, revisão de vagas, matching determinístico,
+Inbox, tracker manual e exportação. P2 adiciona IA por chamada explícita e busca semântica.
+Veja [configuração, privacidade, custos e benchmark de P2](phase-2/operations.md).
+AWS e canais de envio continuam fora do runtime atual.
 
 ## Pré-requisitos
 

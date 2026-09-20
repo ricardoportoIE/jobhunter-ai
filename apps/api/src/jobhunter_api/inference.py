@@ -82,7 +82,9 @@ class OpenAIInference:
                 if isinstance(detail, dict) and detail.get("code") == "insufficient_quota"
                 else f"PROVIDER_HTTP_{exc.status_code}"
             )
-            raise ProviderFailure(code, charge_unknown=exc.status_code >= 500) from None
+            raise ProviderFailure(
+                code, charge_unknown=exc.status_code >= 500 or exc.status_code == 408
+            ) from None
         except Exception:
             raise ProviderFailure("PROVIDER_UNAVAILABLE", charge_unknown=True) from None
         ordered = sorted(response.data, key=lambda item: item.index)
@@ -124,16 +126,22 @@ class OpenAIInference:
             detail = exc.body.get("error", exc.body) if isinstance(exc.body, dict) else {}
             if isinstance(detail, dict) and detail.get("code") == "insufficient_quota":
                 code = "PROVIDER_INSUFFICIENT_QUOTA"
-            raise ProviderFailure(code, charge_unknown=exc.status_code >= 500) from None
+            raise ProviderFailure(
+                code, charge_unknown=exc.status_code >= 500 or exc.status_code == 408
+            ) from None
         except Exception:
             raise ProviderFailure("PROVIDER_UNAVAILABLE", charge_unknown=True) from None
         if response.usage is None:
             raise ProviderFailure("USAGE_MISSING", charge_unknown=True)
+        refused = any(
+            item.type == "message" and any(part.type == "refusal" for part in item.content)
+            for item in response.output
+        )
         return Completion(
             text=response.output_text,
             input_tokens=response.usage.input_tokens,
             output_tokens=response.usage.output_tokens,
             request_id=response._request_id,
             elapsed_ms=round((monotonic() - start) * 1000),
-            status=response.status or "unknown",
+            status="refused" if refused else response.status or "unknown",
         )

@@ -11,7 +11,8 @@ export default function Privacy() {
         <h2>Exportar os dados da aplicação</h2>
         <p>
           O arquivo inclui perfil, fatos, evidências, vagas, análises,
-          candidaturas e histórico de alterações. Guarde-o em um local privado.
+          candidaturas, histórico de alterações, sugestões de IA e índice de
+          busca. Guarde-o em um local privado.
         </p>
         {task.feedback}
         <button
@@ -37,6 +38,27 @@ export default function Privacy() {
         </button>
       </section>
       <section className="panel narrow">
+        <h2>Processamento pela OpenAI</h2>
+        <p>
+          Extrair uma vaga envia seu texto ao provedor. Matching e busca enviam
+          os textos que você autorizar nas respectivas telas. A chave permanece
+          no backend; arquivos de CV não são enviados automaticamente.
+        </p>
+        <p>
+          O armazenamento de respostas está desativado. Isso não elimina a
+          possível retenção de conteúdo em logs de monitorização de abuso, por
+          até 30 dias. Esta configuração não pressupõe residência de dados na
+          Europa.
+        </p>
+        <a
+          href="https://developers.openai.com/api/docs/guides/your-data"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Consultar os controles de dados da OpenAI ↗
+        </a>
+      </section>
+      <section className="panel narrow">
         <h2>Eliminar os dados locais</h2>
         <p>
           A eliminação completa, incluindo snapshots e auditoria, é uma operação
@@ -48,6 +70,11 @@ export default function Privacy() {
           versões anteriores no histórico. O comando administrativo elimina
           esses registros do banco. Documentos de origem e exportações guardadas
           fora da aplicação precisam ser tratados separadamente.
+        </p>
+        <p>
+          Totais de custo sem vínculo pessoal são preservados para que a
+          eliminação não reinicie o orçamento mensal. A eliminação local não
+          apaga dados já processados pelo provedor.
         </p>
       </section>
     </>

@@ -2,6 +2,12 @@
 
 Estado: estratégia adotada; provider/modelo final dependem do benchmark na fase 2. Data da consulta: 2026-09-19.
 
+Atualização P2, 2026-09-20: o utilizador escolheu OpenAI e forneceu chave privada. Adapter
+Responses/embeddings implementado com orçamento local e revisão humana. GPT-4.1 mini é
+padrão provisório; nano é segundo candidato. Duas tentativas retornaram HTTP 429 e o utilizador
+confirmou faturamento não configurado. Benchmark e escolha empírica permanecem pendentes.
+Ver [operação P2](../phase-2/operations.md).
+
 ## Distinção necessária
 
 Bedrock oferece acesso a modelos; AgentCore oferece capacidades de execução e ferramentas para agentes. Um não é requisito automático do outro. LangGraph é uma biblioteca de orquestração com persistência e interrupções para revisão humana. [AgentCore](https://aws.amazon.com/bedrock/agentcore/pricing/), [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview).

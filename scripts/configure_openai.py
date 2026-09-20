@@ -18,8 +18,9 @@ def main() -> None:
         raise SystemExit("Expected exactly one OpenAI key; no configuration changed.")
     lines = destination.read_text(encoding="utf-8").splitlines()
     lines = [line for line in lines if not line.startswith("JOBHUNTER_OPENAI_API_KEY=")]
-    destination.write_text("\n".join([*lines, "JOBHUNTER_OPENAI_API_KEY=" + matches[0]]) + "\n",
-                           encoding="utf-8")
+    destination.write_text(
+        "\n".join([*lines, "JOBHUNTER_OPENAI_API_KEY=" + matches[0]]) + "\n", encoding="utf-8"
+    )
     destination.chmod(0o600)
     print("OpenAI key configured in ignored .env; value not displayed.")
 

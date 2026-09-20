@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Fact, Job } from "./types";
 import { Field } from "./ui";
-import { useTask } from "./useTask";
+import { useAiTask } from "./useAiTask";
 
 type Hit = { id: string; kind: string; label: string; similarity: number };
 export default function SemanticSearch({ facts }: { facts: Fact[] }) {
@@ -15,7 +15,7 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
   const [loadError, setLoadError] = useState("");
-  const task = useTask();
+  const task = useAiTask(consent);
   useEffect(() => {
     let active = true;
     api<{ items: Job[]; total: number }>(`/jobs?limit=100&offset=${offset}`)
@@ -119,14 +119,19 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
         <button
           disabled={task.busy || !consent || !selected}
           onClick={() =>
-            void task.run(async () => {
+            void task.run(async (headers) => {
               const item = options.find((item) => item.id === selected)!;
-              await api("/ai/index", "POST", {
-                kind,
-                source_id: item.id,
-                expected_version: item.version,
-                external_processing_confirmed: true,
-              });
+              await api(
+                "/ai/index",
+                "POST",
+                {
+                  kind,
+                  source_id: item.id,
+                  expected_version: item.version,
+                  external_processing_confirmed: true,
+                },
+                headers,
+              );
             }, "Registro indexado para pesquisa.")
           }
         >
@@ -139,15 +144,20 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
             const query = String(
               new FormData(event.currentTarget).get("query"),
             );
-            void task.run(async () => {
+            void task.run(async (headers) => {
               const result = await api<{
                 items: Hit[];
                 indexed_documents: number;
-              }>("/ai/search", "POST", {
-                query,
-                kind,
-                external_processing_confirmed: true,
-              });
+              }>(
+                "/ai/search",
+                "POST",
+                {
+                  query,
+                  kind,
+                  external_processing_confirmed: true,
+                },
+                headers,
+              );
               setHits(result.items);
               setIndexed(result.indexed_documents);
             }, "Pesquisa concluída.");

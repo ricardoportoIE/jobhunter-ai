@@ -1,10 +1,13 @@
 """Disposable browser-test server: fixed test DB and synthetic credentials only."""
 
 import os
+from datetime import UTC, datetime
+from unittest.mock import patch
 from uuid import uuid4
 
 import psycopg
 import uvicorn
+from ai_fixture_provider import BrowserFixtureProvider
 from argon2 import PasswordHasher
 from psycopg import sql
 from pydantic import SecretStr
@@ -37,17 +40,25 @@ def main() -> None:
             "app_db_user": "jobhunter_e2e",
             "app_db_password": SecretStr("synthetic-e2e-database-only"),
             "allowed_origins": ["http://127.0.0.1:5174"],
+            "openai_api_key": None,
+            "ai_prices_reviewed": datetime.now(UTC).date(),
         }
     )
     migrate(settings)
     provision(settings)
     with connect(settings) as db:
-        db.execute("TRUNCATE users,login_limits,audit_events CASCADE")
+        db.execute("TRUNCATE users,login_limits,audit_events,ai_calls CASCADE")
         db.execute(
             "INSERT INTO users(id,username,password_hash) VALUES (%s,'local',%s)",
             (uuid4(), PasswordHasher().hash("synthetic-browser-test-only")),
         )
-    uvicorn.run(create_app(settings), host="127.0.0.1", port=8001, access_log=False)
+    fixture = BrowserFixtureProvider()
+    with (
+        patch("jobhunter_api.job_parser.get_provider", return_value=fixture),
+        patch("jobhunter_api.ai_matching.get_provider", return_value=fixture),
+        patch("jobhunter_api.semantic.embedding_provider", return_value=fixture),
+    ):
+        uvicorn.run(create_app(settings), host="127.0.0.1", port=8001, access_log=False)
 
 
 if __name__ == "__main__":

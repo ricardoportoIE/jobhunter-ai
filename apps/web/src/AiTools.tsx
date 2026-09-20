@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Job } from "./types";
-import { useTask } from "./useTask";
+import { useAiTask } from "./useAiTask";
 import { ErrorState, Loading } from "./ui";
 
 export type AiStatus = {
@@ -54,7 +54,7 @@ function Quote({ citation }: { citation?: Citation }) {
 }
 export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
   const [extraction, setExtraction] = useState<Extraction | null>(null);
-  const task = useTask();
+  const task = useAiTask();
   useEffect(() => {
     let active = true;
     api<Extraction | null>(`/ai/jobs/${job.id}/extraction`)
@@ -81,11 +81,16 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
       <button
         disabled={task.busy}
         onClick={() =>
-          void task.run(async () => {
+          void task.run(async (headers) => {
             setExtraction(
-              await api<Extraction>(`/ai/jobs/${job.id}/parse`, "POST", {
-                expected_version: job.version,
-              }),
+              await api<Extraction>(
+                `/ai/jobs/${job.id}/parse`,
+                "POST",
+                {
+                  expected_version: job.version,
+                },
+                headers,
+              ),
             );
           }, "Extração disponível para conferência.")
         }
@@ -94,7 +99,7 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
       </button>
       {task.feedback}
       {extraction && (
-        <details open>
+        <details open={!stale}>
           <summary>Conferir sugestões e trechos de origem</summary>
           {stale && (
             <p role="status">
@@ -102,22 +107,28 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
             </p>
           )}
           <div className="ai-fields">
-            {Object.entries(extraction.result.fields).map(([name, value]) => (
-              <article key={name}>
-                <h3>{labels[name] || name}</h3>
-                <p>
-                  {value === null
-                    ? "Desconhecido"
-                    : typeof value === "object"
-                      ? Object.entries(value as Record<string, unknown>)
-                          .filter(([, v]) => v !== null)
-                          .map(([k, v]) => `${k}: ${String(v)}`)
-                          .join(" · ")
-                      : String(value)}
-                </p>
-                <Quote citation={extraction.result.citations[name]} />
-              </article>
-            ))}
+            {Object.entries(extraction.result.fields)
+              .sort(
+                ([a], [b]) =>
+                  Object.keys(labels).indexOf(a) -
+                  Object.keys(labels).indexOf(b),
+              )
+              .map(([name, value]) => (
+                <article key={name}>
+                  <h3>{labels[name] || name}</h3>
+                  <p>
+                    {value === null
+                      ? "Desconhecido"
+                      : typeof value === "object"
+                        ? Object.entries(value as Record<string, unknown>)
+                            .filter(([, v]) => v !== null)
+                            .map(([k, v]) => `${k}: ${String(v)}`)
+                            .join(" · ")
+                        : String(value)}
+                  </p>
+                  <Quote citation={extraction.result.citations[name]} />
+                </article>
+              ))}
           </div>
           <h3>Requisitos sugeridos</h3>
           {extraction.result.requirements.map((item, index) => (
@@ -162,6 +173,18 @@ type Run = {
   output_tokens: number | null;
   latency_ms: number | null;
   error_code: string | null;
+};
+const operations: Record<string, string> = {
+  parse: "Extração",
+  suggest: "Sugestão de matching",
+  embed: "Indexação ou busca",
+};
+const states: Record<string, string> = {
+  succeeded: "Concluída",
+  running: "Em andamento",
+  failed: "Não concluída",
+  invalid: "Resposta rejeitada",
+  uncertain: "Custo a conferir",
 };
 export function AiActivity() {
   const [data, setData] = useState<{ status: AiStatus; runs: Run[] } | null>(
@@ -230,7 +253,8 @@ export function AiActivity() {
       {runs.map((run) => (
         <article className="panel" key={run.id}>
           <h3>
-            {run.operation} · {run.status}
+            {operations[run.operation] ?? run.operation} ·{" "}
+            {states[run.status] ?? run.status}
           </h3>
           <p>{run.model}</p>
           <p>

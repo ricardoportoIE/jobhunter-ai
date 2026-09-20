@@ -36,8 +36,8 @@ def totals(db: Connection, settings: Settings) -> Row:
         "SELECT coalesce(sum(coalesce(actual_eur,reserved_eur)),0) AS allocated, "
         "coalesce(sum(actual_eur),0) AS spent, "
         "coalesce(sum(reserved_eur) FILTER (WHERE actual_eur IS NULL),0) AS reserved "
-        "FROM ai_calls WHERE created_at >= date_trunc('month', now() AT TIME ZONE 'UTC') "
-        "AT TIME ZONE 'UTC'"
+        "FROM ai_calls WHERE actual_eur IS NULL OR coalesce(finished_at,created_at) >= "
+        "date_trunc('month', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'"
     ).fetchone()
     assert row is not None
     # Reserve the entire separate AWS allowance; phase 2 has no AWS billing integration.
@@ -97,11 +97,24 @@ def reserve(
                 raise Problem(409, "IDEMPOTENCY_CONFLICT", "Chave utilizada com outro conteúdo.")
             if existing["status"] == "succeeded":
                 return existing, True
+            recovered = db.execute(
+                "SELECT * FROM ai_calls WHERE owner_id=%s AND operation=%s AND payload_hash=%s "
+                "AND status='succeeded' ORDER BY created_at DESC LIMIT 1",
+                (owner, operation, payload_hash),
+            ).fetchone()
+            if recovered:
+                return recovered, True
             raise Problem(
                 409,
                 "AI_EXECUTION_EXISTS",
                 "Execução em andamento ou já encerrada. Consulte o histórico de IA.",
             )
+        if db.execute(
+            "SELECT 1 FROM ai_calls WHERE owner_id=%s AND operation=%s AND payload_hash=%s "
+            "AND status='running'",
+            (owner, operation, payload_hash),
+        ).fetchone():
+            raise Problem(409, "AI_IN_PROGRESS", "Este conteúdo já está sendo processado.")
         age = (datetime.now(UTC).date() - settings.ai_prices_reviewed).days
         if age < 0 or age > 30:
             raise Problem(409, "PRICES_STALE", "Atualize a revisão dos preços antes de usar IA.")
@@ -174,10 +187,10 @@ def settle(
         )
     with connect(settings) as db:
         db.execute("SELECT pg_advisory_xact_lock(71020)")
-        db.execute(
+        changed = db.execute(
             "UPDATE ai_calls SET status=%s,actual_eur=%s,input_tokens=%s,output_tokens=%s,"
             "latency_ms=%s,provider_request_id=%s,result=%s,error_code=%s,finished_at=now() "
-            "WHERE id=%s AND status='running'",
+            "WHERE id=%s AND status='running' AND owner_id=%s RETURNING id",
             (
                 status,
                 amount,
@@ -188,8 +201,11 @@ def settle(
                 Jsonb(result),
                 error,
                 call["id"],
+                call["owner_id"],
             ),
-        )
+        ).fetchone()
+        if changed is None:
+            raise Problem(409, "AI_RUN_CANCELLED", "Os dados desta execução foram eliminados.")
         audit(db, call["owner_id"], "ai." + status, call["id"], 1)
 
 
@@ -228,22 +244,35 @@ def execute(
         settle(
             settings, call, None, "uncertain" if exc.charge_unknown else "failed", error=exc.code
         )
+        message = (
+            "A OpenAI recusou por limite ou créditos. Confira o faturamento e os limites da API."
+            if exc.code in {"PROVIDER_HTTP_429", "PROVIDER_INSUFFICIENT_QUOTA"}
+            else "A IA não concluiu a chamada. Consulte o histórico antes de tentar novamente."
+        )
         raise Problem(
             502,
             "AI_PROVIDER_ERROR",
-            "A IA não concluiu a chamada. Consulte o histórico antes de tentar novamente.",
+            message,
         ) from None
     except Exception:
         settle(settings, call, None, "uncertain", error="UNEXPECTED_PROVIDER_ERROR")
         raise Problem(
             502, "AI_PROVIDER_ERROR", "Chamada interrompida; custo em reconciliação."
         ) from None
+    if completion.input_tokens > input_bound or completion.output_tokens > max_output:
+        settle(settings, call, completion, "uncertain", error="USAGE_OUT_OF_BOUND")
+        raise Problem(
+            502, "USAGE_OUT_OF_BOUND", "Uso inesperado do provedor; reconcilie a cobrança."
+        )
     try:
         if completion.status != "completed":
             raise ValueError("Incomplete or refused output")
         result = validate(completion)
     except (ValueError, ValidationError, KeyError, TypeError):
-        settle(settings, call, completion, "invalid", error="INVALID_OUTPUT")
+        code = {"refused": "MODEL_REFUSAL", "incomplete": "OUTPUT_INCOMPLETE"}.get(
+            completion.status, "INVALID_OUTPUT"
+        )
+        settle(settings, call, completion, "invalid", error=code)
         raise Problem(
             422,
             "AI_INVALID_OUTPUT",

@@ -42,4 +42,9 @@ def export(actor: Actor, request: Request, response: Response) -> Row:
             "snapshots": snapshots,
             "audit_events": events,
             "ai_runs": runs,
+            "embedding_index": db.execute(
+                "SELECT kind,source_id,source_version,model,chunk,vector,run_id "
+                "FROM ai_embeddings WHERE owner_id=%s ORDER BY source_id,chunk",
+                (actor.id,),
+            ).fetchall(),
         }

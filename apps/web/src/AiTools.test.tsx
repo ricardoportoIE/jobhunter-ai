@@ -7,6 +7,38 @@ import type { Job } from "./types";
 
 vi.mock("./api", () => ({ api: vi.fn() }));
 const mocked = vi.mocked(api);
+it("only retries a failed paid operation after an explicit click", async () => {
+  let attempts = 0;
+  mocked.mockImplementation(async (path) => {
+    if (path.endsWith("extraction")) return null;
+    attempts += 1;
+    if (attempts === 1) throw new Error("Confira os créditos da API.");
+    return {
+      run_id: "retried",
+      result: {
+        job_version: 1,
+        fields: {},
+        citations: {},
+        requirements: [],
+        risk_flags: [],
+      },
+    };
+  });
+  render(
+    <AiJobTools job={{ id: "retry", version: 1 } as Job} saved={vi.fn()} />,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Extrair com IA" }));
+  await screen.findByText("Confira os créditos da API.");
+  expect(attempts).toBe(1);
+  await userEvent.click(
+    screen.getByRole("button", {
+      name: "Tentar novamente após corrigir a causa",
+    }),
+  );
+  await screen.findByText("Extração disponível para conferência.");
+  expect(attempts).toBe(2);
+  expect(mocked.mock.calls.at(-1)?.[3]?.["Idempotency-Key"]).toBeTruthy();
+});
 it("keeps extraction a draft until the user explicitly fills the review form", async () => {
   const saved = vi.fn();
   const result = {

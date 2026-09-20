@@ -22,6 +22,7 @@ export function useTask() {
   }
   return {
     busy,
+    error,
     run,
     feedback: (
       <>

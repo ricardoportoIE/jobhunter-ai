@@ -2,7 +2,7 @@
 
 Plataforma de inteligência de carreira que compara vagas com um perfil baseado em evidências e prepara candidaturas para revisão humana.
 
-**Estado: núcleo da fase 1 implementado.** Login local, perfil e evidências versionados, revisão de vagas, matching determinístico, Inbox e tracker manual. A avaliação pública foi executada e tem divergências documentadas para revisão humana. O baseline continua local; IA e AWS pertencem às fases seguintes, com teto futuro de €25/mês.
+**Estado: P1 e recursos de P2 implementados localmente.** Extração com IA e citações, rascunhos revisáveis, embeddings, busca semântica, revisão de duplicados, matching assistido e controle de custos. O benchmark real de P2 aguarda faturamento da API OpenAI: as duas tentativas iniciais retornaram HTTP 429. Não há medição de qualidade nem modelo vencedor declarado. Teto do projeto: €10/mês de IA e €25 combinados.
 
 ## Iniciar localmente
 
@@ -19,6 +19,11 @@ python scripts/smoke_local.py
 Abra [a aplicação](http://127.0.0.1:5173). O utilizador é `local`; a senha inicial de login está em `.private/local-login.txt`. As credenciais do banco ficam em `.env`. Ambos são ignorados pelo Git. Para parar e preservar o banco: `docker compose down`.
 
 Veja [desenvolvimento e testes](docs/local-development.md), [entregas por etapa](docs/phase-1/progress.md), [contratos de runtime](docs/phase-1/runtime-contracts.md), [avaliação dos 20 casos](docs/phase-1/evaluation-results.md) e [privacidade e eliminação](docs/phase-1/security-and-data.md).
+
+Para os recursos de IA, veja [operação e privacidade de P2](docs/phase-2/operations.md),
+[etapas e commits](docs/phase-2/progress.md) e [validação e pendências](docs/phase-2/validation.md).
+A chave é configurada somente no backend, em `.env`, usando `python scripts/configure_openai.py CAMINHO_DO_ARQUIVO`.
+Depois de configurar, recrie a API com `docker compose up --detach --wait api`.
 
 ## Começar pela fase 0
 
@@ -42,7 +47,7 @@ Veja [desenvolvimento e testes](docs/local-development.md), [entregas por etapa]
 - [ADR-003: evidências, scoring e aprovação](docs/adr/0003-evidence-and-approval.md)
 - [ADR-004: orçamento e AWS temporária](docs/adr/0004-local-first-budget.md)
 
-Fluxo implementado: registrar evidências e fatos, publicar o perfil, importar texto de uma vaga, confirmar requisitos, avaliar atendimento, visualizar score/cobertura/lacunas e acompanhar candidatura manual. Parsing livre por IA entra na fase 2.
+Fluxo implementado: registrar evidências e fatos, publicar o perfil, importar texto de uma vaga, extrair um rascunho com IA ou preencher manualmente, confirmar requisitos, revisar sugestões fundamentadas, visualizar score/cobertura/lacunas e acompanhar candidatura manual. O cálculo final continua determinístico.
 
 ## Dados e validação
 
@@ -57,4 +62,4 @@ python -m venv .venv
 .venv\Scripts\python scripts/validate_phase0.py --private
 ```
 
-O comando com `--private` valida também os dados privados nesta máquina e não se aplica a clones sem `.private/`. Os testes da aplicação estão no guia de desenvolvimento. Não há deploy cloud, recursos AWS, integração de email ou envio de candidatura configurados. O piloto humano e a preparação da fase 2 são os próximos passos.
+O comando com `--private` valida também os dados privados nesta máquina e não se aplica a clones sem `.private/`. Os testes da aplicação estão no guia de desenvolvimento. Não há deploy cloud, recursos AWS, integração de email ou envio de candidatura configurados. O benchmark com faturamento ativo e a revisão humana são as pendências de validação do P2.

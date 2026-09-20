@@ -93,6 +93,7 @@ test("profile → import → review → match → evidence → manual tracker �
     .getByLabel("Justificativa: Python")
     .fill("Projeto fictício revisado evidencia o requisito.");
   await page
+    .getByRole("group", { name: "Fatos que sustentam esta avaliação" })
     .getByLabel(`${prefix} desenvolveu uma API Python de estudo.`, {
       exact: true,
     })

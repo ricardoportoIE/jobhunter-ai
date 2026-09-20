@@ -5,9 +5,11 @@ from uuid import UUID
 
 import pytest
 
+from jobhunter_api.ai_admin import reconcile
 from jobhunter_api.ai_budget import cost, execute, reserve, totals
 from jobhunter_api.errors import Problem
 from jobhunter_api.inference import Completion, ProviderFailure
+from jobhunter_api.manage import erase
 from jobhunter_api.settings import Settings
 from jobhunter_api.store import connect
 
@@ -124,3 +126,93 @@ def test_price_age_combined_budget_and_invalid_output(db_settings: Settings) -> 
     with connect(db_settings) as db:
         row = db.execute("SELECT * FROM ai_calls").fetchone()
     assert row and row["status"] == "invalid" and row["actual_eur"] > 0
+
+
+def test_interrupted_reservation_survives_month_rollover_and_reconciliation(
+    db_settings: Settings,
+) -> None:
+    identity = owner(db_settings)
+    call, _ = reserve(db_settings, identity, "test", "month", "month", MODEL, "v1", 1000, 100)
+    with connect(db_settings) as db:
+        db.execute(
+            "UPDATE ai_calls SET created_at=now()-interval '35 days' WHERE id=%s", (call["id"],)
+        )
+        usage = totals(db, db_settings)
+    assert usage["unreconciled"] and Decimal(usage["reserved_eur"]) == call["reserved_eur"]
+    reconcile(db_settings, call["id"], Decimal("0.0005"))
+    with connect(db_settings) as db:
+        usage = totals(db, db_settings)
+    assert not usage["unreconciled"] and Decimal(usage["spent_eur"]) == Decimal("0.0005")
+
+
+def test_erasure_during_inference_cannot_restore_personal_results(db_settings: Settings) -> None:
+    identity = owner(db_settings)
+
+    def complete() -> Completion:
+        erase(db_settings, "DELETE_LOCAL_APPLICATION_DATA")
+        return Completion("private output", 10, 10, "test", 2, "completed")
+
+    with pytest.raises(Problem) as error:
+        execute(
+            db_settings,
+            identity,
+            "test",
+            "erase",
+            {},
+            MODEL,
+            "v1",
+            100,
+            100,
+            complete,
+            lambda _: {"private": "must not return after erasure"},
+        )
+    assert error.value.code == "AI_RUN_CANCELLED"
+    with connect(db_settings) as db:
+        row = db.execute("SELECT owner_id,result,status FROM ai_calls").fetchone()
+        assert row == {"owner_id": None, "result": None, "status": "running"}
+        assert db.execute("SELECT count(*) AS n FROM audit_events").fetchone() == {"n": 0}
+
+
+def test_explicit_retry_keeps_cost_history_and_recovers_original_key(db_settings: Settings) -> None:
+    identity = owner(db_settings)
+
+    def refused() -> Completion:
+        raise ProviderFailure("PROVIDER_HTTP_429", charge_unknown=False)
+
+    with pytest.raises(Problem):
+        execute(
+            db_settings,
+            identity,
+            "retry",
+            "original",
+            {},
+            MODEL,
+            "v1",
+            100,
+            100,
+            refused,
+            lambda _: {},
+        )
+    retried = execute(
+        db_settings,
+        identity,
+        "retry",
+        "second",
+        {},
+        MODEL,
+        "v1",
+        100,
+        100,
+        lambda: Completion("{}", 10, 10, None, 1, "completed"),
+        lambda _: {"ok": True},
+    )
+    recovered = execute(
+        db_settings, identity, "retry", "original", {}, MODEL, "v1", 100, 100, refused, lambda _: {}
+    )
+    assert recovered["cached"] and recovered["run_id"] == retried["run_id"]
+    with connect(db_settings) as db:
+        assert db.execute("SELECT count(*) AS n FROM ai_calls").fetchone() == {"n": 2}
+    reserve(db_settings, identity, "running", "first", "same", MODEL, "v1", 100, 100)
+    with pytest.raises(Problem) as error:
+        reserve(db_settings, identity, "running", "other", "same", MODEL, "v1", 100, 100)
+    assert error.value.code == "AI_IN_PROGRESS"

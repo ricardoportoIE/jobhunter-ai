@@ -104,7 +104,7 @@ export default function JobDetail({
       )}
       {tab === "review" && (
         <DuplicateReview
-          key={job.version}
+          key={`duplicates-${job.version}`}
           job={job}
           saved={() => setRefresh(refresh + 1)}
         />
