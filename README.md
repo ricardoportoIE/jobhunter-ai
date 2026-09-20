@@ -1,5 +1,7 @@
 # JobHunter AI
 
+[![CI](https://github.com/ricardoportoIE/jobhunter-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/ricardoportoIE/jobhunter-ai/actions/workflows/ci.yml)
+
 **An evidence-led career assistant that helps people decide which vacancies to pursue and prepare applications they can stand behind.**
 
 Job searching involves more than matching keywords. A useful decision needs to account for experience, evidence, missing information and requirements that cannot be negotiated. JobHunter AI brings these into one reviewable workflow: build a factual profile, assess a vacancy, prepare an application and track the outcome.

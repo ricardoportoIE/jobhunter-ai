@@ -129,7 +129,7 @@ python scripts/smoke_local.py --exercise-db-recovery
 python scripts/check_documentation.py
 ```
 
-The second command briefly stops this project's `db`, verifies liveness 200/readiness 503, and restarts it in `finally` without deleting data. `--web-url`/`--api-url` allow different ports. The five CI jobs cover the API, frontend, Compose, browser E2E and design contracts. The workflow is ready; it has not run on GitHub because no remote is configured.
+The second command briefly stops this project's `db`, verifies liveness 200/readiness 503, and restarts it in `finally` without deleting data. `--web-url`/`--api-url` allow different ports. The five CI jobs cover the API, frontend, Compose, browser E2E and design contracts. The workflow runs on pushes and pull requests; see [GitHub Actions](https://github.com/ricardoportoIE/jobhunter-ai/actions/workflows/ci.yml) for its current status.
 
 ## Privacy
 
