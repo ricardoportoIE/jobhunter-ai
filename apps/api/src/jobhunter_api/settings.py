@@ -2,6 +2,7 @@
 
 from datetime import date
 from decimal import Decimal
+from hashlib import sha256
 from typing import Literal, cast
 
 from pydantic import Field, SecretStr
@@ -36,6 +37,11 @@ class Settings(BaseSettings):
     ai_strategy_effort: Effort = "high"
     ai_review_effort: Effort = "high"
     ai_research_effort: Effort = "high"
+    ai_parsing_prompt_suffix: str = Field(default="", max_length=4000)
+    ai_matching_prompt_suffix: str = Field(default="", max_length=4000)
+    ai_strategy_prompt_suffix: str = Field(default="", max_length=4000)
+    ai_review_prompt_suffix: str = Field(default="", max_length=4000)
+    ai_research_prompt_suffix: str = Field(default="", max_length=4000)
     ai_max_output_tokens: int = Field(default=8000, ge=1000, le=16000)
     ai_monthly_eur: Decimal = Field(default=Decimal("10"), gt=0, le=10)
     combined_monthly_eur: Decimal = Field(default=Decimal("25"), gt=0, le=25)
@@ -43,6 +49,22 @@ class Settings(BaseSettings):
     ai_eur_per_usd: Decimal = Field(default=Decimal("1.25"), ge=1, le=5)
     ai_prices_reviewed: date = date(2026, 9, 20)
     ai_timeout_seconds: float = Field(default=180, ge=1, le=210)
+
+    def prompt(self, operation: str, instructions: str, version: str) -> tuple[str, str]:
+        task = {
+            "parse": "parsing",
+            "suggest": "matching",
+            "suggest_review": "review",
+            "strategy": "strategy",
+            "research": "research",
+        }.get(operation)
+        suffix = str(getattr(self, f"ai_{task}_prompt_suffix", "")).strip()
+        if not suffix:
+            return instructions, version
+        return (
+            instructions + "\nAdditional operator guidance:\n" + suffix,
+            version + "+" + sha256(suffix.encode()).hexdigest()[:12],
+        )
 
     def policy(self, operation: str, override: str | None = None) -> tuple[str, Effort | None]:
         task = {

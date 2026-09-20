@@ -73,13 +73,18 @@ def permitted_url(url: str, domains: list[str]) -> bool:
 
 
 def search(
-    provider: OpenAIInference, model: str, effort: Effort | None, payload: Row, maximum: int
+    provider: OpenAIInference,
+    model: str,
+    effort: Effort | None,
+    payload: Row,
+    maximum: int,
+    instructions: str = RESEARCH_PROMPT,
 ) -> Completion:
     start = monotonic()
     try:
         response = provider.client.responses.create(
             model=model,
-            instructions=RESEARCH_PROMPT,
+            instructions=instructions,
             input=json.dumps(payload),
             reasoning={"effort": effort or "high"},
             store=False,
@@ -184,6 +189,7 @@ def research(job_id: UUID, data: ResearchInput, actor: Actor, request: Request) 
         "as_of": now.date().isoformat(),
     }
     model, effort = settings.policy("research")
+    instructions, version = settings.prompt("research", RESEARCH_PROMPT, RESEARCH_VERSION)
     provider = OpenAIInference(settings)
     try:
         result = execute(
@@ -198,10 +204,12 @@ def research(job_id: UUID, data: ResearchInput, actor: Actor, request: Request) 
                 "freshness_bucket": now.strftime("%Y-%m-%dT%H"),
             },
             model,
-            RESEARCH_VERSION,
+            version,
             200000,
             settings.ai_max_output_tokens,
-            lambda: search(provider, model, effort, payload, settings.ai_max_output_tokens),
+            lambda: search(
+                provider, model, effort, payload, settings.ai_max_output_tokens, instructions
+            ),
             lambda completion: {
                 **validate_research(completion, payload),
                 "job_id": str(job_id),

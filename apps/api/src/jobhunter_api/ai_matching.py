@@ -178,6 +178,7 @@ def suggest(job_id: UUID, data: SuggestInput, actor: Actor, request: Request) ->
         ids = [str(identity) for identity in data.fact_ids]
         if len(ids) != len(set(ids)) or any(identity not in allowed for identity in ids):
             raise Problem(422, "FACT_NOT_ELIGIBLE", "Selecione fatos válidos e não sensíveis.")
+        ids.sort()
         facts = [
             {
                 "id": identity,

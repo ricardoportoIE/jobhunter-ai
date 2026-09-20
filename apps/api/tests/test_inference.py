@@ -5,12 +5,30 @@ import pytest
 from openai import OpenAI
 from pydantic import BaseModel, SecretStr
 
-from jobhunter_api.inference import OpenAIInference, ProviderFailure
+from jobhunter_api.ai_matching import ReliableMatch
+from jobhunter_api.inference import OpenAIInference, ProviderFailure, constrained_schema
+from jobhunter_api.package_domain import StrategyOutput
 from jobhunter_api.settings import Settings
 
 
 class Example(BaseModel):
     title: str | None
+
+
+def test_ids_are_enumerated_without_cross_request_schema_leakage() -> None:
+    payload = {"facts": [{"id": "f"}], "evidence": [{"id": "e"}], "requirements": [{"id": "r"}]}
+    contract = constrained_schema(ReliableMatch, payload)
+    assert contract["$defs"]["Grounding"]["properties"]["fact_id"]["enum"] == ["f"]
+    assert contract["$defs"]["Grounding"]["properties"]["evidence_id"]["enum"] == ["e"]
+    assert contract["$defs"]["SuggestedAssessment"]["properties"]["requirement_id"]["enum"] == ["r"]
+    nullable = contract["$defs"]["Clarification"]["properties"]["requirement_id"]["anyOf"]
+    assert nullable[0]["enum"] == ["r"] and nullable[1]["type"] == "null"
+    strategy = constrained_schema(StrategyOutput, payload)
+    assert strategy["properties"]["cv_fact_ids"]["items"]["enum"] == ["f"]
+    assert (
+        "enum"
+        not in constrained_schema(ReliableMatch, {})["$defs"]["Grounding"]["properties"]["fact_id"]
+    )
 
 
 def test_provider_contract_and_redaction() -> None:

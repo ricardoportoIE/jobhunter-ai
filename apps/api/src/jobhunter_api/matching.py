@@ -154,6 +154,12 @@ def match(match_id: UUID, actor: Actor, request: Request) -> Row:
         if new_issues:
             stale = True
             row["data"]["clarifications"] = [*row["data"].get("clarifications", []), *new_issues]
+            row["data"]["recommendation_at_analysis"] = row["data"]["recommendation"]
+            if row["data"]["recommendation"] != "BLOCKED":
+                row["data"]["recommendation"] = "REVIEW"
+            row["data"]["review_flags"] = list(
+                dict.fromkeys([*row["data"]["review_flags"], "CLARIFICATION_REQUIRED"])
+            )
         return {**public(row), "stale": stale}
 
 

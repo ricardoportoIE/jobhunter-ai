@@ -25,7 +25,11 @@ def test_scope_conflict_requires_review_but_incidental_senior_does_not() -> None
 
 
 def test_notes_cannot_clear_unknown_mandatory_requirements_or_explicit_blockers() -> None:
-    issue = {"key": "a" * 64, "code": "DECISIVE_INFORMATION_MISSING"}
+    issue = {
+        "key": "a" * 64,
+        "code": "DECISIVE_INFORMATION_MISSING",
+        "requires_assessment_change": True,
+    }
     note = Resolution(
         key=issue["key"],
         note="I would like to proceed anyway.",

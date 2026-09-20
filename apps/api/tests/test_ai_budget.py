@@ -27,6 +27,10 @@ def test_task_policies_tool_cost_and_cache_configuration(db_settings: Settings) 
     identity = owner(db_settings)
     assert db_settings.policy("suggest") == ("gpt-5.6-luna", "high")
     assert db_settings.policy("parse") == (MODEL, None)
+    customized = db_settings.model_copy(update={"ai_matching_prompt_suffix": "Explain ambiguity."})
+    prompt, version = customized.prompt("suggest", "Base rules", "v1")
+    assert prompt.startswith("Base rules") and prompt.endswith("Explain ambiguity.")
+    assert version.startswith("v1+") and customized.prompt("parse", "Base", "v1") == ("Base", "v1")
     calls = []
 
     def invoke() -> Completion:

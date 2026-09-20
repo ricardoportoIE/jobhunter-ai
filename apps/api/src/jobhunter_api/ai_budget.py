@@ -11,7 +11,13 @@ from pydantic import BaseModel, ValidationError
 
 from jobhunter_api.deduplication import fingerprint
 from jobhunter_api.errors import Problem
-from jobhunter_api.inference import Completion, ProviderFailure, StructuredInference, strict_schema
+from jobhunter_api.inference import (
+    CONTRACT_VERSION,
+    Completion,
+    ProviderFailure,
+    StructuredInference,
+    constrained_schema,
+)
 from jobhunter_api.records import audit
 from jobhunter_api.settings import Settings
 from jobhunter_api.store import Connection, Row, connect
@@ -360,10 +366,17 @@ def structured(
     import json
 
     selected, effort = settings.policy(operation, model)
+    prompt, prompt_version = settings.prompt(operation, prompt, prompt_version)
     maximum = settings.ai_max_output_tokens if effort is not None else 5000
-    config: Row = {"effort": effort, "max_output_tokens": maximum, "tools": []}
+    config: Row = {
+        "effort": effort,
+        "max_output_tokens": maximum,
+        "tools": [],
+        "contract_version": CONTRACT_VERSION,
+    }
     serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
-    contract = json.dumps(strict_schema(schema.model_json_schema()))
+    contract_schema = constrained_schema(schema, payload)
+    contract = json.dumps(contract_schema)
     bound = len((prompt + serialized + contract).encode("utf-8")) + 2048
 
     def checked(completion: Completion) -> Row:
@@ -374,7 +387,7 @@ def structured(
         owner,
         operation,
         key,
-        {"data": payload, "schema": schema.model_json_schema(), "instructions": prompt},
+        {"data": payload, "schema": contract_schema, "instructions": prompt},
         selected,
         prompt_version,
         bound,

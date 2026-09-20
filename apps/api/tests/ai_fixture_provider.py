@@ -99,7 +99,39 @@ class BrowserFixtureProvider:
                 ],
                 "limitations": ["Fixture de teste."],
             }
+            if model == "gpt-4.1-mini-2025-04-14":
+                for item in result["assessments"]:
+                    item.update(
+                        status="unknown",
+                        reason="Segunda avaliação requer esclarecimento.",
+                        citations=[],
+                        confidence=0,
+                    )
         return Completion(json.dumps(result), 100, 100, "browser-fixture", 5, "completed")
+
+    def research(self) -> Completion:
+        return Completion(
+            json.dumps(
+                {
+                    "answer": "Fonte pública para conferência [1]",
+                    "citations": [
+                        {
+                            "url": "https://www.gov.ie/example",
+                            "title": "Fonte oficial de teste",
+                            "start": 31,
+                            "end": 34,
+                        }
+                    ],
+                    "web_search_calls": 1,
+                }
+            ),
+            100,
+            100,
+            "browser-research",
+            5,
+            "completed",
+            web_search_calls=1,
+        )
 
     def embed(self, texts: list[str]) -> Completion:
         vectors = []

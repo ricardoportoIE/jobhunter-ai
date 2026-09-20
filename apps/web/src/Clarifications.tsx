@@ -7,6 +7,7 @@ export type Clarification = {
   code: string;
   message: string;
   requirement_id: string | null;
+  requires_assessment_change?: boolean;
   alternatives?: {
     run_id: string;
     model: string;
@@ -106,7 +107,7 @@ export default function Clarifications({
       {issues.map((issue) => (
         <div key={issue.key}>
           <ClarificationList issues={[issue]} />
-          {issue.code !== "DECISIVE_INFORMATION_MISSING" && (
+          {!issue.requires_assessment_change && (
             <>
               <label>
                 Conclusão da revisão

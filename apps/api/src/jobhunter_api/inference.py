@@ -1,5 +1,6 @@
 """Single explicit OpenAI adapter. No tools, retries, fallback providers or response storage."""
 
+import json
 from dataclasses import dataclass
 from time import monotonic
 from typing import Any, Protocol
@@ -8,6 +9,8 @@ from openai import APIStatusError, OpenAI
 from pydantic import BaseModel
 
 from jobhunter_api.settings import Effort, Settings
+
+CONTRACT_VERSION = "structured-ids-1.0"
 
 
 class ProviderFailure(Exception):
@@ -61,6 +64,52 @@ def strict_schema(schema: dict[str, Any]) -> dict[str, Any]:
                 if isinstance(item, dict):
                     strict_schema(item)
     return schema
+
+
+def constrained_schema(schema: type[BaseModel], payload: dict[str, Any]) -> dict[str, Any]:
+    """Constrain supplied IDs at generation time; semantic/ownership checks still run afterward."""
+    contract = strict_schema(schema.model_json_schema())
+    facts = sorted({str(f["id"]) for f in payload.get("facts", [])})
+    evidence = sorted({str(e["id"]) for e in payload.get("evidence", [])})
+    requirements = sorted(
+        {
+            str(r["id"])
+            for r in payload.get("requirements", payload.get("job", {}).get("requirements", []))
+        }
+    )
+    permitted = {
+        "fact_id": facts,
+        "fact_ids": facts,
+        "cv_fact_ids": facts,
+        "letter_fact_ids": facts,
+        "evidence_id": evidence,
+        "requirement_id": requirements,
+    }
+
+    def restrict(node: dict[str, Any], ids: list[str]) -> None:
+        if node.get("type") == "array":
+            restrict(node["items"], ids)
+        elif "anyOf" in node:
+            for branch in node["anyOf"]:
+                restrict(branch, ids)
+        elif node.get("type") == "string":
+            node["enum"] = ids
+
+    def visit(node: dict[str, Any]) -> None:
+        for field, child in node.get("properties", {}).items():
+            ids = permitted.get(field)
+            if ids and len(ids) <= 250:
+                restrict(child, ids)
+        for value in node.values():
+            if isinstance(value, dict):
+                visit(value)
+            elif isinstance(value, list):
+                for child in value:
+                    if isinstance(child, dict):
+                        visit(child)
+
+    visit(contract)
+    return contract
 
 
 class OpenAIInference:
@@ -126,6 +175,11 @@ class OpenAIInference:
             else {"temperature": 0}
         )
         try:
+            payload = json.loads(data)
+        except ValueError:
+            payload = {}
+        contract = constrained_schema(schema, payload if isinstance(payload, dict) else {})
+        try:
             response = self.client.responses.create(
                 model=model,
                 instructions=prompt,
@@ -135,7 +189,7 @@ class OpenAIInference:
                         "type": "json_schema",
                         "name": schema.__name__,
                         "strict": True,
-                        "schema": strict_schema(schema.model_json_schema()),
+                        "schema": contract,
                     }
                 },
                 max_output_tokens=max_output,

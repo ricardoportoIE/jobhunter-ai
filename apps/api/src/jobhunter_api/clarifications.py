@@ -65,7 +65,7 @@ def current_runs(db: Connection, owner: UUID, job: Row, candidate: Row) -> list[
         "SELECT id,model,result,operation FROM ai_calls WHERE owner_id=%s "
         "AND operation IN ('suggest','suggest_review') AND status='succeeded' "
         "AND result->>'job_id'=%s AND result->>'job_version'=%s "
-        "AND result->>'profile_version'=%s ORDER BY created_at DESC LIMIT 30",
+        "AND result->>'profile_version'=%s ORDER BY created_at DESC",
         (owner, job["id"], str(job["version"]), str(candidate["version"])),
     ).fetchall()
     versions = {
@@ -138,6 +138,7 @@ def collect(
                 issues.append(
                     {
                         "code": "DECISIVE_INFORMATION_MISSING",
+                        "requires_assessment_change": True,
                         "requirement_id": req["id"],
                         "message": "Requisito eliminatório ainda não confirmado: " + req["text"],
                     }
@@ -171,7 +172,7 @@ def apply_gate(result: Row, issues: list[Row], resolutions: list[Resolution], ac
     pending = [
         issue
         for issue in issues
-        if issue["key"] not in resolved or issue["code"] == "DECISIVE_INFORMATION_MISSING"
+        if issue["key"] not in resolved or issue.get("requires_assessment_change", False)
     ]
     result["clarifications"] = pending
     result["clarification_resolutions"] = [

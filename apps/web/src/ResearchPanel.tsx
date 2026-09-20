@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { api } from "./api";
 import type { Job } from "./types";
 import { useAiTask } from "./useAiTask";
@@ -14,6 +14,32 @@ type Research = {
     citations: { url: string; title: string; start: number; end: number }[];
   };
 };
+function CitedAnswer({ result }: { result: Research["result"] }) {
+  const chars = Array.from(result.answer);
+  const parts: ReactNode[] = [];
+  let cursor = 0;
+  [...result.citations]
+    .sort((a, b) => a.start - b.start)
+    .forEach((citation, index) => {
+      if (citation.start < cursor || citation.end > chars.length) return;
+      parts.push(chars.slice(cursor, citation.start).join(""));
+      parts.push(
+        <a
+          key={`${citation.start}:${index}`}
+          href={citation.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={citation.title}
+          aria-label={`Fonte: ${citation.title}`}
+        >
+          [{index + 1}]
+        </a>,
+      );
+      cursor = citation.end;
+    });
+  parts.push(chars.slice(cursor).join(""));
+  return <p className="preserve">{parts}</p>;
+}
 export default function ResearchPanel({ job }: { job: Job }) {
   const [question, setQuestion] = useState("");
   const [domains, setDomains] = useState(
@@ -122,7 +148,7 @@ export default function ResearchPanel({ job }: { job: Job }) {
               decisiva.
             </p>
           )}
-          <p className="preserve">{item.result.answer}</p>
+          <CitedAnswer result={item.result} />
           <ul>
             {item.result.citations.map((citation, index) => (
               <li key={index}>

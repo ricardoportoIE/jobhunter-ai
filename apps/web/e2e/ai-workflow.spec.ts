@@ -69,6 +69,16 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
   const jobId = page.url().split("#job/")[1];
   if (!jobId) throw new Error("Missing imported job route");
   await page
+    .getByLabel("Pergunta pública", { exact: true })
+    .fill("Onde estão as regras oficiais atuais?");
+  await page
+    .getByLabel("Autorizo enviar esta pergunta pública à OpenAI e à busca web.")
+    .check();
+  await page.getByRole("button", { name: "Pesquisar fontes públicas" }).click();
+  await expect(
+    page.getByRole("link", { name: "Fonte oficial de teste", exact: true }),
+  ).toBeVisible();
+  await page
     .getByRole("button", { name: "Extrair com IA", exact: true })
     .click();
   await expect(
@@ -97,7 +107,7 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
     .check();
   await page
     .getByLabel(
-      "Autorizo o envio dos fatos selecionados e seus trechos de evidência à OpenAI.",
+      "Autorizo o envio da vaga, dos fatos selecionados e seus trechos de evidência à OpenAI.",
     )
     .check();
   await page.getByRole("button", { name: "Sugerir avaliações com IA" }).click();
@@ -108,6 +118,16 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
   await page
     .getByRole("button", { name: "Preencher avaliações para minha revisão" })
     .click();
+  await expect(page.getByLabel("Atendimento: Python")).toHaveValue("met");
+  await page
+    .getByRole("button", { name: "Solicitar segunda avaliação" })
+    .click();
+  await expect(page.getByText("Avaliação anterior preservada")).toBeVisible();
+  await expect(
+    page.getByText(
+      "As avaliações divergem sobre as mesmas evidências. Esclareça.",
+    ),
+  ).toBeVisible();
   await expect(page.getByLabel("Atendimento: Python")).toHaveValue("met");
   await expect(
     page.getByLabel(

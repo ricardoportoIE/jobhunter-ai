@@ -164,6 +164,12 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
 }
 
 type Run = {
+  execution_config?: { effort?: string | null };
+  usage?: {
+    reasoning_tokens: number;
+    cached_input_tokens: number;
+    web_search_calls: number;
+  };
   id: string;
   operation: string;
   model: string;
@@ -270,7 +276,19 @@ export function AiActivity() {
             {operations[run.operation] ?? run.operation} ·{" "}
             {states[run.status] ?? run.status}
           </h3>
-          <p>{run.model}</p>
+          <p>
+            {run.model}
+            {run.execution_config?.effort
+              ? ` · ${run.execution_config.effort}`
+              : ""}
+          </p>
+          {run.usage && (
+            <p>
+              Raciocínio: {run.usage.reasoning_tokens} tokens · Entrada em
+              cache: {run.usage.cached_input_tokens} tokens · Buscas web:{" "}
+              {run.usage.web_search_calls}
+            </p>
+          )}
           <p>
             €{Number(run.actual_eur ?? run.reserved_eur).toFixed(6)}
             {run.actual_eur === null ? " reservados" : " contabilizados"} ·

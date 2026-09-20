@@ -40,7 +40,8 @@ def main() -> None:
             "app_db_user": "jobhunter_e2e",
             "app_db_password": SecretStr("synthetic-e2e-database-only"),
             "allowed_origins": ["http://127.0.0.1:5174"],
-            "openai_api_key": None,
+            "openai_api_key": SecretStr("synthetic-e2e-not-a-real-key"),
+            "ai_review_model": "gpt-4.1-mini-2025-04-14",
             "ai_prices_reviewed": datetime.now(UTC).date(),
         }
     )
@@ -58,6 +59,7 @@ def main() -> None:
         patch("jobhunter_api.ai_matching.get_provider", return_value=fixture),
         patch("jobhunter_api.packages.get_provider", return_value=fixture),
         patch("jobhunter_api.semantic.embedding_provider", return_value=fixture),
+        patch("jobhunter_api.research.search", return_value=fixture.research()),
     ):
         uvicorn.run(create_app(settings), host="127.0.0.1", port=8001, access_log=False)
 
