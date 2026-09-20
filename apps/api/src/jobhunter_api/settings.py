@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     ai_model: Model = "gpt-4.1-mini-2025-04-14"
     ai_parsing_model: Model | None = None
+    ai_cv_model: Model | None = None
+    ai_cv_effort: Effort = "high"
+    ai_cv_prompt_suffix: str = Field(default="", max_length=4000)
     ai_matching_model: Model = "gpt-5.6-luna"
     ai_strategy_model: Model | None = None
     ai_review_model: Model = "gpt-5.6-luna"
@@ -52,6 +55,7 @@ class Settings(BaseSettings):
 
     def prompt(self, operation: str, instructions: str, version: str) -> tuple[str, str]:
         task = {
+            "cv_extract": "cv",
             "parse": "parsing",
             "suggest": "matching",
             "suggest_review": "review",
@@ -68,6 +72,7 @@ class Settings(BaseSettings):
 
     def policy(self, operation: str, override: str | None = None) -> tuple[str, Effort | None]:
         task = {
+            "cv_extract": "cv",
             "parse": "parsing",
             "suggest": "matching",
             "suggest_review": "review",

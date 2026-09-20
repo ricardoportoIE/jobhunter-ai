@@ -146,6 +146,8 @@ export function Inbox() {
 export function ImportJob() {
   const task = useTask();
   const [key] = useState(() => crypto.randomUUID());
+  const [mode, setMode] = useState<"text" | "url">("url");
+  const [imported, setImported] = useState<Job | null>(null);
   return (
     <>
       <p className="eyebrow">NOVA OPORTUNIDADE</p>
@@ -155,57 +157,128 @@ export function ImportJob() {
         próxima tela.
       </p>
       <section className="panel narrow">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            const data = new FormData(event.currentTarget);
-            void task.run(async () => {
-              const job = await api<Job>(
-                "/jobs/import",
-                "POST",
-                {
-                  raw_text: String(data.get("raw_text")),
-                  source_name: value(data, "source_name") || "manual",
-                  source_url: optional(data, "source_url"),
-                  external_id: optional(data, "external_id"),
-                  location_hint: optional(data, "location_hint"),
-                },
-                { "Idempotency-Key": key },
-              );
-              window.location.hash = `job/${job.id}`;
-            }, "Vaga importada.");
-          }}
-        >
-          <Field label="Texto original da vaga">
-            <textarea name="raw_text" rows={12} required maxLength={50000} />
-          </Field>
-          <div className="form-grid">
-            <Field label="Fonte">
+        <nav className="tabs" aria-label="Import method">
+          <button
+            aria-pressed={mode === "url"}
+            disabled={task.busy}
+            onClick={() => setMode("url")}
+          >
+            From a link
+          </button>
+          <button
+            aria-pressed={mode === "text"}
+            disabled={task.busy}
+            onClick={() => setMode("text")}
+          >
+            Paste text
+          </button>
+        </nav>
+        {mode === "url" && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
+              void task.run(async () => {
+                const result = await api<{
+                  job: Job;
+                  extraction_error: string | null;
+                }>("/jobs/import-url", "POST", {
+                  url: String(data.get("url")),
+                  ai_consent: data.has("ai_consent"),
+                });
+                if (result.extraction_error) {
+                  setImported(result.job);
+                  throw new Error(
+                    "The advert was imported, but AI extraction could not finish. Open the job to review it manually or retry extraction from its details.",
+                  );
+                }
+                window.location.hash = `job/${result.job.id}`;
+              }, "Advert extracted. Review the draft fields before confirming.");
+            }}
+          >
+            <Field label="Public vacancy link">
               <input
-                name="source_name"
-                placeholder="Site da empresa, portal…"
+                name="url"
+                type="url"
+                required
+                maxLength={2000}
+                placeholder="https://careers.example.com/jobs/123"
+              />
+            </Field>
+            <p>
+              We read the public page and use AI to draft its fields and
+              requirements. Missing information stays unknown. Pages requiring
+              login, CAPTCHA or JavaScript may need pasted text.
+            </p>
+            <label className="check">
+              <input type="checkbox" name="ai_consent" required />I authorise
+              reading this public page and sending its text to OpenAI for
+              extraction.
+            </label>
+            {task.feedback}
+            {imported && (
+              <a className="button" href={`#job/${imported.id}`}>
+                Open imported job for review
+              </a>
+            )}
+            <button className="primary" disabled={task.busy}>
+              {task.busy ? "Reading and extracting…" : "Extract from link"}
+            </button>
+          </form>
+        )}
+        {mode === "text" && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
+              void task.run(async () => {
+                const job = await api<Job>(
+                  "/jobs/import",
+                  "POST",
+                  {
+                    raw_text: String(data.get("raw_text")),
+                    source_name: value(data, "source_name") || "manual",
+                    source_url: optional(data, "source_url"),
+                    external_id: optional(data, "external_id"),
+                    location_hint: optional(data, "location_hint"),
+                  },
+                  { "Idempotency-Key": key },
+                );
+                window.location.hash = `job/${job.id}`;
+              }, "Vaga importada.");
+            }}
+          >
+            <Field label="Texto original da vaga">
+              <textarea name="raw_text" rows={12} required maxLength={50000} />
+            </Field>
+            <div className="form-grid">
+              <Field label="Fonte">
+                <input
+                  name="source_name"
+                  placeholder="Site da empresa, portal…"
+                  maxLength={200}
+                />
+              </Field>
+              <Field label="ID na fonte (opcional)">
+                <input name="external_id" maxLength={200} />
+              </Field>
+            </div>
+            <Field label="URL de origem (opcional)">
+              <input type="url" name="source_url" maxLength={2000} />
+            </Field>
+            <Field label="Localidade do anúncio (opcional)">
+              <input
+                name="location_hint"
+                placeholder="Ajuda a distinguir anúncios em cidades diferentes"
                 maxLength={200}
               />
             </Field>
-            <Field label="ID na fonte (opcional)">
-              <input name="external_id" maxLength={200} />
-            </Field>
-          </div>
-          <Field label="URL de origem (opcional)">
-            <input type="url" name="source_url" maxLength={2000} />
-          </Field>
-          <Field label="Localidade do anúncio (opcional)">
-            <input
-              name="location_hint"
-              placeholder="Ajuda a distinguir anúncios em cidades diferentes"
-              maxLength={200}
-            />
-          </Field>
-          {task.feedback}
-          <button className="primary" disabled={task.busy}>
-            {task.busy ? "Importando…" : "Importar e revisar"}
-          </button>
-        </form>
+            {task.feedback}
+            <button className="primary" disabled={task.busy}>
+              {task.busy ? "Importando…" : "Importar e revisar"}
+            </button>
+          </form>
+        )}
       </section>
     </>
   );

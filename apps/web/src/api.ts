@@ -16,16 +16,23 @@ export async function api<T>(
   data?: unknown,
   extra?: Record<string, string>,
 ): Promise<T> {
+  const binary = data instanceof Blob;
   const response = await fetch(`/api/v1${path}`, {
     method,
     credentials: "same-origin",
     cache: "no-store",
     headers: {
-      ...(data === undefined ? {} : { "Content-Type": "application/json" }),
+      ...(data === undefined
+        ? {}
+        : {
+            "Content-Type": binary
+              ? "application/octet-stream"
+              : "application/json",
+          }),
       ...(method === "GET" ? {} : { "X-CSRF-Token": csrf }),
       ...extra,
     },
-    body: data === undefined ? undefined : JSON.stringify(data),
+    body: data === undefined ? undefined : binary ? data : JSON.stringify(data),
   });
   if (!response.ok) {
     if (response.status === 401 && path !== "/session")

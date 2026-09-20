@@ -10,10 +10,12 @@ from jobhunter_api.ai_routes import router as ai_router
 from jobhunter_api.applications import router as applications_router
 from jobhunter_api.auth import router as session_router
 from jobhunter_api.clarifications import router as clarifications_router
+from jobhunter_api.cv_import import router as cv_router
 from jobhunter_api.database import check_database
 from jobhunter_api.errors import install_errors
 from jobhunter_api.hybrid_dedup import router as duplicates_router
 from jobhunter_api.job_parser import router as parser_router
+from jobhunter_api.job_url import router as job_url_router
 from jobhunter_api.jobs import router as jobs_router
 from jobhunter_api.matching import router as matching_router
 from jobhunter_api.middleware import RequestBoundary
@@ -67,7 +69,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.add_middleware(RequestBoundary)
     application.include_router(session_router)
     application.include_router(profile_router)
+    application.include_router(cv_router)
     application.include_router(jobs_router)
+    application.include_router(job_url_router)
     application.include_router(matching_router)
     application.include_router(applications_router)
     application.include_router(privacy_router)

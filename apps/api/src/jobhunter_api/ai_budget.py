@@ -362,12 +362,14 @@ def structured(
     schema: type[BaseModel],
     validate: Callable[[dict[str, Any]], Row],
     model: str | None = None,
+    *,
+    max_output: int | None = None,
 ) -> Row:
     import json
 
     selected, effort = settings.policy(operation, model)
     prompt, prompt_version = settings.prompt(operation, prompt, prompt_version)
-    maximum = settings.ai_max_output_tokens if effort is not None else 5000
+    maximum = max_output or (settings.ai_max_output_tokens if effort is not None else 5000)
     config: Row = {
         "effort": effort,
         "max_output_tokens": maximum,

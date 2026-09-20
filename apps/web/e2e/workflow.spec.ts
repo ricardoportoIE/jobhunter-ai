@@ -60,6 +60,7 @@ test("profile → import → review → match → evidence → manual tracker �
     "Versão do perfil revisada e preservada.",
   );
   await page.getByRole("link", { name: "Importar vaga", exact: true }).click();
+  await page.getByRole("button", { name: "Paste text" }).click();
   await page
     .getByLabel("Texto original da vaga")
     .fill(

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { api } from "./api";
 import type { Evidence, Fact, Profile } from "./types";
 import { Field } from "./ui";
+import CvImport from "./CvImport";
 
 type Props = {
   profile: Profile;
@@ -51,6 +52,7 @@ export default function ProfilePage({
         ))}
       </nav>
       {task.feedback}
+      {tab === "profile" && <CvImport profile={profile} refresh={refresh} />}
       {tab === "profile" && (
         <section className="panel">
           <h2>Direção da procura</h2>

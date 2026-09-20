@@ -57,6 +57,7 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
     .getByRole("link", { name: "Importar vaga", exact: true })
     .first()
     .click();
+  await page.getByRole("button", { name: "Paste text" }).click();
   await page
     .getByLabel("Texto original da vaga")
     .fill(

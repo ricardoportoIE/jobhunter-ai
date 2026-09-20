@@ -57,6 +57,7 @@ describe("interactive workflow", () => {
   it("imports raw text and sends a stable retry key", async () => {
     mocked.mockRejectedValue(new Error("Falha de rede"));
     render(<ImportJob />);
+    await userEvent.click(screen.getByRole("button", { name: "Paste text" }));
     await userEvent.type(
       screen.getByLabelText("Texto original da vaga"),
       "Python required",

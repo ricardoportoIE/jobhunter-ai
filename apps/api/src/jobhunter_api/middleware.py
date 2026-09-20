@@ -18,12 +18,17 @@ class RequestBoundary:
         correlation = str(uuid4())
         scope.setdefault("state", {})["correlation_id"] = correlation
         chunks = bytearray()
+        maximum = (
+            4 * 1024 * 1024
+            if scope.get("path") == "/api/v1/candidate/cv/extract"
+            else self.maximum_bytes
+        )
         while True:
             message = await receive()
             if message["type"] == "http.disconnect":
                 return
             chunks.extend(message.get("body", b""))
-            if len(chunks) > self.maximum_bytes:
+            if len(chunks) > maximum:
                 response = JSONResponse(
                     status_code=413,
                     content={
