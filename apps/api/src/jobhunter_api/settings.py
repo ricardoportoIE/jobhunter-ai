@@ -2,10 +2,13 @@
 
 from datetime import date
 from decimal import Decimal
-from typing import Literal
+from typing import Literal, cast
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+type Model = Literal["gpt-4.1-mini-2025-04-14", "gpt-4.1-nano-2025-04-14", "gpt-5.6-luna"]
+type Effort = Literal["none", "low", "medium", "high", "xhigh", "max"]
 
 
 class Settings(BaseSettings):
@@ -22,15 +25,36 @@ class Settings(BaseSettings):
     app_db_user: str = "jobhunter_app"
     app_db_password: SecretStr | None = None
     openai_api_key: SecretStr | None = None
-    ai_model: Literal["gpt-4.1-mini-2025-04-14", "gpt-4.1-nano-2025-04-14"] = (
-        "gpt-4.1-mini-2025-04-14"
-    )
+    ai_model: Model = "gpt-4.1-mini-2025-04-14"
+    ai_parsing_model: Model | None = None
+    ai_matching_model: Model = "gpt-5.6-luna"
+    ai_strategy_model: Model | None = None
+    ai_review_model: Model = "gpt-5.6-luna"
+    ai_research_model: Literal["gpt-5.6-luna"] = "gpt-5.6-luna"
+    ai_parsing_effort: Effort = "high"
+    ai_matching_effort: Effort = "high"
+    ai_strategy_effort: Effort = "high"
+    ai_review_effort: Effort = "high"
+    ai_research_effort: Effort = "high"
+    ai_max_output_tokens: int = Field(default=8000, ge=1000, le=16000)
     ai_monthly_eur: Decimal = Field(default=Decimal("10"), gt=0, le=10)
     combined_monthly_eur: Decimal = Field(default=Decimal("25"), gt=0, le=25)
     # Conservative accounting allowance, NOT a live exchange-rate quote.
     ai_eur_per_usd: Decimal = Field(default=Decimal("1.25"), ge=1, le=5)
-    ai_prices_reviewed: date = date(2026, 9, 19)
-    ai_timeout_seconds: float = Field(default=40, ge=1, le=45)
+    ai_prices_reviewed: date = date(2026, 9, 20)
+    ai_timeout_seconds: float = Field(default=180, ge=1, le=210)
+
+    def policy(self, operation: str, override: str | None = None) -> tuple[str, Effort | None]:
+        task = {
+            "parse": "parsing",
+            "suggest": "matching",
+            "suggest_review": "review",
+            "strategy": "strategy",
+            "research": "research",
+        }.get(operation)
+        model = override or (getattr(self, f"ai_{task}_model") if task else None) or self.ai_model
+        effort = getattr(self, f"ai_{task}_effort", "high") if model == "gpt-5.6-luna" else None
+        return model, cast(Effort | None, effort)
 
     def runtime(self) -> "Settings":
         if self.app_db_password:

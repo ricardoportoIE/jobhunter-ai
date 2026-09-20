@@ -23,6 +23,77 @@ def owner(settings: Settings) -> UUID:
         return UUID(str(row["id"]))
 
 
+def test_task_policies_tool_cost_and_cache_configuration(db_settings: Settings) -> None:
+    identity = owner(db_settings)
+    assert db_settings.policy("suggest") == ("gpt-5.6-luna", "high")
+    assert db_settings.policy("parse") == (MODEL, None)
+    calls = []
+
+    def invoke() -> Completion:
+        calls.append(1)
+        return Completion(
+            "{}",
+            100,
+            200,
+            "fixture",
+            2,
+            "completed",
+            reasoning_tokens=150,
+            cached_input_tokens=50,
+            web_search_calls=2,
+        )
+
+    def run(key: str, effort: str = "high", version: str = "v1") -> dict[str, object]:
+        return execute(
+            db_settings,
+            identity,
+            "research",
+            key,
+            {},
+            "gpt-5.6-luna",
+            version,
+            1000,
+            500,
+            invoke,
+            lambda _: {"ok": True},
+            execution_config={"effort": effort},
+            max_tool_calls=3,
+        )
+
+    first = run("first")
+    assert run("another-key")["run_id"] == first["run_id"] and len(calls) == 1
+    assert run("medium", "medium")["run_id"] != first["run_id"]
+    assert run("new-prompt", version="v2")["run_id"] != first["run_id"]
+    with connect(db_settings) as db:
+        row = db.execute("SELECT * FROM ai_calls WHERE id=%s", (first["run_id"],)).fetchone()
+    assert row
+    expected = cost("gpt-5.6-luna", 100, 200, db_settings.ai_eur_per_usd)
+    assert row["actual_eur"] == expected + Decimal("0.02") * db_settings.ai_eur_per_usd
+    assert row["actual_eur"] <= row["reserved_eur"]
+    assert row["price_snapshot"]["usage"]["reasoning_tokens"] == 150
+
+
+def test_unexpected_tool_usage_blocks_further_spending(db_settings: Settings) -> None:
+    with pytest.raises(Problem) as error:
+        execute(
+            db_settings,
+            owner(db_settings),
+            "research",
+            None,
+            {},
+            "gpt-5.6-luna",
+            "v1",
+            1000,
+            500,
+            lambda: Completion("{}", 100, 200, None, 1, "completed", web_search_calls=4),
+            lambda _: {},
+            max_tool_calls=3,
+        )
+    assert error.value.code == "USAGE_OUT_OF_BOUND"
+    with connect(db_settings) as db:
+        assert totals(db, db_settings)["unreconciled"]
+
+
 def test_atomic_reservations_across_workers(db_settings: Settings) -> None:
     settings = db_settings.model_copy(
         update={"ai_monthly_eur": cost(MODEL, 1000, 100, Decimal("1.25"))}

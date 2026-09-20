@@ -41,8 +41,15 @@ def test_provider_contract_and_redaction() -> None:
 
 
 @pytest.mark.parametrize("refusal", [False, True])
-def test_sdk_success_and_refusal_keep_usage(refusal: bool) -> None:
+@pytest.mark.parametrize("model", ["gpt-4.1-mini-2025-04-14", "gpt-5.6-luna"])
+def test_sdk_success_and_refusal_keep_usage(refusal: bool, model: str) -> None:
     def respond(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert body["model"] == model
+        if model == "gpt-5.6-luna":
+            assert body["reasoning"] == {"effort": "high"} and "temperature" not in body
+        else:
+            assert body["temperature"] == 0 and "reasoning" not in body
         content = (
             {"type": "refusal", "refusal": "declined"}
             if refusal
@@ -66,7 +73,13 @@ def test_sdk_success_and_refusal_keep_usage(refusal: bool) -> None:
                         "content": [content],
                     }
                 ],
-                "usage": {"input_tokens": 10, "output_tokens": 2, "total_tokens": 12},
+                "usage": {
+                    "input_tokens": 10,
+                    "output_tokens": 2,
+                    "total_tokens": 12,
+                    "input_tokens_details": {"cached_tokens": 5},
+                    "output_tokens_details": {"reasoning_tokens": 1},
+                },
             },
         )
 
@@ -78,7 +91,8 @@ def test_sdk_success_and_refusal_keep_usage(refusal: bool) -> None:
         max_retries=0,
         http_client=httpx.Client(transport=httpx.MockTransport(respond)),
     )
-    result = adapter.complete("gpt-4.1-mini-2025-04-14", "extract", "data", Example, 200)
+    result = adapter.complete(model, "extract", "data", Example, 200, effort="high")
     assert result.status == ("refused" if refusal else "completed")
     assert result.input_tokens == 10 and result.output_tokens == 2
     assert result.request_id == "request-fixture"
+    assert result.reasoning_tokens == 1 and result.cached_input_tokens == 5

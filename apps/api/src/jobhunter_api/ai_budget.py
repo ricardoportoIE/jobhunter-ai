@@ -19,9 +19,11 @@ from jobhunter_api.store import Connection, Row, connect
 PRICES = {
     "gpt-4.1-mini-2025-04-14": (Decimal("0.40"), Decimal("1.60")),
     "gpt-4.1-nano-2025-04-14": (Decimal("0.10"), Decimal("0.40")),
+    "gpt-5.6-luna": (Decimal("0.20"), Decimal("1.20")),
     "text-embedding-3-small": (Decimal("0.02"), Decimal("0")),
 }
 MICRO = Decimal("0.00000001")
+WEB_SEARCH_USD = Decimal("0.01")
 
 
 def cost(model: str, inputs: int, outputs: int, conversion: Decimal) -> Decimal:
@@ -80,12 +82,21 @@ def reserve(
     prompt_version: str,
     input_bound: int,
     max_output: int,
+    *,
+    execution_config: Row | None = None,
+    max_tool_calls: int = 0,
 ) -> tuple[Row, bool]:
     if not key.strip() or len(key) > 200:
         raise Problem(422, "INVALID_KEY", "Chave de execução inválida.")
-    if model not in PRICES or not 0 < input_bound <= 120000 or not 0 <= max_output <= 6000:
+    if (
+        model not in PRICES
+        or not 0 < input_bound <= 200000
+        or not 0 <= max_output <= 16000
+        or not 0 <= max_tool_calls <= 3
+    ):
         raise Problem(422, "AI_INPUT_LIMIT", "Conteúdo acima do limite de uma execução de IA.")
     amount = cost(model, input_bound, max_output, settings.ai_eur_per_usd)
+    amount += max_tool_calls * WEB_SEARCH_USD * settings.ai_eur_per_usd
     with connect(settings) as db:
         db.execute("SELECT pg_advisory_xact_lock(71020)")
         existing = db.execute(
@@ -109,6 +120,13 @@ def reserve(
                 "AI_EXECUTION_EXISTS",
                 "Execução em andamento ou já encerrada. Consulte o histórico de IA.",
             )
+        completed = db.execute(
+            "SELECT * FROM ai_calls WHERE owner_id=%s AND operation=%s AND payload_hash=%s "
+            "AND status='succeeded' ORDER BY created_at DESC LIMIT 1",
+            (owner, operation, payload_hash),
+        ).fetchone()
+        if completed:
+            return completed, True
         if db.execute(
             "SELECT 1 FROM ai_calls WHERE owner_id=%s AND operation=%s AND payload_hash=%s "
             "AND status='running'",
@@ -158,6 +176,9 @@ def reserve(
                         "reviewed": settings.ai_prices_reviewed.isoformat(),
                         "input_token_bound": input_bound,
                         "max_output_tokens": max_output,
+                        "max_tool_calls": max_tool_calls,
+                        "web_search_usd_per_call": str(WEB_SEARCH_USD),
+                        "execution_config": execution_config or {},
                     }
                 ),
                 amount,
@@ -185,11 +206,17 @@ def settle(
             completion.output_tokens,
             Decimal(call["price_snapshot"]["eur_per_usd_allowance"]),
         )
+        amount += (
+            completion.web_search_calls
+            * Decimal(call["price_snapshot"].get("web_search_usd_per_call", "0"))
+            * Decimal(call["price_snapshot"]["eur_per_usd_allowance"])
+        )
     with connect(settings) as db:
         db.execute("SELECT pg_advisory_xact_lock(71020)")
         changed = db.execute(
             "UPDATE ai_calls SET status=%s,actual_eur=%s,input_tokens=%s,output_tokens=%s,"
-            "latency_ms=%s,provider_request_id=%s,result=%s,error_code=%s,finished_at=now() "
+            "latency_ms=%s,provider_request_id=%s,result=%s,error_code=%s,finished_at=now(), "
+            "price_snapshot=price_snapshot || %s "
             "WHERE id=%s AND status='running' AND owner_id=%s RETURNING id",
             (
                 status,
@@ -200,6 +227,17 @@ def settle(
                 completion.request_id if completion else None,
                 Jsonb(result),
                 error,
+                Jsonb(
+                    {
+                        "usage": {
+                            "reasoning_tokens": completion.reasoning_tokens,
+                            "cached_input_tokens": completion.cached_input_tokens,
+                            "web_search_calls": completion.web_search_calls,
+                        }
+                    }
+                    if completion
+                    else {}
+                ),
                 call["id"],
                 call["owner_id"],
             ),
@@ -221,8 +259,20 @@ def execute(
     max_output: int,
     invoke: Callable[[], Completion],
     validate: Callable[[Completion], Row],
+    *,
+    execution_config: Row | None = None,
+    max_tool_calls: int = 0,
 ) -> Row:
-    hashed = fingerprint({"payload": payload, "model": model, "prompt": prompt_version})
+    hashed = fingerprint(
+        {
+            "payload": payload,
+            "model": model,
+            "prompt": prompt_version,
+            "execution_config": execution_config or {},
+            "max_output": max_output,
+            "max_tool_calls": max_tool_calls,
+        }
+    )
     call, cached = reserve(
         settings,
         owner,
@@ -233,12 +283,20 @@ def execute(
         prompt_version,
         input_bound,
         max_output,
+        execution_config=execution_config,
+        max_tool_calls=max_tool_calls,
     )
     if cached:
         return {"run_id": str(call["id"]), "cached": True, "result": call["result"]}
     try:
         completion = invoke()
-        if completion.input_tokens < 0 or completion.output_tokens < 0:
+        if (
+            completion.input_tokens < 0
+            or completion.output_tokens < 0
+            or not 0 <= completion.reasoning_tokens <= completion.output_tokens
+            or not 0 <= completion.cached_input_tokens <= completion.input_tokens
+            or completion.web_search_calls < 0
+        ):
             raise ProviderFailure("USAGE_INVALID", charge_unknown=True)
     except ProviderFailure as exc:
         settle(
@@ -259,7 +317,11 @@ def execute(
         raise Problem(
             502, "AI_PROVIDER_ERROR", "Chamada interrompida; custo em reconciliação."
         ) from None
-    if completion.input_tokens > input_bound or completion.output_tokens > max_output:
+    if (
+        completion.input_tokens > input_bound
+        or completion.output_tokens > max_output
+        or not 0 <= completion.web_search_calls <= max_tool_calls
+    ):
         settle(settings, call, completion, "uncertain", error="USAGE_OUT_OF_BOUND")
         raise Problem(
             502, "USAGE_OUT_OF_BOUND", "Uso inesperado do provedor; reconcilie a cobrança."
@@ -297,7 +359,9 @@ def structured(
 ) -> Row:
     import json
 
-    selected = model or settings.ai_model
+    selected, effort = settings.policy(operation, model)
+    maximum = settings.ai_max_output_tokens if effort is not None else 5000
+    config: Row = {"effort": effort, "max_output_tokens": maximum, "tools": []}
     serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
     contract = json.dumps(strict_schema(schema.model_json_schema()))
     bound = len((prompt + serialized + contract).encode("utf-8")) + 2048
@@ -314,7 +378,8 @@ def structured(
         selected,
         prompt_version,
         bound,
-        5000,
-        lambda: provider.complete(selected, prompt, serialized, schema, 5000),
+        maximum,
+        lambda: provider.complete(selected, prompt, serialized, schema, maximum, effort=effort),
         checked,
+        execution_config=config,
     )

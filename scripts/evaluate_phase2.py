@@ -15,7 +15,7 @@ from jobhunter_api.ai_budget import totals
 from jobhunter_api.errors import Problem
 from jobhunter_api.inference import Completion, OpenAIInference
 from jobhunter_api.job_parser import PARSER_VERSION, ParsedJob, parse_vacancy, validate_extraction
-from jobhunter_api.settings import Settings
+from jobhunter_api.settings import Effort, Settings
 from jobhunter_api.store import connect
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,9 +28,16 @@ class PublicDiagnosticProvider(OpenAIInference):
     last: Completion | None = None
 
     def complete(
-        self, model: str, prompt: str, data: str, schema: type[BaseModel], max_output: int
+        self,
+        model: str,
+        prompt: str,
+        data: str,
+        schema: type[BaseModel],
+        max_output: int,
+        *,
+        effort: Effort | None = None,
     ) -> Completion:
-        self.last = super().complete(model, prompt, data, schema, max_output)
+        self.last = super().complete(model, prompt, data, schema, max_output, effort=effort)
         return self.last
 
 

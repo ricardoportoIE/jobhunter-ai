@@ -9,12 +9,20 @@ from pydantic import BaseModel
 from jobhunter_api.inference import Completion
 from jobhunter_api.job_parser import ParsedJob
 from jobhunter_api.package_domain import StrategyOutput
+from jobhunter_api.settings import Effort
 from jobhunter_api.store import Row
 
 
 class BrowserFixtureProvider:
     def complete(
-        self, model: str, prompt: str, data: str, schema: type[BaseModel], max_output: int
+        self,
+        model: str,
+        prompt: str,
+        data: str,
+        schema: type[BaseModel],
+        max_output: int,
+        *,
+        effort: Effort | None = None,
     ) -> Completion:
         payload = json.loads(data)
         if schema is ParsedJob:

@@ -7,7 +7,7 @@ from typing import Any, Protocol
 from openai import APIStatusError, OpenAI
 from pydantic import BaseModel
 
-from jobhunter_api.settings import Settings
+from jobhunter_api.settings import Effort, Settings
 
 
 class ProviderFailure(Exception):
@@ -25,11 +25,21 @@ class Completion:
     request_id: str | None
     elapsed_ms: int
     status: str
+    reasoning_tokens: int = 0
+    cached_input_tokens: int = 0
+    web_search_calls: int = 0
 
 
 class StructuredInference(Protocol):
     def complete(
-        self, model: str, prompt: str, data: str, schema: type[BaseModel], max_output: int
+        self,
+        model: str,
+        prompt: str,
+        data: str,
+        schema: type[BaseModel],
+        max_output: int,
+        *,
+        effort: Effort | None = None,
     ) -> Completion: ...
 
 
@@ -100,9 +110,21 @@ class OpenAIInference:
         )
 
     def complete(
-        self, model: str, prompt: str, data: str, schema: type[BaseModel], max_output: int
+        self,
+        model: str,
+        prompt: str,
+        data: str,
+        schema: type[BaseModel],
+        max_output: int,
+        *,
+        effort: Effort | None = None,
     ) -> Completion:
         start = monotonic()
+        options: dict[str, Any] = (
+            {"reasoning": {"effort": effort or "high"}}
+            if model == "gpt-5.6-luna"
+            else {"temperature": 0}
+        )
         try:
             response = self.client.responses.create(
                 model=model,
@@ -118,7 +140,7 @@ class OpenAIInference:
                 },
                 max_output_tokens=max_output,
                 store=False,
-                temperature=0,
+                **options,
             )
         except APIStatusError as exc:
             # Do not propagate headers, request bodies, credentials or provider error text.
@@ -144,4 +166,10 @@ class OpenAIInference:
             request_id=response._request_id,
             elapsed_ms=round((monotonic() - start) * 1000),
             status="refused" if refused else response.status or "unknown",
+            reasoning_tokens=(response.usage.output_tokens_details.reasoning_tokens or 0)
+            if response.usage.output_tokens_details
+            else 0,
+            cached_input_tokens=(response.usage.input_tokens_details.cached_tokens or 0)
+            if response.usage.input_tokens_details
+            else 0,
         )
