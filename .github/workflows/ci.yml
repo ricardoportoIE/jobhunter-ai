@@ -50,6 +50,10 @@ jobs:
       - run: uv run --locked ruff check ../../scripts/evaluate_phase3.py
       - run: uv run --locked ruff format --check ../../scripts/evaluate_phase3.py
       - run: uv run --locked python ../../scripts/evaluate_phase3.py --check
+      - run: uv run --locked ruff check ../../scripts/build_reasoning_cases.py ../../scripts/compare_reasoning_models.py
+      - run: uv run --locked ruff format --check ../../scripts/build_reasoning_cases.py ../../scripts/compare_reasoning_models.py
+      - run: uv run --locked python ../../scripts/compare_reasoning_models.py --check
+      - run: uv run --locked python ../../scripts/compare_reasoning_models.py --check --protocol refined
       - run: uv build
 
   web:

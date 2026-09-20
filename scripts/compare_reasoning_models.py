@@ -54,7 +54,8 @@ supplied work-permission/hours conditions explicitly conflict with non-negotiabl
 Provide short Portuguese reasons, decisive quotes and questions to resolve uncertainty. Do not
 estimate interview/offer probability or turn technical suitability into legal authorisation.
 """
-QUOTE_CLARIFICATION = """\nFor vacancy_quote and candidate_quote, copy one exact contiguous substring
+QUOTE_CLARIFICATION = """
+For vacancy_quote and candidate_quote, copy one exact contiguous substring
 from the respective input field. Do not add quotation marks, ellipses, a slash, translated words
 or concatenate separate passages. JSON delimiters are sufficient. All factual statements in the
 reason must be supported by the supplied text; preserve the stated qualification level.
@@ -350,13 +351,16 @@ def main() -> None:
     parser.add_argument("--max-additional-eur", type=Decimal, default=Decimal("3.00"))
     args = parser.parse_args()
     dataset = json.loads(DATA.read_text(encoding="utf-8"))
-    dataset_hash = hashlib.sha256(DATA.read_bytes()).hexdigest()
+    # Git normalises CRLF on Windows; use the same UTF-8/LF digest on all platforms.
+    dataset_hash = hashlib.sha256(DATA.read_text(encoding="utf-8").encode()).hexdigest()
     assert len(dataset["cases"]) == 32
     destination = (
         REPORT
         if args.protocol == "baseline"
         else REPORT.with_name("reasoning-comparison-refined.json")
     )
+    if args.smoke:
+        destination = destination.with_stem(destination.stem + "-smoke")
     selected_cases = [
         c for c in dataset["cases"] if args.protocol == "baseline" or c["task"] == "triage_probe"
     ]
@@ -416,6 +420,20 @@ def main() -> None:
     cases = selected_cases[:1] if args.smoke else selected_cases
     repeats = (1,) if args.smoke else (1, 2)
     jobs = [(case, model, repeat) for repeat in repeats for case in cases for model in MODELS]
+    # A rerun must preserve invalid raw outputs rather than overwrite them with a cache error.
+    if destination.exists():
+        previous = json.loads(destination.read_text(encoding="utf-8"))
+        if previous["dataset_sha256"] != dataset_hash or previous["version"] != report["version"]:
+            raise ValueError(
+                "Existing report has a different dataset/protocol; version the experiment"
+            )
+        report = previous
+    retained = {(r["case_id"], r["model"], r["repeat"]) for r in report["results"]}
+    jobs = [
+        (case, model, repeat)
+        for case, model, repeat in jobs
+        if (case["id"], model, repeat) not in retained
+    ]
     with ThreadPoolExecutor(max_workers=2) as pool:
         pending = [
             pool.submit(run_one, settings, owner["id"], case, model, repeat, args.protocol)

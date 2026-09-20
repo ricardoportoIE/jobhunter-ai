@@ -29,6 +29,8 @@ Para gerar documentos, abra uma vaga revisada e escolha **4. Pacote de candidatu
 Veja [operação de P3](docs/phase-3/operations.md), [etapas e commits](docs/phase-3/progress.md)
 e [testes reais e verificação visual](docs/phase-3/validation.md).
 
+Seleção por confiabilidade: [comparação real GPT-4.1 mini × GPT-5.6 Luna](docs/evals/model-comparison.md).
+
 ## Começar pela fase 0
 
 1. [Produto, escopo e métricas](docs/phase-0/product-brief.md)
