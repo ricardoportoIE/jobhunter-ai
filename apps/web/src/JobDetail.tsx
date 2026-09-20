@@ -2,6 +2,7 @@ import { useTask } from "./useTask";
 import { AiJobTools } from "./AiTools";
 import DuplicateReview from "./DuplicateReview";
 import AiMatching from "./AiMatching";
+import PackagePanel from "./PackagePanel";
 import { optional } from "./forms";
 import { useEffect, useState } from "react";
 import ShortlistButton from "./ShortlistButton";
@@ -34,7 +35,9 @@ export default function JobDetail({
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState("");
   const [refresh, setRefresh] = useState(0);
-  const [tab, setTab] = useState<"review" | "analyse" | "result">("review");
+  const [tab, setTab] = useState<"review" | "analyse" | "result" | "package">(
+    "review",
+  );
   const [match, setMatch] = useState<Match | null>(null);
   useEffect(() => {
     let active = true;
@@ -98,7 +101,21 @@ export default function JobDetail({
         >
           3. Resultado e evidências
         </button>
+        <button
+          aria-pressed={tab === "package"}
+          onClick={() => setTab("package")}
+        >
+          4. Pacote de candidatura
+        </button>
       </nav>
+      {tab === "package" && (
+        <PackagePanel
+          key={`${job.id}:${job.version}:${profile.version}`}
+          job={job}
+          profile={profile}
+          facts={facts}
+        />
+      )}
       {tab === "review" && (
         <AiJobTools job={job} saved={() => setRefresh(refresh + 1)} />
       )}

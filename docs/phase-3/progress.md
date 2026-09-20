@@ -7,7 +7,7 @@ Implementação autorizada em 2026-09-20, com commits locais por etapa.
 | P3-01 | Contratos, permissões de uso e snapshots | Implementado: `12c9e19` |
 | P3-02 | Estratégia, revisão e geração versionada | Implementado |
 | P3-03 | CV, cover letter, respostas e downloads DOCX/PDF/JSON | Implementado |
-| P3-04 | Tela de aprovação, diferenças e evidências | Pendente |
+| P3-04 | Tela de aprovação, diferenças e evidências | Implementado; E2E desktop/mobile aprovado |
 | P3-05 | Testes reais, segurança, renderização e documentação | Pendente |
 
 Princípio: a IA seleciona fatos e explica a estratégia. Alegações nos documentos são

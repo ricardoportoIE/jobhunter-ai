@@ -56,6 +56,7 @@ def main() -> None:
     with (
         patch("jobhunter_api.job_parser.get_provider", return_value=fixture),
         patch("jobhunter_api.ai_matching.get_provider", return_value=fixture),
+        patch("jobhunter_api.packages.get_provider", return_value=fixture),
         patch("jobhunter_api.semantic.embedding_provider", return_value=fixture),
     ):
         uvicorn.run(create_app(settings), host="127.0.0.1", port=8001, access_log=False)

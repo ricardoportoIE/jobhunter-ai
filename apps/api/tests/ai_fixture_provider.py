@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from jobhunter_api.inference import Completion
 from jobhunter_api.job_parser import ParsedJob
+from jobhunter_api.package_domain import StrategyOutput
 from jobhunter_api.store import Row
 
 
@@ -45,6 +46,25 @@ class BrowserFixtureProvider:
                 ],
                 risk_flags=[],
             )
+        elif schema is StrategyOutput:
+            fact = payload["facts"][0]
+            result = {
+                "cv_fact_ids": [fact["id"]],
+                "letter_fact_ids": [fact["id"]],
+                "focus": [
+                    {
+                        "requirement_id": r["id"],
+                        "fact_ids": [fact["id"]],
+                        "explanation": "Projeto documentado relevante; emprego comercial não inferido.",
+                    }
+                    for r in payload["job"]["requirements"]
+                ],
+                "answers": [
+                    {"question_index": i, "fact_ids": []} for i in range(len(payload["questions"]))
+                ],
+                "risks": ["Revise as lacunas antes de aprovar."],
+                "interview_points": ["Explicar decisões de implementação do projeto."],
+            }
         else:
             fact, evidence = payload["facts"][0], payload["evidence"][0]
             result = {
