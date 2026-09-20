@@ -127,7 +127,11 @@ def edit_source(source_id: UUID, data: SourceEdit, actor: Actor, request: Reques
             and (not row["data"]["connected"] or not data.label_id.startswith("Label_"))
         ):
             raise Problem(422, "GMAIL_LABEL_REQUIRED", "Connect Gmail and choose a custom label.")
-        values = data.model_dump(mode="json", exclude={"expected_version", "access_confirmed"})
+        values = data.model_dump(
+            mode="json", exclude={"expected_version", "access_confirmed"}, exclude_unset=True
+        )
+        if values.get("label_id", row["data"]["label_id"]) != row["data"]["label_id"]:
+            values.update(cursor=None, next_sync_at=None)
         return public(
             update(
                 db,

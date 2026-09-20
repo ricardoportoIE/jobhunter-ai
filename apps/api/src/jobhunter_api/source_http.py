@@ -99,7 +99,7 @@ def request_json(
                 chunks.extend(chunk)
                 if len(chunks) > MAX_BYTES:
                     raise SourceFailure("SOURCE_CONTENT_LIMIT")
-            result = json.loads(chunks)
+            result = json.loads(chunks) if chunks else {}
             if not isinstance(result, dict):
                 raise SourceFailure("SOURCE_INVALID_RESPONSE")
             return status, result_headers, result

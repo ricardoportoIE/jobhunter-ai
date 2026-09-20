@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     app_db_user: str = "jobhunter_app"
     app_db_password: SecretStr | None = None
     openai_api_key: SecretStr | None = None
+    gmail_client_id: str = ""
+    gmail_client_secret: SecretStr | None = None
+    gmail_redirect_uri: str = "http://127.0.0.1:5173/"
+    discovery_encryption_key: SecretStr | None = None
     ai_model: Model = "gpt-4.1-mini-2025-04-14"
     ai_parsing_model: Model | None = None
     ai_cv_model: Model | None = None

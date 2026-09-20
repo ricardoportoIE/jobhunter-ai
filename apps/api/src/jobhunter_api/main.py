@@ -14,6 +14,7 @@ from jobhunter_api.cv_import import router as cv_router
 from jobhunter_api.database import check_database
 from jobhunter_api.discovery import router as discovery_router
 from jobhunter_api.errors import install_errors
+from jobhunter_api.gmail import router as gmail_router
 from jobhunter_api.hybrid_dedup import router as duplicates_router
 from jobhunter_api.job_parser import router as parser_router
 from jobhunter_api.job_url import router as job_url_router
@@ -85,6 +86,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(clarifications_router)
     application.include_router(research_router)
     application.include_router(discovery_router)
+    application.include_router(gmail_router)
 
     @application.get("/api/health/live", tags=["health"])
     def live() -> LiveStatus:

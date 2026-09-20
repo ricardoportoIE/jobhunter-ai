@@ -8,7 +8,7 @@ local commit after its checks; the complete phase is pushed only after final rev
 |---|---|---|
 | P4-01 | Owned source registry, access reviews and persistence contracts | Implemented |
 | P4-02 | Greenhouse reader, synchronisation, revisions and deduplication | Implemented |
-| P4-03 | Gmail OAuth, dedicated-label reader and configuration guide | Pending |
+| P4-03 | Gmail OAuth, dedicated-label reader and configuration guide | Implemented; live connection awaits credentials |
 | P4-04 | Discovery interface, preference hints and company research hand-off | Pending |
 | P4-05 | End-to-end validation, security review and operational documentation | Pending |
 
@@ -51,3 +51,11 @@ lease records interrupted work. Each complete response is saved atomically. Part
 responses and failures never imply that a vacancy has closed. Missing posts are labelled
 **not listed**, while reviewed jobs remain untouched. New and changed versions retain
 provenance; older changed versions are retained in the private export.
+
+## P4-03 checks
+
+Nineteen focused tests passed across Gmail, discovery and privacy. They cover OAuth
+configuration, PKCE, consent, state replay/expiry, rejected scopes, encrypted storage,
+export exclusions, disconnect, token refresh, label boundaries, malicious HTML and
+attachment/body limits. Ruff and mypy passed. See [Gmail setup](gmail-setup.md) for the
+operator steps and the explicit distinction between synthetic and live validation.

@@ -169,7 +169,9 @@ def run_sync(settings: Settings, owner: UUID, source_id: UUID, reader: Reader | 
         elif data["provider"] == "greenhouse":
             batch = read_greenhouse(source)
         else:
-            raise SourceFailure("GMAIL_NOT_CONFIGURED", stop=True)
+            from jobhunter_api.gmail import read_gmail
+
+            batch = read_gmail(settings, source)
     except SourceFailure as error:
         failure = error
     except Exception:

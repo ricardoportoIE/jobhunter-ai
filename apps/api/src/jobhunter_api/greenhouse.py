@@ -23,6 +23,7 @@ class DiscoveredItem(BaseModel):
     raw_text: str = Field(min_length=1, max_length=50000)
     source_updated_at: str | None = Field(default=None, max_length=100)
     item_type: Literal["vacancy", "email"] = "vacancy"
+    links: list[str] = Field(default_factory=list, max_length=30)
 
     @field_validator("url")
     @classmethod
