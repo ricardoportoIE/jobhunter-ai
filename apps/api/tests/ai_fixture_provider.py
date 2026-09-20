@@ -34,12 +34,30 @@ class BrowserFixtureProvider:
                     {
                         "claim": "Built a Python API in 2025.",
                         "category": "project",
-                        "quote": "Built a Python API in 2025.",
+                        "source_start_line": next(
+                            line["line"]
+                            for line in payload["lines"]
+                            if "Built a Python API in 2025." in line["text"]
+                        ),
+                        "source_end_line": next(
+                            line["line"]
+                            for line in payload["lines"]
+                            if "Built a Python API in 2025." in line["text"]
+                        ),
                     },
                     {
                         "claim": "Postgraduate Diploma in Computing.",
                         "category": "education",
-                        "quote": "Postgraduate Diploma in Computing.",
+                        "source_start_line": next(
+                            line["line"]
+                            for line in payload["lines"]
+                            if "Postgraduate Diploma in Computing." in line["text"]
+                        ),
+                        "source_end_line": next(
+                            line["line"]
+                            for line in payload["lines"]
+                            if "Postgraduate Diploma in Computing." in line["text"]
+                        ),
                     },
                 ],
             }

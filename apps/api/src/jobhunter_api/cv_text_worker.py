@@ -35,6 +35,12 @@ def extract(content: bytes, extension: str) -> str:
         text = "\n\n".join(parts)
         if not has_text:
             raise ValueError("CV_NO_TEXT")
+    elif extension == ".md":
+        text = content.decode("utf-8-sig")
+        if any(ord(char) < 32 and char not in "\n\r\t" for char in text):
+            raise ValueError("CV_INVALID_FILE")
+        # Markdown is source text: never render HTML, fetch links or run embedded commands.
+        text = text.replace("\r\n", "\n").replace("\r", "\n")
     elif extension == ".docx":
         if not content.startswith(b"PK"):
             raise ValueError("CV_INVALID_FILE")

@@ -12,6 +12,7 @@ from jobhunter_api.cv_import import read_cv, validate_cv
 from jobhunter_api.cv_text_worker import extract
 from jobhunter_api.errors import Problem
 from jobhunter_api.inference import Completion
+from jobhunter_api.store import Row
 
 CV_TEXT = "Alex Example\nBuilt a Python API in 2025.\nPostgraduate Diploma in Computing."
 
@@ -33,12 +34,14 @@ def output() -> dict[str, object]:
             {
                 "claim": "Built a Python API in 2025.",
                 "category": "project",
-                "quote": "Built a Python API in 2025.",
+                "source_start_line": 2,
+                "source_end_line": 2,
             },
             {
                 "claim": "Postgraduate Diploma in Computing.",
                 "category": "education",
-                "quote": "Postgraduate Diploma in Computing.",
+                "source_start_line": 3,
+                "source_end_line": 3,
             },
         ],
     }
@@ -51,6 +54,9 @@ def test_real_docx_pdf_parser_and_rejected_uploads() -> None:
     canvas.drawString(72, 700, CV_TEXT.replace("\n", " "))
     canvas.save()
     assert "Alex Example" in read_cv(stream.getvalue(), "cv.pdf")
+    assert read_cv(("\ufeff" + CV_TEXT).encode("utf-8"), "cv.md") == CV_TEXT
+    with pytest.raises(Problem):
+        read_cv(b"\xff\x00" + b"binary content" * 5, "cv.md")
     with pytest.raises(Problem):
         read_cv(b"not a Word document", "old.doc")
     with pytest.raises(Problem):
@@ -69,6 +75,77 @@ def test_real_docx_pdf_parser_and_rejected_uploads() -> None:
     data["display_name"] = "Invented Name"
     with pytest.raises(ValueError):
         validate_cv(data, CV_TEXT)
+
+
+def test_wrapped_source_ranges_preserve_exact_whitespace_and_intervening_lines() -> None:
+    text = (
+        "Alex Example\nBuilt a Python API with\n  PostgreSQL in 2025.\n"
+        "Other coursework.\nFinal project: 10/10."
+    )
+    data: Row = {
+        "display_name": "Alex Example",
+        "warnings": [],
+        "facts": [
+            {
+                "claim": "Built a Python API with PostgreSQL in 2025.",
+                "category": "project",
+                "source_start_line": 2,
+                "source_end_line": 5,
+            }
+        ],
+    }
+    result = validate_cv(data, text)
+    assert result["facts"][0]["quote"] == text.split("\n", 1)[1]
+    assert "Other coursework." in result["facts"][0]["quote"]
+    for start, end in [(0, 2), (3, 2), (2, 99)]:
+        data["facts"][0].update(source_start_line=start, source_end_line=end)
+        with pytest.raises(ValueError, match="source range"):
+            validate_cv(data, text)
+    with pytest.raises(ValueError, match="No supported facts"):
+        validate_cv({"display_name": None, "facts": [], "warnings": []}, text)
+
+
+def test_markdown_retry_after_invalid_output_is_explicit_and_cached(
+    signed_client: TestClient,
+) -> None:
+    client = signed_client
+    headers = {
+        "Content-Type": "application/octet-stream",
+        "X-CV-Filename": "cv.md",
+        "X-AI-Consent": "true",
+        "Idempotency-Key": "first-cv-attempt",
+    }
+    bad = output()
+    bad["facts"][0]["source_end_line"] = 100  # type: ignore[index]
+    with patch("jobhunter_api.cv_import.get_provider") as provider:
+        provider.return_value.complete.side_effect = [
+            Completion(json.dumps(bad), 100, 100, "fixture", 1, "completed"),
+            Completion(json.dumps(output()), 100, 100, "fixture", 1, "completed"),
+        ]
+        failed = client.post(
+            "/api/v1/candidate/cv/extract", content=CV_TEXT.encode(), headers=headers
+        )
+        assert failed.status_code == 422
+        assert failed.json()["error"]["code"] == "CV_EXTRACTION_INVALID"
+        assert client.get("/api/v1/candidate/cv/drafts").json() == []
+        assert client.get("/api/v1/candidate/facts").json() == []
+        assert (
+            client.post(
+                "/api/v1/candidate/cv/extract", content=CV_TEXT.encode(), headers=headers
+            ).status_code
+            == 409
+        )
+        headers["Idempotency-Key"] = "explicit-retry"
+        success = client.post(
+            "/api/v1/candidate/cv/extract", content=CV_TEXT.encode(), headers=headers
+        )
+        assert success.status_code == 200
+        replay = client.post(
+            "/api/v1/candidate/cv/extract", content=CV_TEXT.encode(), headers=headers
+        )
+        assert replay.json()["id"] == success.json()["id"]
+        assert all(f["quote"] in CV_TEXT for f in success.json()["facts"])
+        assert provider.return_value.complete.call_count == 2
 
 
 def test_cv_draft_edit_remove_add_apply_and_replay(signed_client: TestClient) -> None:
