@@ -1,0 +1,11 @@
+{
+  "version": "human-review-2026-09-20-1",
+  "label_author": "user",
+  "source": "Explicit user reply in project conversation",
+  "dataset": "real-cases-0.1.0",
+  "labels": [
+    {"case_id": "REAL-01", "intent": "discard", "reason": "precisa estar estudando em dublin", "reason_verification": "Not established by the supplied public snapshot; user-reported requirement, not a canonical job fact."},
+    {"case_id": "REAL-10", "intent": "prioritise", "reason": "um dos nossos objetivos", "in_scope": true},
+    {"case_id": "REAL-12", "intent": "consider", "reason": "esta no nosso escopo", "in_scope": true, "clarification_required": "Confirm actual role before tailoring; title/body conflict does not itself mean out of scope."}
+  ]
+}
