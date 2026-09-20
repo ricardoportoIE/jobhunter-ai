@@ -145,7 +145,7 @@ def test_idempotency_settlement_and_unknown_cost(db_settings: Settings) -> None:
     first, second = run("key"), run("key")
     assert first["run_id"] == second["run_id"] and second["cached"]
     assert len(calls) == 1
-    with pytest.raises(Problem, match="Chave"):
+    with pytest.raises(Problem, match="IDEMPOTENCY_CONFLICT"):
         run("key", "changed")
 
     def timeout() -> Completion:

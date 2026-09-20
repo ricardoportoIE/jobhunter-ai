@@ -35,12 +35,12 @@ def install_errors(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def validation(request: Request, error: RequestValidationError) -> JSONResponse:
-        return failure(request, 422, "INVALID_INPUT", "Confira os campos e seus limites.")
+        return failure(request, 422, "INVALID_INPUT", "Check the fields and their limits.")
 
     @app.exception_handler(HTTPException)
     async def http_error(request: Request, error: HTTPException) -> JSONResponse:
-        return failure(request, error.status_code, "HTTP_ERROR", "Requisição não disponível.")
+        return failure(request, error.status_code, "HTTP_ERROR", "Requisition not available.")
 
     @app.exception_handler(Exception)
     async def unexpected(request: Request, error: Exception) -> JSONResponse:
-        return failure(request, 500, "INTERNAL_ERROR", "Não foi possível concluir a operação.")
+        return failure(request, 500, "INTERNAL_ERROR", "Could not complete the operation.")

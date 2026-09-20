@@ -27,13 +27,14 @@ Private drafts retain extracted text, a source-file hash, excerpts and the AI ru
 reference locally. They are included in authenticated export and administrative
 erasure. The original upload bytes are not retained. Extraction uses the existing
 budget ledger and cache, with `JOBHUNTER_AI_CV_MODEL`, `JOBHUNTER_AI_CV_EFFORT` and
-`JOBHUNTER_AI_CV_PROMPT_SUFFIX`; the default model follows `JOBHUNTER_AI_MODEL`.
+`JOBHUNTER_AI_CV_PROMPT_SUFFIX`. Docker defaults to GPT-4.1 mini; direct API settings
+fall back to `JOBHUNTER_AI_MODEL` when no CV model is specified.
 The CV output allowance is 12,000 tokens, reserved before calling the provider.
 Review establishes a candidate declaration, not independent verification.
 
 ## Import a vacancy link
 
-In **Import advert**, choose **From a link**, enter a public HTTPS vacancy URL and
+In **Import vacancy**, choose **From a link**, enter a public HTTPS vacancy URL and
 confirm reading the page and sending its text to OpenAI. The application extracts
 the readable text, prefers a single structured `JobPosting` when available, imports
 the source and creates a draft with the existing AI parser. Check every field and
@@ -58,6 +59,55 @@ The review confirmation checkbox is required. A visible explanation and validati
 message identify it when submission is attempted without confirmation. The archive
 help icon explains that archiving hides an opportunity from the active Inbox while
 retaining its history, and how to restore it through the archived filter.
+
+## Interface language
+
+Use **Language** on the login screen or session bar to select **English (UK)** or
+**Português**. British English is the default. The browser remembers the choice in
+local storage, updates the page language for assistive technology and changes labels
+without remounting forms or discarding unsaved input. Dates follow the selected locale.
+
+The source labels are British English; Portuguese translations are maintained in
+`apps/web/src/locales/pt.json`. New interface messages must use the translation
+helpers, keep stable data keys and preserve placeholder numbers. Catalogue tests
+check static message coverage and placeholder consistency.
+
+Original adverts, evidence quotations, candidate declarations and previously stored
+AI responses retain their original language. New AI explanations use British English;
+the interface selector does not translate factual source material or regenerate AI
+responses. Downloaded application document templates remain British English.
+Project documentation remains British English regardless of the interface choice.
+
+## Validation and limits
+
+The added tests cover genuine PDF/DOCX parsing, malformed and macro-bearing files,
+literal source quotations, consent, draft editing and application, idempotency,
+profile conflicts, private and mixed DNS destinations, pinned TLS connections,
+redirects, access rules, structured vacancy data and recovery from AI failure.
+Browser tests exercise draft editing and resumption, language switching with unsaved
+input, persistent language choice, link extraction, review confirmation and archive
+help at desktop and mobile sizes. Browser AI responses and remote pages are synthetic
+fixtures in an isolated test database.
+
+On 20 September 2026, separate live GPT-4.1 mini checks extracted two quoted facts
+from a synthetic Word CV and confirmed that repeating the request used the cache.
+A real public vacancy page was read through the production URL reader; AI extracted
+its title and six requirements, with source quotations passing local validation.
+These checks did not change candidate facts or add a vacancy to the personal Inbox.
+Their paid calls used the existing budget ledger. They are integration smoke tests,
+not a measurement of extraction accuracy across CV layouts or vacancy websites.
+
+Local validation passed 111 API tests, 15 frontend tests and eight browser tests
+(four workflows at desktop and mobile sizes), plus type, lint, formatting, build,
+historical evaluation and documentation checks. Browser tests used Microsoft Edge
+locally; CI retains its configured Chromium installation.
+
+The wording changes have new prompt versions: parser `job-parser-1.4-en-GB`, matching
+`evidence-matching-1.3-en-GB`, strategy `application-strategy-1.2-en-GB` and public
+research `public-research-1.1-en-GB`. Historical benchmark files and raw responses
+remain unchanged. Offline benchmark checks retain their recorded prompt versions
+and normalise only the exact translated guardrail label when comparing historical
+matching output. Historical scores do not certify these newer prompt versions.
 
 ## Sources
 

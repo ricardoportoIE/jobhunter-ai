@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import { useState } from "react";
 import { api } from "./api";
 import {
@@ -8,7 +9,6 @@ import {
   type Profile,
 } from "./types";
 import { useAiTask } from "./useAiTask";
-
 type Suggestion = {
   run_id: string | null;
   stale: boolean;
@@ -51,15 +51,14 @@ export default function AiMatching({
   );
   return (
     <section className="ai-panel">
-      <h3>Sugestões com evidências</h3>
+      <h3>{t("Suggestions with evidence")}</h3>
       <p>
-        Selecione os fatos que a IA pode avaliar. Serão enviados à OpenAI os
-        título, texto da vaga, requisitos, afirmações selecionadas e trechos das
-        suas evidências. Dados marcados como sensíveis são excluídos; nomes de
-        arquivos e referências locais permanecem aqui.
+        {t(
+          "Select facts that AI can evaluate. The job title, description, requirements, selected statements and excerpts of your evidence will be sent to OpenAI. Data marked as sensitive is excluded; file names and local references remain here.",
+        )}
       </p>
       <fieldset>
-        <legend>Fatos autorizados para esta consulta</legend>
+        <legend>{t("Facts authorised for this query")}</legend>
         {available.map((fact) => (
           <label className="check" key={fact.id}>
             <input
@@ -83,8 +82,9 @@ export default function AiMatching({
         ))}
         {!available.length && (
           <p>
-            Nenhum fato elegível disponível. Registre evidências e publique o
-            perfil.
+            {t(
+              "No eligible facts available. Record evidence and publish the profile.",
+            )}
           </p>
         )}
       </fieldset>
@@ -94,8 +94,9 @@ export default function AiMatching({
           checked={consent}
           onChange={(event) => setConsent(event.target.checked)}
         />
-        Autorizo o envio da vaga, dos fatos selecionados e seus trechos de
-        evidência à OpenAI.
+        {t(
+          "I authorise sending the job, selected facts and their evidence snippets to OpenAI.",
+        )}
       </label>
       <button
         disabled={task.busy || !consent}
@@ -116,10 +117,10 @@ export default function AiMatching({
               ),
             );
             changed?.();
-          }, "Sugestões prontas para revisão.")
+          }, t("Suggestions ready for review."))
         }
       >
-        {task.busy ? "Avaliando…" : "Sugerir avaliações com IA"}
+        {task.busy ? t("Evaluating\u2026") : t("Suggest assessments with AI")}
       </button>
       <button
         disabled={task.busy || !consent || !suggestion}
@@ -140,15 +141,15 @@ export default function AiMatching({
             setPrevious(suggestion);
             setSuggestion(value);
             changed?.();
-          }, "Segunda avaliação disponível. Confira as divergências antes de decidir.")
+          }, t("Second assessment available. Check disagreements before deciding."))
         }
       >
-        Solicitar segunda avaliação
+        {t("Request a second assessment")}
       </button>
       {task.feedback}
       {previous && (
         <details>
-          <summary>Avaliação anterior preservada</summary>
+          <summary>{t("Previous evaluation preserved")}</summary>
           {previous.result.assessments.map((item) => (
             <p key={item.requirement_id}>
               <strong>{outcomes[item.status]}</strong> · {item.reason}
@@ -160,7 +161,7 @@ export default function AiMatching({
         <>
           {suggestion.stale && (
             <p role="alert">
-              A vaga ou o perfil mudou. Gere uma nova sugestão.
+              {t("The job or profile has changed. Generate a new suggestion.")}
             </p>
           )}
           {suggestion.result.assessments.map((item) => (
@@ -174,13 +175,17 @@ export default function AiMatching({
               </h4>
               <p>{item.reason}</p>
               <small>
-                Confiança declarada: {Math.round(item.confidence * 100)}% (não
-                calibrada)
+                {t("Declared confidence: ")}
+                {Math.round(item.confidence * 100)}
+                {t("% (not calibrated)")}
               </small>
               {item.citations.map((citation, index) => (
                 <details key={index}>
-                  <summary>Conferir fato e evidência</summary>
-                  <p>Fato: {citation.fact_quote}</p>
+                  <summary>{t("Check fact and evidence")}</summary>
+                  <p>
+                    {t("Fact: ")}
+                    {citation.fact_quote}
+                  </p>
                   <blockquote>{citation.evidence_quote}</blockquote>
                 </details>
               ))}
@@ -205,7 +210,7 @@ export default function AiMatching({
               );
             }}
           >
-            Preencher avaliações para minha revisão
+            {t("Fill in assessments for my review")}
           </button>
         </>
       )}

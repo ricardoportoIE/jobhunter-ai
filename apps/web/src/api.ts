@@ -1,4 +1,8 @@
-export type Session = { user_id: string; csrf_token: string };
+import { t } from "./i18n";
+export type Session = {
+  user_id: string;
+  csrf_token: string;
+};
 let csrf = "";
 export function setSession(session: Session | null) {
   csrf = session?.csrf_token ?? "";
@@ -40,11 +44,17 @@ export async function api<T>(
     const body: unknown = await response.json().catch(() => null);
     const message =
       body && typeof body === "object" && "error" in body
-        ? (body as { error: { message?: string } }).error.message
+        ? (
+            body as {
+              error: {
+                message?: string;
+              };
+            }
+          ).error.message
         : undefined;
     throw new ApiError(
       response.status,
-      message || "Não foi possível concluir. Tente novamente.",
+      message ? t(message) : t("Could not complete. Please try again."),
     );
   }
   return response.status === 204

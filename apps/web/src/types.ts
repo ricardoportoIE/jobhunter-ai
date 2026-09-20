@@ -1,4 +1,8 @@
-export type Entity = { id: string; version: number };
+import { localisedLabels } from "./i18n";
+export type Entity = {
+  id: string;
+  version: number;
+};
 export type Profile = Entity & {
   display_name: string | null;
   status: "draft" | "reviewed";
@@ -26,16 +30,16 @@ export type Fact = Entity & {
   valid_from: string | null;
   valid_until: string | null;
 };
-export const categories = {
-  technical_skills: "Competências técnicas",
-  seniority_experience: "Experiência",
-  portfolio: "Portfólio",
-  education: "Formação",
-  location_work_mode: "Local e modalidade",
-  salary: "Salário",
-  work_authorisation_hours: "Autorização e horário",
-  career_value: "Estratégia de carreira",
-};
+export const categories = localisedLabels({
+  technical_skills: "Technical skills",
+  seniority_experience: "Experience",
+  portfolio: "Portfolio",
+  education: "Education",
+  location_work_mode: "Location and working arrangement",
+  salary: "Salary",
+  work_authorisation_hours: "Authorisation and hours",
+  career_value: "Career strategy",
+});
 export type Category = keyof typeof categories;
 export type Requirement = {
   id: string;
@@ -93,39 +97,47 @@ export type Match = Entity & {
     status: string;
     reason: string;
   }[];
-  blockers: { requirement_id: string | null; reason: string }[];
+  blockers: {
+    requirement_id: string | null;
+    reason: string;
+  }[];
   breakdown: {
     category: Category;
     weight: number;
     coverage: number;
     attainment: number | null;
-    assessments: (Assessment & { evidence_ids: string[] })[];
+    assessments: (Assessment & {
+      evidence_ids: string[];
+    })[];
   }[];
   created_at: string;
-  profile_snapshot: { facts: Fact[]; evidence: Evidence[] };
+  profile_snapshot: {
+    facts: Fact[];
+    evidence: Evidence[];
+  };
 };
-export const recommendations: Record<string, string> = {
-  PRIORITISE: "Priorizar",
-  APPLY_AFTER_REVIEW: "Candidatar após revisão",
-  REVIEW: "Revisar",
-  TRACK_OR_ARCHIVE: "Acompanhar ou arquivar",
-  BLOCKED: "Bloqueada",
-};
-export const gates: Record<string, string> = {
-  READY_WITHIN_CONFIRMED_LIMITS: "Dentro dos limites confirmados",
-  REVIEW_BEFORE_START: "Revisar antes de iniciar trabalho",
-  BLOCKED: "Incompatibilidade confirmada",
-};
-export const outcomes: Record<string, string> = {
-  unknown: "Desconhecido",
-  met: "Atendido",
-  partial: "Parcial",
-  unmet: "Não atendido",
-};
-
-export const reviewFlags: Record<string, string> = {
-  CLARIFICATION_REQUIRED: "Esclarecimento necessário antes de priorizar",
-  SPONSORSHIP_UNKNOWN: "Sponsorship não informado",
-  FACT_NOT_ELIGIBLE: "Há fatos sem validade ou autorização para esta análise",
-  SENIORITY_EXCLUDED: "Nível da vaga fora do alvo confirmado",
-};
+export const recommendations: Record<string, string> = localisedLabels({
+  PRIORITISE: "Prioritise",
+  APPLY_AFTER_REVIEW: "Apply after review",
+  REVIEW: "Review",
+  TRACK_OR_ARCHIVE: "Follow up or archive",
+  BLOCKED: "Blocked",
+});
+export const gates: Record<string, string> = localisedLabels({
+  READY_WITHIN_CONFIRMED_LIMITS: "Within confirmed limits",
+  REVIEW_BEFORE_START: "Review before starting work",
+  BLOCKED: "Confirmed incompatibility",
+});
+export const outcomes: Record<string, string> = localisedLabels({
+  unknown: "Unknown",
+  met: "Met",
+  partial: "Partial",
+  unmet: "Not met",
+});
+export const reviewFlags: Record<string, string> = localisedLabels({
+  CLARIFICATION_REQUIRED: "Clarification needed before prioritising",
+  SPONSORSHIP_UNKNOWN: "Sponsorship not declared",
+  FACT_NOT_ELIGIBLE:
+    "There are facts without validity or authorisation for this analysis",
+  SENIORITY_EXCLUDED: "Vacancy level outside confirmed target",
+});

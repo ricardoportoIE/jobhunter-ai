@@ -1,12 +1,12 @@
+import { t } from "./i18n";
 import { useState } from "react";
-
 export function useTask() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   async function run(
     action: () => Promise<void>,
-    message = "Alteração salva.",
+    message = t("Change saved."),
   ) {
     setBusy(true);
     setError("");
@@ -15,7 +15,9 @@ export function useTask() {
       await action();
       setSuccess(message);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Falha na operação.");
+      setError(
+        reason instanceof Error ? reason.message : t("Operation failed."),
+      );
     } finally {
       setBusy(false);
     }
@@ -26,8 +28,8 @@ export function useTask() {
     run,
     feedback: (
       <>
-        {error && <p role="alert">{error}</p>}
-        {success && <p role="status">{success}</p>}
+        {error && <p role="alert">{t(error)}</p>}
+        {success && <p role="status">{t(success)}</p>}
       </>
     ),
   };

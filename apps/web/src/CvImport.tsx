@@ -1,9 +1,9 @@
+import { t } from "./i18n";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Fact, Profile } from "./types";
 import { Field } from "./ui";
 import { useTask } from "./useTask";
-
 type DraftFact = {
   claim: string;
   category: Fact["category"];
@@ -28,7 +28,6 @@ const categories: DraftFact["category"][] = [
   "constraint",
 ];
 const uses = ["matching", "cv", "cover_letter", "application_form"] as const;
-
 export default function CvImport({
   profile,
   refresh,
@@ -73,7 +72,7 @@ export default function CvImport({
     }
   }
   async function saveDraft() {
-    if (!draft) throw new Error("Choose a draft first.");
+    if (!draft) throw new Error(t("Choose a draft first."));
     const result = await api<Draft>(
       `/candidate/cv/drafts/${draft.id}`,
       "PATCH",
@@ -92,20 +91,22 @@ export default function CvImport({
   }
   return (
     <section className="panel cv-import">
-      <h2>Start with your CV</h2>
+      <h2>{t("Start with your CV")}</h2>
       <p>
-        Upload a PDF or Word .docx to prepare your profile and evidence. Review,
-        add, edit or remove suggestions before applying them. Existing facts are
-        preserved.
+        {t(
+          "Upload a PDF or Word .docx to prepare your profile and evidence. Review, add, edit or remove suggestions before applying them. Existing facts are preserved.",
+        )}
       </p>
       <form
         onSubmit={(event) => {
           event.preventDefault();
           void task.run(async () => {
             if (!file || !consent)
-              throw new Error("Choose a CV and confirm AI processing first.");
+              throw new Error(
+                t("Choose a CV and confirm AI processing first."),
+              );
             if (file.size > 4 * 1024 * 1024)
-              throw new Error("The CV must be no larger than 4 MiB.");
+              throw new Error(t("The CV must be no larger than 4 MiB."));
             const result = await api<Draft>(
               "/candidate/cv/extract",
               "POST",
@@ -117,16 +118,18 @@ export default function CvImport({
             );
             if (result.status === "applied")
               throw new Error(
-                "This CV has already been imported. Edit your existing profile and facts below.",
+                t(
+                  "This CV has already been imported. Edit your existing profile and facts below.",
+                ),
               );
             setDraft(result);
             setReviewed(false);
             await loadDrafts();
-          }, "CV draft ready. Review the suggestions below.");
+          }, t("CV draft ready. Review the suggestions below."));
         }}
       >
         <fieldset disabled={task.busy}>
-          <Field label="CV document (PDF or Word .docx)">
+          <Field label={t("CV document (PDF or Word .docx)")}>
             <input
               type="file"
               accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -138,8 +141,9 @@ export default function CvImport({
             />
           </Field>
           <p>
-            Maximum 4 MiB and 20 PDF pages. Use a document with selectable text;
-            scanned PDFs need OCR first. Convert older .doc files to .docx.
+            {t(
+              "Maximum 4 MiB and 20 PDF pages. Use a document with selectable text; scanned PDFs need OCR first. Convert older .doc files to .docx.",
+            )}
           </p>
           <label className="check">
             <input
@@ -148,28 +152,29 @@ export default function CvImport({
               checked={consent}
               onChange={(event) => setConsent(event.target.checked)}
             />
-            I agree to send the extracted CV text, which may contain personal
-            information, to OpenAI for this extraction.
+            {t(
+              "I agree to send the extracted CV text, which may contain personal information, to OpenAI for this extraction.",
+            )}
           </label>
           <button className="primary">
-            {task.busy ? "Extracting CV…" : "Extract CV with AI"}
+            {task.busy ? t("Extracting CV\u2026") : t("Extract CV with AI")}
           </button>
         </fieldset>
       </form>
       {loadError && (
         <p role="alert">
-          Saved drafts could not be loaded.{" "}
+          {t("Saved drafts could not be loaded.")}{" "}
           <button
             onClick={() => {
-              void task.run(loadDrafts, "Drafts loaded.");
+              void task.run(loadDrafts, t("Drafts loaded."));
             }}
           >
-            Retry loading drafts
+            {t("Retry loading drafts")}
           </button>
         </p>
       )}
       {!!savedDrafts.length && (
-        <Field label="Resume a saved CV draft">
+        <Field label={t("Resume a saved CV draft")}>
           <select
             value={draft?.id ?? ""}
             disabled={task.busy}
@@ -181,7 +186,7 @@ export default function CvImport({
               setReviewed(false);
             }}
           >
-            <option value="">Choose a draft</option>
+            <option value="">{t("Choose a draft")}</option>
             {savedDrafts.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.filename}
@@ -198,7 +203,9 @@ export default function CvImport({
             void task.run(async () => {
               if (!reviewed || !allowed.length)
                 throw new Error(
-                  "Confirm the reviewed facts and choose at least one permitted use.",
+                  t(
+                    "Confirm the reviewed facts and choose at least one permitted use.",
+                  ),
                 );
               const saved = await saveDraft();
               await api(`/candidate/cv/drafts/${saved.id}/apply`, "POST", {
@@ -211,21 +218,22 @@ export default function CvImport({
               setReviewed(false);
               await loadDrafts();
               await refresh();
-            }, "Profile and evidence updated. Review your profile and publish its version when ready.");
+            }, t("Profile and evidence updated. Review your profile and publish its version when ready."));
           }}
         >
           <fieldset disabled={task.busy}>
-            <h3>Review your CV draft</h3>
+            <h3>{t("Review your CV draft")}</h3>
             <p>
-              AI extraction is a suggestion, not independent verification. Check
-              names, dates, qualifications and every claim against the source.
+              {t(
+                "AI extraction is a suggestion, not independent verification. Check names, dates, qualifications and every claim against the source.",
+              )}
             </p>
             {draft.warnings.map((warning, index) => (
               <p key={index} role="note">
                 {warning}
               </p>
             ))}
-            <Field label="Display name">
+            <Field label={t("Display name")}>
               <input
                 value={draft.display_name ?? ""}
                 maxLength={200}
@@ -234,7 +242,7 @@ export default function CvImport({
                 }
               />
             </Field>
-            <Field label="Target roles (comma-separated)">
+            <Field label={t("Target roles (comma-separated)")}>
               <input
                 value={draft.target_roles.join(", ")}
                 onChange={(event) =>
@@ -249,7 +257,7 @@ export default function CvImport({
                 }
               />
             </Field>
-            <Field label="Locations (comma-separated)">
+            <Field label={t("Locations (comma-separated)")}>
               <input
                 value={draft.locations.join(", ")}
                 onChange={(event) =>
@@ -265,16 +273,17 @@ export default function CvImport({
               />
             </Field>
             <p>
-              Search markets and working arrangements retain your existing
-              profile settings. You can adjust them in the profile form below.
+              {t(
+                "Search markets and working arrangements retain your existing profile settings. You can adjust them in the profile form below.",
+              )}
             </p>
             <details>
-              <summary>View extracted source text</summary>
+              <summary>{t("View extracted source text")}</summary>
               <pre className="raw-text">{draft.source_text}</pre>
             </details>
             {draft.facts.map((fact, index) => (
               <section className="draft-fact" key={index}>
-                <Field label={`Claim ${index + 1}`}>
+                <Field label={t("Claim {0}", [index + 1])}>
                   <textarea
                     required
                     maxLength={3000}
@@ -290,7 +299,7 @@ export default function CvImport({
                     }
                   />
                 </Field>
-                <Field label={`Category ${index + 1}`}>
+                <Field label={t("Category {0}", [index + 1])}>
                   <select
                     value={fact.category}
                     onChange={(event) =>
@@ -309,12 +318,14 @@ export default function CvImport({
                   >
                     {categories.map((category) => (
                       <option key={category} value={category}>
-                        {category}
+                        {t(
+                          category.charAt(0).toUpperCase() + category.slice(1),
+                        )}
                       </option>
                     ))}
                   </select>
                 </Field>
-                <Field label={`Source excerpt ${index + 1}`}>
+                <Field label={t("Source excerpt {0}", [index + 1])}>
                   <textarea
                     value={fact.quote}
                     maxLength={3000}
@@ -330,8 +341,9 @@ export default function CvImport({
                   />
                 </Field>
                 <p>
-                  Keep an exact excerpt from the CV. Leave it blank only for a
-                  new statement you are declaring yourself.
+                  {t(
+                    "Keep an exact excerpt from the CV. Leave it blank only for a new statement you are declaring yourself.",
+                  )}
                 </p>
                 <label className="check">
                   <input
@@ -352,7 +364,7 @@ export default function CvImport({
                       })
                     }
                   />
-                  Sensitive fact — exclude from automatic selection
+                  {t("Sensitive fact \u2014 exclude from automatic selection")}
                 </label>
                 <button
                   type="button"
@@ -360,7 +372,7 @@ export default function CvImport({
                     change({ facts: draft.facts.filter((_, i) => i !== index) })
                   }
                 >
-                  Remove claim
+                  {t("Remove claim")}
                 </button>
               </section>
             ))}
@@ -381,7 +393,7 @@ export default function CvImport({
                 })
               }
             >
-              Add a claim
+              {t("Add a claim")}
             </button>
             <button
               type="button"
@@ -389,13 +401,13 @@ export default function CvImport({
                 void task.run(async () => {
                   await saveDraft();
                   await loadDrafts();
-                }, "Draft saved. Your profile has not changed.");
+                }, t("Draft saved. Your profile has not changed."));
               }}
             >
-              Save draft for later
+              {t("Save draft for later")}
             </button>
             <fieldset>
-              <legend>Permitted uses for the reviewed facts</legend>
+              <legend>{t("Permitted uses for the reviewed facts")}</legend>
               {uses.map((use) => (
                 <label className="check" key={use}>
                   <input
@@ -414,8 +426,8 @@ export default function CvImport({
                     {
                       matching: "Matching",
                       cv: "CV",
-                      cover_letter: "Cover letter",
-                      application_form: "Application forms",
+                      cover_letter: t("Cover letter"),
+                      application_form: t("Application forms"),
                     }[use]
                   }
                 </label>
@@ -428,11 +440,14 @@ export default function CvImport({
                 checked={reviewed}
                 onChange={(event) => setReviewed(event.target.checked)}
               />
-              I have reviewed the profile, claims and evidence, confirm they are
-              accurate and authorise the selected uses.
+              {t(
+                "I have reviewed the profile, claims and evidence, confirm they are accurate and authorise the selected uses.",
+              )}
             </label>
             <button className="primary">
-              {task.busy ? "Saving…" : "Apply reviewed profile and evidence"}
+              {task.busy
+                ? t("Saving\u2026")
+                : t("Apply reviewed profile and evidence")}
             </button>
           </fieldset>
         </form>

@@ -1,10 +1,15 @@
+import { t } from "./i18n";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Fact, Job } from "./types";
 import { Field } from "./ui";
 import { useAiTask } from "./useAiTask";
-
-type Hit = { id: string; kind: string; label: string; similarity: number };
+type Hit = {
+  id: string;
+  kind: string;
+  label: string;
+  similarity: number;
+};
 export default function SemanticSearch({ facts }: { facts: Fact[] }) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [kind, setKind] = useState<"job" | "fact">("job");
@@ -18,7 +23,10 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
   const task = useAiTask(consent);
   useEffect(() => {
     let active = true;
-    api<{ items: Job[]; total: number }>(`/jobs?limit=100&offset=${offset}`)
+    api<{
+      items: Job[];
+      total: number;
+    }>(`/jobs?limit=100&offset=${offset}`)
       .then((result) => {
         if (active) {
           setJobs(result.items);
@@ -45,14 +53,15 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
       : eligibleFacts.map((f) => ({ ...f, label: f.claim }));
   return (
     <>
-      <p className="eyebrow">PESQUISA POR SIGNIFICADO</p>
-      <h1>Busca semântica</h1>
+      <p className="eyebrow">{t("SEARCH BY MEANING")}</p>
+      <h1>{t("Semantic search")}</h1>
       <p>
-        Encontre vagas ou fatos próximos da sua pesquisa. A similaridade ajuda a
-        localizar evidências; não comprova atendimento a um requisito.
+        {t(
+          "Find jobs or facts close to your search. Similarity helps locate evidence; it does not prove meeting a requirement.",
+        )}
       </p>
       <section className="panel narrow">
-        <Field label="Pesquisar em">
+        <Field label={t("Search in")}>
           <select
             value={kind}
             onChange={(event) => {
@@ -61,8 +70,8 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
               setHits(null);
             }}
           >
-            <option value="job">Vagas</option>
-            <option value="fact">Fatos com evidências</option>
+            <option value="job">{t("Jobs")}</option>
+            <option value="fact">{t("Facts with evidence")}</option>
           </select>
         </Field>
         <label className="check">
@@ -71,22 +80,23 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
             checked={consent}
             onChange={(event) => setConsent(event.target.checked)}
           />
-          Autorizo enviar à OpenAI o texto selecionado e a pesquisa para gerar
-          embeddings.
+          {t(
+            "I authorise sending selected text and research to OpenAI to generate embeddings.",
+          )}
         </label>
-        <h2>Adicionar ao índice</h2>
+        <h2>{t("Add to index")}</h2>
         <p>
-          Os vetores ficam no banco local. Edições deixam a versão anterior fora
-          da busca; indexe novamente quando necessário. Fatos sensíveis ou sem
-          evidência válida são excluídos.
+          {t(
+            "Vectors remain in the local database. Edits exclude the previous version from search; reindex when necessary. Sensitive facts or those without valid evidence are excluded.",
+          )}
         </p>
         {loadError && <p role="alert">{loadError}</p>}
-        <Field label="Registro a indexar">
+        <Field label={t("Record to index")}>
           <select
             value={selected}
             onChange={(event) => setSelected(event.target.value)}
           >
-            <option value="">Selecione um registro</option>
+            <option value="">{t("Select a record")}</option>
             {options.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.label}
@@ -103,7 +113,7 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
                 setSelected("");
               }}
             >
-              Vagas anteriores
+              {t("Previous jobs")}
             </button>
             <button
               disabled={offset + 100 >= total}
@@ -112,7 +122,7 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
                 setSelected("");
               }}
             >
-              Próximas vagas
+              {t("Next vacancies")}
             </button>
           </div>
         )}
@@ -132,12 +142,12 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
                 },
                 headers,
               );
-            }, "Registro indexado para pesquisa.")
+            }, t("Record indexed for search."))
           }
         >
-          Indexar registro selecionado
+          {t("Index selected record")}
         </button>
-        <h2>Pesquisar</h2>
+        <h2>{t("Search")}</h2>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -160,36 +170,42 @@ export default function SemanticSearch({ facts }: { facts: Fact[] }) {
               );
               setHits(result.items);
               setIndexed(result.indexed_documents);
-            }, "Pesquisa concluída.");
+            }, t("Search completed."));
           }}
         >
-          <Field label="O que procura?">
+          <Field label={t("What are you looking for?")}>
             <input
               name="query"
               required
               maxLength={1000}
-              placeholder="Ex.: APIs Python e bases de dados"
+              placeholder={t("E.g.: Python APIs and databases")}
             />
           </Field>
           <button disabled={task.busy || !consent}>
-            Buscar por significado
+            {t("Search by meaning")}
           </button>
         </form>
         {task.feedback}
       </section>
       {hits && (
         <section className="panel">
-          <h2>Resultados</h2>
-          <p>{indexed} registro(s) com índice válido.</p>
+          <h2>{t("Results")}</h2>
+          <p>
+            {indexed}
+            {t(" record(s) with valid index.")}
+          </p>
           {!hits.length && (
-            <p>Sem resultados. Indexe um registro atual antes de pesquisar.</p>
+            <p>{t("No results. Index a current record before searching.")}</p>
           )}
           {hits.map((hit) => (
             <article key={hit.id}>
               <a href={hit.kind === "job" ? `#job/${hit.id}` : "#profile"}>
                 {hit.label}
               </a>
-              <p>Similaridade: {hit.similarity.toFixed(3)}</p>
+              <p>
+                {t("Similarity: ")}
+                {hit.similarity.toFixed(3)}
+              </p>
             </article>
           ))}
         </section>

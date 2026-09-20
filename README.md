@@ -6,6 +6,10 @@ A career intelligence platform that compares vacancies against an evidence-based
 
 ## Start locally
 
+The interface defaults to **English (UK)**, with a persistent Portuguese option.
+Start a profile from a PDF/Word CV draft or import a public vacancy link, then review
+the extracted information before applying it. See [CV imports, vacancy links and languages](docs/imports-and-languages.md).
+
 With Docker Desktop in Linux mode, Python and uv 0.12.7, run from the repository root:
 
 ```powershell

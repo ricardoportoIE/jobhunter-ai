@@ -1,18 +1,18 @@
+import { t } from "./i18n";
 import { api } from "./api";
 import { useTask } from "./useTask";
-
 export default function Privacy() {
   const task = useTask();
   return (
     <>
-      <p className="eyebrow">SEUS DADOS</p>
-      <h1>Privacidade e histórico</h1>
+      <p className="eyebrow">{t("YOUR DATA")}</p>
+      <h1>{t("Privacy and history")}</h1>
       <section className="panel narrow">
-        <h2>Exportar os dados da aplicação</h2>
+        <h2>{t("Export application data")}</h2>
         <p>
-          O arquivo inclui perfil, fatos, evidências, vagas, análises,
-          candidaturas, histórico de alterações, sugestões de IA e índice de
-          busca. Guarde-o em um local privado.
+          {t(
+            "The file includes profile, facts, evidence, vacancies, analyses, applications, change history, AI suggestions and search index. Keep it in a private location.",
+          )}
         </p>
         {task.feedback}
         <button
@@ -31,50 +31,48 @@ export default function Privacy() {
               link.download = "jobhunter-export.json";
               link.click();
               setTimeout(() => URL.revokeObjectURL(url), 1000);
-            }, "Exportação preparada.");
+            }, t("Export prepared."));
           }}
         >
-          Baixar exportação
+          {t("Download export")}
         </button>
       </section>
       <section className="panel narrow">
-        <h2>Processamento pela OpenAI</h2>
+        <h2>{t("Processing by OpenAI")}</h2>
         <p>
-          Extrair uma vaga envia seu texto ao provedor. Matching e busca enviam
-          os textos que você autorizar nas respectivas telas. A chave permanece
-          no backend; arquivos de CV não são enviados automaticamente.
+          {t(
+            "Extracting a vacancy sends its text to OpenAI. CV extraction sends the text from your chosen file after consent. Matching and search send only the text you authorise. The API key remains in the backend.",
+          )}
         </p>
         <p>
-          O armazenamento de respostas está desativado. Isso não elimina a
-          possível retenção de conteúdo em logs de monitorização de abuso, por
-          até 30 dias. Esta configuração não pressupõe residência de dados na
-          Europa.
+          {t(
+            "Response storage is disabled. This does not eliminate possible content retention in abuse monitoring logs for up to 30 days. This setting does not imply data residency in Europe.",
+          )}
         </p>
         <a
           href="https://developers.openai.com/api/docs/guides/your-data"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Consultar os controles de dados da OpenAI ↗
+          {t("Consult OpenAI data controls \u2197")}
         </a>
       </section>
       <section className="panel narrow">
-        <h2>Eliminar os dados locais</h2>
+        <h2>{t("Delete local data")}</h2>
         <p>
-          A eliminação completa, incluindo snapshots e auditoria, é uma operação
-          administrativa local descrita no guia do projeto. Ela encerra todas as
-          sessões e preserva a conta de acesso.
+          {t(
+            "Complete deletion, including snapshots and audit, is a local administrative operation described in the project guide. It closes all sessions and preserves the access account.",
+          )}
         </p>
         <p>
-          Remover um fato ou evidência da tela invalida análises, mas mantém
-          versões anteriores no histórico. O comando administrativo elimina
-          esses registros do banco. Documentos de origem e exportações guardadas
-          fora da aplicação precisam ser tratados separadamente.
+          {t(
+            "Removing a fact or evidence from the screen invalidates analyses but keeps previous versions in the history. The administrative command deletes these records from the database. Source documents and exports saved outside the application need to be handled separately.",
+          )}
         </p>
         <p>
-          Totais de custo sem vínculo pessoal são preservados para que a
-          eliminação não reinicie o orçamento mensal. A eliminação local não
-          apaga dados já processados pelo provedor.
+          {t(
+            "Cost totals without personal linkage are preserved so that deletion does not reset the monthly budget. Local deletion does not erase data already processed by the provider.",
+          )}
         </p>
       </section>
     </>

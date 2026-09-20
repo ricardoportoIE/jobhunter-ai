@@ -210,7 +210,7 @@ def save_fact(data: FactInput, actor: Actor, request: Request, record_id: UUID |
             raise Problem(
                 422,
                 "REVIEW_REQUIRED",
-                "Verificação exige confirmação, usos e evidências revisadas.",
+                "Verification requires confirmation, uses and reviewed evidence.",
             )
         payload = data.model_dump(mode="json", exclude={"expected_version", "review_confirmed"})
         payload.update(

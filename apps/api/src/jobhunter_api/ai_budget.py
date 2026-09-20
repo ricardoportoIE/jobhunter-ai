@@ -93,14 +93,14 @@ def reserve(
     max_tool_calls: int = 0,
 ) -> tuple[Row, bool]:
     if not key.strip() or len(key) > 200:
-        raise Problem(422, "INVALID_KEY", "Chave de execução inválida.")
+        raise Problem(422, "INVALID_KEY", "Invalid execution key.")
     if (
         model not in PRICES
         or not 0 < input_bound <= 200000
         or not 0 <= max_output <= 16000
         or not 0 <= max_tool_calls <= 3
     ):
-        raise Problem(422, "AI_INPUT_LIMIT", "Conteúdo acima do limite de uma execução de IA.")
+        raise Problem(422, "AI_INPUT_LIMIT", "Content exceeds the limit for an AI execution.")
     amount = cost(model, input_bound, max_output, settings.ai_eur_per_usd)
     amount += max_tool_calls * WEB_SEARCH_USD * settings.ai_eur_per_usd
     with connect(settings) as db:
@@ -111,7 +111,7 @@ def reserve(
         ).fetchone()
         if existing:
             if existing["payload_hash"] != payload_hash:
-                raise Problem(409, "IDEMPOTENCY_CONFLICT", "Chave utilizada com outro conteúdo.")
+                raise Problem(409, "IDEMPOTENCY_CONFLICT", "Key used with different content.")
             if existing["status"] == "succeeded":
                 return existing, True
             recovered = db.execute(
@@ -124,7 +124,7 @@ def reserve(
             raise Problem(
                 409,
                 "AI_EXECUTION_EXISTS",
-                "Execução em andamento ou já encerrada. Consulte o histórico de IA.",
+                "Execution in progress or already finished. Check the AI history.",
             )
         completed = db.execute(
             "SELECT * FROM ai_calls WHERE owner_id=%s AND operation=%s AND payload_hash=%s "
@@ -138,29 +138,29 @@ def reserve(
             "AND status='running'",
             (owner, operation, payload_hash),
         ).fetchone():
-            raise Problem(409, "AI_IN_PROGRESS", "Este conteúdo já está sendo processado.")
+            raise Problem(409, "AI_IN_PROGRESS", "This content is already being processed.")
         age = (datetime.now(UTC).date() - settings.ai_prices_reviewed).days
         if age < 0 or age > 30:
-            raise Problem(409, "PRICES_STALE", "Atualize a revisão dos preços antes de usar IA.")
+            raise Problem(409, "PRICES_STALE", "Update the price review before using AI.")
         usage = totals(db, settings)
         if usage["unreconciled"]:
             raise Problem(
                 409,
                 "COST_UNRECONCILED",
-                "Há uma execução com custo desconhecido. Reconcilie o histórico de IA.",
+                "There is an execution with unknown cost. Reconcile the AI history.",
             )
         if (
             Decimal(usage["allocated_eur"]) + amount > settings.ai_monthly_eur
             or Decimal(usage["combined_allocated_eur"]) + amount > settings.combined_monthly_eur
         ):
-            raise Problem(429, "AI_BUDGET_EXCEEDED", "Limite mensal reservado para IA atingido.")
+            raise Problem(429, "AI_BUDGET_EXCEEDED", "Reserved monthly limit for AI reached.")
         attempts = db.execute(
             "SELECT count(*) AS n FROM ai_calls WHERE owner_id=%s AND operation=%s "
             "AND payload_hash=%s AND created_at>now()-interval '1 day'",
             (owner, operation, payload_hash),
         ).fetchone()
         if attempts and attempts["n"] >= 2:
-            raise Problem(429, "AI_RETRY_LIMIT", "Limite de duas tentativas por conteúdo em 24h.")
+            raise Problem(429, "AI_RETRY_LIMIT", "Limit of two attempts per content in 24 hours.")
         identity = uuid4()
         row = db.execute(
             "INSERT INTO ai_calls (id,owner_id,operation,request_key,payload_hash,model,"
@@ -249,7 +249,7 @@ def settle(
             ),
         ).fetchone()
         if changed is None:
-            raise Problem(409, "AI_RUN_CANCELLED", "Os dados desta execução foram eliminados.")
+            raise Problem(409, "AI_RUN_CANCELLED", "The data for this execution has been deleted.")
         audit(db, call["owner_id"], "ai." + status, call["id"], 1)
 
 
@@ -309,9 +309,9 @@ def execute(
             settings, call, None, "uncertain" if exc.charge_unknown else "failed", error=exc.code
         )
         message = (
-            "A OpenAI recusou por limite ou créditos. Confira o faturamento e os limites da API."
+            "OpenAI refused due to limit or credits. Check billing and API limits."
             if exc.code in {"PROVIDER_HTTP_429", "PROVIDER_INSUFFICIENT_QUOTA"}
-            else "A IA não concluiu a chamada. Consulte o histórico antes de tentar novamente."
+            else "The AI did not complete the call. Check the history before retrying."
         )
         raise Problem(
             502,
@@ -321,7 +321,7 @@ def execute(
     except Exception:
         settle(settings, call, None, "uncertain", error="UNEXPECTED_PROVIDER_ERROR")
         raise Problem(
-            502, "AI_PROVIDER_ERROR", "Chamada interrompida; custo em reconciliação."
+            502, "AI_PROVIDER_ERROR", "Call interrupted; cost under reconciliation."
         ) from None
     if (
         completion.input_tokens > input_bound
@@ -330,7 +330,7 @@ def execute(
     ):
         settle(settings, call, completion, "uncertain", error="USAGE_OUT_OF_BOUND")
         raise Problem(
-            502, "USAGE_OUT_OF_BOUND", "Uso inesperado do provedor; reconcilie a cobrança."
+            502, "USAGE_OUT_OF_BOUND", "Unexpected provider usage; reconcile the billing."
         )
     try:
         if completion.status != "completed":
@@ -344,7 +344,7 @@ def execute(
         raise Problem(
             422,
             "AI_INVALID_OUTPUT",
-            "A resposta da IA não passou na validação. Os dados revisados foram preservados.",
+            "The AI response failed validation. The reviewed data was preserved.",
         ) from None
     settle(settings, call, completion, "succeeded", result)
     return {"run_id": str(call["id"]), "cached": False, "result": result}

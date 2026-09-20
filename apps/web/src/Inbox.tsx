@@ -1,23 +1,27 @@
+import { t } from "./i18n";
 import { useTask } from "./useTask";
 import { optional, value } from "./forms";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Job } from "./types";
 import { ErrorState, Field, Loading } from "./ui";
-
 export function Inbox() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [archived, setArchived] = useState(false);
   const [offset, setOffset] = useState(0);
   const [refresh, setRefresh] = useState(0);
-  const [result, setResult] = useState<{ items: Job[]; total: number } | null>(
-    null,
-  );
+  const [result, setResult] = useState<{
+    items: Job[];
+    total: number;
+  } | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
-    api<{ items: Job[]; total: number }>(
+    api<{
+      items: Job[];
+      total: number;
+    }>(
       `/jobs?limit=20&offset=${offset}&q=${encodeURIComponent(query)}&archived=${archived}${status ? "&status=" + status : ""}`,
     )
       .then((data) => {
@@ -37,12 +41,12 @@ export function Inbox() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">OPORTUNIDADES</p>
-          <h1>Sua Inbox</h1>
-          <p>Uma oportunidade de cada vez, com decisões rastreáveis.</p>
+          <p className="eyebrow">{t("OPPORTUNITIES")}</p>
+          <h1>{t("Your Inbox")}</h1>
+          <p>{t("One opportunity at a time, with traceable decisions.")}</p>
         </div>
         <a className="button primary" href="#import">
-          Importar vaga
+          {t("Import vacancy")}
         </a>
       </div>
       <form
@@ -58,22 +62,22 @@ export function Inbox() {
           setRefresh(refresh + 1);
         }}
       >
-        <Field label="Buscar título ou empresa">
-          <input name="q" placeholder="Ex.: Junior Python" />
+        <Field label={t("Search title or company")}>
+          <input name="q" placeholder={t("E.g.: Junior Python")} />
         </Field>
-        <Field label="Estágio">
+        <Field label={t("Stage")}>
           <select name="status">
-            <option value="">Todos</option>
-            <option value="DISCOVERED">Importada</option>
-            <option value="PARSED">Revisada</option>
-            <option value="SCORED">Analisada</option>
+            <option value="">{t("All")}</option>
+            <option value="DISCOVERED">{t("Imported")}</option>
+            <option value="PARSED">{t("Reviewed")}</option>
+            <option value="SCORED">{t("Analysed")}</option>
           </select>
         </Field>
         <label className="check">
           <input type="checkbox" name="archived" />
-          Arquivadas
+          {t("Archived")}
         </label>
-        <button>Filtrar</button>
+        <button>{t("Filter")}</button>
       </form>
       {error ? (
         <ErrorState error={error} retry={() => setRefresh(refresh + 1)} />
@@ -81,14 +85,17 @@ export function Inbox() {
         <Loading />
       ) : (
         <>
-          <p className="muted">{result.total} oportunidade(s)</p>
+          <p className="muted">
+            {result.total}
+            {t(" opportunity(ies)")}
+          </p>
           {!result.items.length ? (
             <section className="empty">
-              <h2>Nenhuma vaga nesta seleção</h2>
+              <h2>{t("No vacancies in this selection")}</h2>
               <p>
-                Importe o texto de um anúncio para começar ou ajuste os filtros.
+                {t("Import an advert to get started, or adjust the filters.")}
               </p>
-              <a href="#import">Importar primeira vaga →</a>
+              <a href="#import">{t("Import first vacancy \u2192")}</a>
             </section>
           ) : (
             <ul className="job-list">
@@ -99,16 +106,16 @@ export function Inbox() {
                       <span className="tag">
                         {
                           {
-                            DISCOVERED: "Importada",
-                            PARSED: "Revisada",
-                            SCORED: "Analisada",
+                            DISCOVERED: t("Imported"),
+                            PARSED: t("Reviewed"),
+                            SCORED: t("Analysed"),
                           }[job.status]
                         }
                       </span>
-                      <h2>{job.title || "Vaga aguardando revisão"}</h2>
+                      <h2>{job.title || t("Job awaiting review")}</h2>
                       <p>
-                        {job.company_name || "Empresa não informada"} ·{" "}
-                        {job.location || "Local não informado"}
+                        {job.company_name || t("Company not provided")} ·{" "}
+                        {job.location || t("Location not provided")}
                       </p>
                     </div>
                     <span aria-hidden="true">↗</span>
@@ -125,7 +132,7 @@ export function Inbox() {
                 setOffset(Math.max(0, offset - 20));
               }}
             >
-              Anterior
+              {t("Previous")}
             </button>
             <button
               disabled={offset + 20 >= result.total}
@@ -134,7 +141,7 @@ export function Inbox() {
                 setOffset(offset + 20);
               }}
             >
-              Próxima
+              {t("Next")}
             </button>
           </div>
         </>
@@ -142,7 +149,6 @@ export function Inbox() {
     </>
   );
 }
-
 export function ImportJob() {
   const task = useTask();
   const [key] = useState(() => crypto.randomUUID());
@@ -150,27 +156,24 @@ export function ImportJob() {
   const [imported, setImported] = useState<Job | null>(null);
   return (
     <>
-      <p className="eyebrow">NOVA OPORTUNIDADE</p>
-      <h1>Importar anúncio</h1>
-      <p>
-        Cole o texto e registre a origem. Os campos serão revisados por você na
-        próxima tela.
-      </p>
+      <p className="eyebrow">{t("NEW OPPORTUNITY")}</p>
+      <h1>{t("Import advert")}</h1>
+      <p>{t("Import an advert to get started, or adjust the filters.")}</p>
       <section className="panel narrow">
-        <nav className="tabs" aria-label="Import method">
+        <nav className="tabs" aria-label={t("Import method")}>
           <button
             aria-pressed={mode === "url"}
             disabled={task.busy}
             onClick={() => setMode("url")}
           >
-            From a link
+            {t("From a link")}
           </button>
           <button
             aria-pressed={mode === "text"}
             disabled={task.busy}
             onClick={() => setMode("text")}
           >
-            Paste text
+            {t("Paste text")}
           </button>
         </nav>
         {mode === "url" && (
@@ -189,14 +192,16 @@ export function ImportJob() {
                 if (result.extraction_error) {
                   setImported(result.job);
                   throw new Error(
-                    "The advert was imported, but AI extraction could not finish. Open the job to review it manually or retry extraction from its details.",
+                    t(
+                      "The advert was imported, but AI extraction could not finish. Open the job to review it manually or retry extraction from its details.",
+                    ),
                   );
                 }
                 window.location.hash = `job/${result.job.id}`;
-              }, "Advert extracted. Review the draft fields before confirming.");
+              }, t("Advert extracted. Review the draft fields before confirming."));
             }}
           >
-            <Field label="Public vacancy link">
+            <Field label={t("Public vacancy link")}>
               <input
                 name="url"
                 type="url"
@@ -206,23 +211,26 @@ export function ImportJob() {
               />
             </Field>
             <p>
-              We read the public page and use AI to draft its fields and
-              requirements. Missing information stays unknown. Pages requiring
-              login, CAPTCHA or JavaScript may need pasted text.
+              {t(
+                "We read the public page and use AI to draft its fields and requirements. Missing information stays unknown. Pages requiring login, CAPTCHA or JavaScript may need pasted text.",
+              )}
             </p>
             <label className="check">
-              <input type="checkbox" name="ai_consent" required />I authorise
-              reading this public page and sending its text to OpenAI for
-              extraction.
+              <input type="checkbox" name="ai_consent" required />
+              {t(
+                "I authorise reading this public page and sending its text to OpenAI for extraction.",
+              )}
             </label>
             {task.feedback}
             {imported && (
               <a className="button" href={`#job/${imported.id}`}>
-                Open imported job for review
+                {t("Open imported job for review")}
               </a>
             )}
             <button className="primary" disabled={task.busy}>
-              {task.busy ? "Reading and extracting…" : "Extract from link"}
+              {task.busy
+                ? t("Reading and extracting\u2026")
+                : t("Extract from link")}
             </button>
           </form>
         )}
@@ -245,37 +253,37 @@ export function ImportJob() {
                   { "Idempotency-Key": key },
                 );
                 window.location.hash = `job/${job.id}`;
-              }, "Vaga importada.");
+              }, t("Job imported."));
             }}
           >
-            <Field label="Texto original da vaga">
+            <Field label={t("Original job text")}>
               <textarea name="raw_text" rows={12} required maxLength={50000} />
             </Field>
             <div className="form-grid">
-              <Field label="Fonte">
+              <Field label={t("Source")}>
                 <input
                   name="source_name"
-                  placeholder="Site da empresa, portal…"
+                  placeholder={t("Company website, portal\u2026")}
                   maxLength={200}
                 />
               </Field>
-              <Field label="ID na fonte (opcional)">
+              <Field label={t("ID at source (optional)")}>
                 <input name="external_id" maxLength={200} />
               </Field>
             </div>
-            <Field label="URL de origem (opcional)">
+            <Field label={t("Source URL (optional)")}>
               <input type="url" name="source_url" maxLength={2000} />
             </Field>
-            <Field label="Localidade do anúncio (opcional)">
+            <Field label={t("Advert location (optional)")}>
               <input
                 name="location_hint"
-                placeholder="Ajuda a distinguir anúncios em cidades diferentes"
+                placeholder={t("Helps distinguish adverts in different cities")}
                 maxLength={200}
               />
             </Field>
             {task.feedback}
             <button className="primary" disabled={task.busy}>
-              {task.busy ? "Importando…" : "Importar e revisar"}
+              {task.busy ? t("Importing\u2026") : t("Import and review")}
             </button>
           </form>
         )}

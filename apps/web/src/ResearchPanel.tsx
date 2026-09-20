@@ -1,8 +1,8 @@
+import { t, dateLocale } from "./i18n";
 import { useEffect, useState, type ReactNode } from "react";
 import { api } from "./api";
 import type { Job } from "./types";
 import { useAiTask } from "./useAiTask";
-
 type Research = {
   run_id: string;
   stale: boolean;
@@ -11,7 +11,12 @@ type Research = {
     answer: string;
     retrieved_at: string;
     refresh_after: string;
-    citations: { url: string; title: string; start: number; end: number }[];
+    citations: {
+      url: string;
+      title: string;
+      start: number;
+      end: number;
+    }[];
   };
 };
 function CitedAnswer({ result }: { result: Research["result"] }) {
@@ -30,7 +35,7 @@ function CitedAnswer({ result }: { result: Research["result"] }) {
           target="_blank"
           rel="noopener noreferrer"
           title={citation.title}
-          aria-label={`Fonte: ${citation.title}`}
+          aria-label={t("Source: {0}", [citation.title])}
         >
           [{index + 1}]
         </a>,
@@ -69,14 +74,14 @@ export default function ResearchPanel({ job }: { job: Job }) {
   }, [job.id, job.version]);
   return (
     <section className="panel">
-      <h2>Consultar informação pública atualizada</h2>
+      <h2>{t("Consult updated public information")}</h2>
       <p>
-        Envie somente uma pergunta pública, sem dados pessoais. A busca usa os
-        domínios indicados e retorna fontes para sua conferência. Os fatos do
-        perfil e a compatibilidade permanecem sujeitos à revisão.
+        {t(
+          "Send only one public question, without personal data. The search uses the indicated domains and returns sources for your checking. Profile facts and compatibility remain subject to review.",
+        )}
       </p>
       <label>
-        Pergunta pública
+        {t("Public question")}
         <textarea
           maxLength={1200}
           value={question}
@@ -87,7 +92,7 @@ export default function ResearchPanel({ job }: { job: Job }) {
         />
       </label>
       <label>
-        Domínios das fontes, separados por vírgulas
+        {t("Source domains, separated by commas")}
         <input
           value={domains}
           onChange={(event) => {
@@ -102,7 +107,9 @@ export default function ResearchPanel({ job }: { job: Job }) {
           checked={consent}
           onChange={(event) => setConsent(event.target.checked)}
         />
-        Autorizo enviar esta pergunta pública à OpenAI e à busca web.
+        {t(
+          "I authorise sending this public question to OpenAI and web search.",
+        )}
       </label>
       <button
         disabled={task.busy || !consent || question.trim().length < 10}
@@ -127,10 +134,10 @@ export default function ResearchPanel({ job }: { job: Job }) {
               ...items.filter((item) => item.run_id !== value.run_id),
             ]);
             setError("");
-          }, "Pesquisa disponível para conferência.")
+          }, t("Search available for review."))
         }
       >
-        {task.busy ? "Pesquisando…" : "Pesquisar fontes públicas"}
+        {task.busy ? t("Searching\u2026") : t("Search public sources")}
       </button>
       {task.feedback}
       {error && <p role="alert">{error}</p>}
@@ -138,14 +145,13 @@ export default function ResearchPanel({ job }: { job: Job }) {
         <details key={item.run_id} open>
           <summary>{item.result.question}</summary>
           <p>
-            Consultado em{" "}
-            {new Date(item.result.retrieved_at).toLocaleString("pt-PT")} ·
-            Conferência humana necessária
+            {t("Consulted on")}{" "}
+            {new Date(item.result.retrieved_at).toLocaleString(dateLocale())}
+            {t(" \u00B7 Human review required")}
           </p>
           {(item.stale || Date.parse(item.result.refresh_after) <= now) && (
             <p role="status">
-              Consulta antiga: pesquise novamente antes de usar informação
-              decisiva.
+              {t("Old query: search again before using decisive information.")}
             </p>
           )}
           <CitedAnswer result={item.result} />

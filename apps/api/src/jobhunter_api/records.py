@@ -11,7 +11,7 @@ from jobhunter_api.store import Connection, Row
 def owner_lock(db: Connection, owner: UUID) -> None:
     db.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (str(owner),))
     if not db.execute("SELECT id FROM users WHERE id=%s", (owner,)).fetchone():
-        raise Problem(401, "AUTH_REQUIRED", "A conta não está disponível.")
+        raise Problem(401, "AUTH_REQUIRED", "The account is not available.")
 
 
 def audit(db: Connection, owner: UUID, action: str, entity: UUID, version: int) -> None:
@@ -27,7 +27,7 @@ def get_record(db: Connection, owner: UUID, kind: str, record_id: UUID) -> Row:
         (record_id, owner, kind),
     ).fetchone()
     if row is None:
-        raise Problem(404, "NOT_FOUND", "Registro não encontrado.")
+        raise Problem(404, "NOT_FOUND", "Record not found.")
     return row
 
 
@@ -48,14 +48,14 @@ def insert(db: Connection, owner: UUID, kind: str, data: Row) -> Row:
 
 def update(db: Connection, row: Row, expected: int, data: Row, *, deleted: bool = False) -> Row:
     if row["version"] != expected:
-        raise Problem(409, "VERSION_CONFLICT", "O registro mudou. Atualize antes de editar.")
+        raise Problem(409, "VERSION_CONFLICT", "The record changed. Update before editing.")
     changed = db.execute(
         "UPDATE records SET data=%s,version=version+1,deleted=%s,updated_at=now() "
         "WHERE id=%s AND owner_id=%s AND version=%s RETURNING *",
         (Jsonb(data), deleted, row["id"], row["owner_id"], expected),
     ).fetchone()
     if changed is None:
-        raise Problem(409, "VERSION_CONFLICT", "Outra edição foi concluída primeiro.")
+        raise Problem(409, "VERSION_CONFLICT", "Another edit was completed first.")
     audit(
         db,
         row["owner_id"],

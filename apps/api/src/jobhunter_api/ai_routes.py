@@ -20,7 +20,14 @@ def status(actor: Actor, request: Request) -> Row:
             "model": settings.ai_model,
             "tasks": {
                 op: {"model": settings.policy(op)[0], "effort": settings.policy(op)[1]}
-                for op in ("parse", "suggest", "suggest_review", "strategy", "research")
+                for op in (
+                    "cv_extract",
+                    "parse",
+                    "suggest",
+                    "suggest_review",
+                    "strategy",
+                    "research",
+                )
             },
             "budget": totals(db, settings),
         }

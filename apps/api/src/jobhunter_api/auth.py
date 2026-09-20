@@ -33,7 +33,7 @@ def settings_for(request: Request) -> Settings:
 
 def check_origin(request: Request) -> None:
     if request.headers.get("origin") not in settings_for(request).allowed_origins:
-        raise Problem(403, "ORIGIN_REJECTED", "Origem não autorizada.")
+        raise Problem(403, "ORIGIN_REJECTED", "Unauthorized origin.")
 
 
 @dataclass(frozen=True)
@@ -46,18 +46,18 @@ class Principal:
 def authenticated(request: Request) -> Principal:
     token = request.cookies.get(COOKIE, "")
     if not token or len(token) > 128:
-        raise Problem(401, "AUTH_REQUIRED", "Inicie uma sessão.")
+        raise Problem(401, "AUTH_REQUIRED", "Start a session.")
     with connect(settings_for(request)) as db:
         row = db.execute(
             "SELECT owner_id,csrf_token FROM sessions WHERE token_hash=%s AND expires_at>now()",
             (digest(token),),
         ).fetchone()
     if row is None:
-        raise Problem(401, "AUTH_REQUIRED", "A sessão expirou. Entre novamente.")
+        raise Problem(401, "AUTH_REQUIRED", "Session expired. Please log in again.")
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
         check_origin(request)
         if not secrets.compare_digest(request.headers.get("x-csrf-token", ""), row["csrf_token"]):
-            raise Problem(403, "CSRF_REJECTED", "Atualize a sessão antes de continuar.")
+            raise Problem(403, "CSRF_REJECTED", "Refresh the session before continuing.")
     return Principal(row["owner_id"], row["csrf_token"], digest(token))
 
 
@@ -87,7 +87,7 @@ def login(data: Login, request: Request, response: Response) -> dict[str, str]:
         ).fetchone()
     assert row is not None
     if row["attempts"] > 10:
-        raise Problem(429, "LOGIN_LIMIT", "Aguarde um minuto antes de tentar novamente.")
+        raise Problem(429, "LOGIN_LIMIT", "Please wait a minute before trying again.")
     with connect(settings) as db:
         user = db.execute(
             "SELECT id,password_hash FROM users WHERE username=%s", (data.username,)
@@ -97,9 +97,9 @@ def login(data: Login, request: Request, response: Response) -> dict[str, str]:
                 user["password_hash"] if user else DUMMY_HASH, data.password.get_secret_value()
             )
         except VerificationError:
-            raise Problem(401, "INVALID_LOGIN", "Utilizador ou senha inválidos.") from None
+            raise Problem(401, "INVALID_LOGIN", "Invalid user or password.") from None
         if not user:
-            raise Problem(401, "INVALID_LOGIN", "Utilizador ou senha inválidos.")
+            raise Problem(401, "INVALID_LOGIN", "Invalid user or password.")
         token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
         db.execute(
             "DELETE FROM sessions WHERE expires_at<=now() OR token_hash=%s",

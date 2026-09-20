@@ -45,7 +45,7 @@ def preview(job_id: UUID, data: Preview, actor: Actor, request: Request) -> list
     with connect(settings_for(request)) as db:
         job, candidate = get_record(db, actor.id, "job", job_id), profile(db, actor.id)
         if job["version"] != data.job_version or candidate["version"] != data.profile_version:
-            raise Problem(409, "VERSION_CONFLICT", "Atualize a vaga e o perfil.")
+            raise Problem(409, "VERSION_CONFLICT", "Update the job and profile.")
         return collect(
             db,
             actor.id,
@@ -61,10 +61,10 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
         owner_lock(db, actor.id)
         job, candidate = get_record(db, actor.id, "job", job_id), profile(db, actor.id)
         if job["version"] != data.job_version or candidate["version"] != data.profile_version:
-            raise Problem(409, "VERSION_CONFLICT", "Atualize a vaga e o perfil antes de analisar.")
+            raise Problem(409, "VERSION_CONFLICT", "Update the job and profile before analysing.")
         if job["data"]["status"] == "DISCOVERED" or candidate["data"]["status"] != "reviewed":
             raise Problem(
-                409, "REVIEW_REQUIRED", "Reveja a vaga e publique o perfil antes de analisar."
+                409, "REVIEW_REQUIRED", "Review the job and publish the profile before analysing."
             )
         stored = db.execute(
             "SELECT data FROM snapshots WHERE owner_id=%s AND kind='profile' "
@@ -72,7 +72,7 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
             (actor.id, candidate["id"], candidate["version"]),
         ).fetchone()
         if not stored:
-            raise Problem(409, "REVIEW_REQUIRED", "Snapshot do perfil ausente.")
+            raise Problem(409, "REVIEW_REQUIRED", "Profile snapshot missing.")
         assessments = [item.model_dump(mode="json") for item in data.assessments]
         if data.ai_run_id:
             suggestion = db.execute(
@@ -86,7 +86,7 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
                 or suggestion["result"]["job_version"] != data.job_version
                 or suggestion["result"]["profile_version"] != data.profile_version
             ):
-                raise Problem(409, "STALE_SUGGESTION", "Sugestão de IA ausente ou desatualizada.")
+                raise Problem(409, "STALE_SUGGESTION", "AI suggestion missing or outdated.")
         at = datetime.now(UTC)
         try:
             result = evaluate(public(job), stored["data"], assessments, at)
@@ -94,7 +94,7 @@ def analyse(job_id: UUID, data: Analysis, actor: Actor, request: Request) -> Row
             apply_gate(result, issues, data.clarification_resolutions, actor.id)
         except ValueError:
             raise Problem(
-                422, "INVALID_ASSESSMENT", "Confira requisitos e referências de fatos."
+                422, "INVALID_ASSESSMENT", "Check requirements and fact references."
             ) from None
         row = insert(
             db,

@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "./api";
 import { ImportJob, Inbox } from "./Inbox";
@@ -9,7 +10,6 @@ import { AiActivity } from "./AiTools";
 import SemanticSearch from "./SemanticSearch";
 import type { Evidence, Fact, Profile } from "./types";
 import { ErrorState, Loading } from "./ui";
-
 async function loadProfile() {
   const [profile, facts, evidence] = await Promise.all([
     api<Profile>("/candidate/profile"),
@@ -18,7 +18,6 @@ async function loadProfile() {
   ]);
   return { profile, facts, evidence };
 }
-
 export default function Workspace() {
   const [route, setRoute] = useState(window.location.hash.slice(1) || "inbox");
   const [data, setData] = useState<{
@@ -64,7 +63,7 @@ export default function Workspace() {
           document.getElementById("workspace-main")?.focus();
         }}
       >
-        Ir para o conteúdo
+        {t("Go to content")}
       </a>
       <aside className="sidebar">
         <a className="brand" href="#inbox">
@@ -75,52 +74,52 @@ export default function Workspace() {
             JobHunter <span className="brand-ai">AI</span>
           </span>
         </a>
-        <p className="eyebrow">ESPAÇO DE TRABALHO</p>
-        <nav aria-label="Navegação principal">
+        <p className="eyebrow">{t("WORKSPACE")}</p>
+        <nav aria-label={t("Main navigation")}>
           <a
             href="#inbox"
             aria-current={route === "inbox" ? "page" : undefined}
           >
-            Inbox de oportunidades
+            {t("Opportunities Inbox")}
           </a>
           <a
             href="#profile"
             aria-current={route === "profile" ? "page" : undefined}
           >
-            Perfil e evidências
+            {t("Profile and evidence")}
           </a>
           <a
             href="#tracker"
             aria-current={route === "tracker" ? "page" : undefined}
           >
-            Candidaturas
+            {t("Applications")}
           </a>
           <a
             href="#import"
             aria-current={route === "import" ? "page" : undefined}
           >
-            Importar vaga
+            {t("Import vacancy")}
           </a>
           <a
             href="#privacy"
             aria-current={route === "privacy" ? "page" : undefined}
           >
-            Privacidade
+            {t("Privacy")}
           </a>
           <a
             href="#search"
             aria-current={route === "search" ? "page" : undefined}
           >
-            Busca semântica
+            {t("Semantic search")}
           </a>
           <a href="#ai" aria-current={route === "ai" ? "page" : undefined}>
-            Atividade de IA
+            {t("AI activity")}
           </a>
         </nav>
         <p className="sidebar-note">
-          Você decide cada passo.
+          {t("You decide every step.")}
           <br />
-          Dados locais; IA sob seu comando.
+          {t("Local data; AI under your command.")}
         </p>
       </aside>
       <main id="workspace-main" tabIndex={-1} className="app-main">

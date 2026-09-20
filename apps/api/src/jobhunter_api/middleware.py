@@ -23,6 +23,10 @@ class RequestBoundary:
             if scope.get("path") == "/api/v1/candidate/cv/extract"
             else self.maximum_bytes
         )
+        if scope.get("method") == "PATCH" and scope.get("path", "").startswith(
+            "/api/v1/candidate/cv/drafts/"
+        ):
+            maximum = 2 * 1024 * 1024
         while True:
             message = await receive()
             if message["type"] == "http.disconnect":
@@ -34,7 +38,7 @@ class RequestBoundary:
                     content={
                         "error": {
                             "code": "BODY_TOO_LARGE",
-                            "message": "Conteúdo excede o limite de 128 KiB.",
+                            "message": "The request exceeds the allowed size.",
                             "correlation_id": correlation,
                         }
                     },
@@ -81,7 +85,7 @@ class RequestBoundary:
                     content={
                         "error": {
                             "code": "INTERNAL_ERROR",
-                            "message": "Não foi possível concluir a operação.",
+                            "message": "Could not complete the operation.",
                             "correlation_id": correlation,
                         }
                     },

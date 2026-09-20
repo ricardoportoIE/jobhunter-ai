@@ -1,5 +1,5 @@
+import { t } from "./i18n";
 import type { ReactNode } from "react";
-
 export function Field({
   label,
   children,
@@ -15,7 +15,7 @@ export function Field({
   );
 }
 export function Loading() {
-  return <p role="status">Carregando…</p>;
+  return <p role="status">{t("Loading\u2026")}</p>;
 }
 export function ErrorState({
   error,
@@ -26,8 +26,8 @@ export function ErrorState({
 }) {
   return (
     <div role="alert">
-      <p>{error}</p>
-      <button onClick={retry}>Tentar novamente</button>
+      <p>{t(error)}</p>
+      <button onClick={retry}>{t("Try again")}</button>
     </div>
   );
 }

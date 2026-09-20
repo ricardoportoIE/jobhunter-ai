@@ -1,14 +1,15 @@
+import { t } from "./i18n";
 import { api } from "./api";
 import type { Match } from "./types";
 import { useTask } from "./useTask";
-
 export default function ShortlistButton({ match }: { match: Match }) {
   const task = useTask();
   return (
     <div className="review-callout">
       <p>
-        Adicionar à shortlist registra seu interesse. A decisão de candidatura
-        continua sob seu controle.
+        {t(
+          "Adding to shortlist registers your interest. The application decision remains under your control.",
+        )}
       </p>
       {task.feedback}
       <button
@@ -20,12 +21,12 @@ export default function ShortlistButton({ match }: { match: Match }) {
               job_id: match.job_id,
               match_id: match.id,
             });
-          }, "Adicionada à shortlist.");
+          }, t("Added to shortlist."));
         }}
       >
-        Adicionar à shortlist
+        {t("Add to shortlist")}
       </button>{" "}
-      <a href="#tracker">Ver candidaturas →</a>
+      <a href="#tracker">{t("View applications \u2192")}</a>
     </div>
   );
 }

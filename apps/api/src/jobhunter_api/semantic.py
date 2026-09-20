@@ -26,7 +26,7 @@ EMBEDDING_VERSION = "embedding-256-chunks-1.0"
 
 def embedding_provider(settings: Settings) -> EmbeddingInference:
     if not settings.openai_api_key or not settings.openai_api_key.get_secret_value():
-        raise Problem(409, "AI_NOT_CONFIGURED", "Configure a chave de IA no backend local.")
+        raise Problem(409, "AI_NOT_CONFIGURED", "Configure the AI key in the local backend.")
     return OpenAIInference(settings)
 
 
@@ -91,9 +91,9 @@ def index(data: IndexInput, actor: Actor, request: Request) -> Row:
     with connect(settings) as db:
         row = get_record(db, actor.id, data.kind, data.source_id)
         if row["version"] != data.expected_version:
-            raise Problem(409, "VERSION_CONFLICT", "Atualize o registro antes de indexar.")
+            raise Problem(409, "VERSION_CONFLICT", "Update the record before indexing.")
         if data.kind == "fact" and str(data.source_id) not in permitted_facts(db, actor.id):
-            raise Problem(409, "FACT_NOT_ELIGIBLE", "Fato sem evidência válida para IA externa.")
+            raise Problem(409, "FACT_NOT_ELIGIBLE", "Fact without valid evidence for external AI.")
         content = row["data"]["raw_text" if data.kind == "job" else "claim"]
     # 1000 Unicode characters <= 4000 UTF-8 bytes/tokens, below per-input model limit.
     chunks = [content[start : start + 1000] for start in range(0, len(content), 1000)]
@@ -109,9 +109,9 @@ def index(data: IndexInput, actor: Actor, request: Request) -> Row:
         owner_lock(db, actor.id)
         current = get_record(db, actor.id, data.kind, data.source_id)
         if current["version"] != data.expected_version:
-            raise Problem(409, "VERSION_CONFLICT", "O registro mudou durante a indexação.")
+            raise Problem(409, "VERSION_CONFLICT", "The record changed during indexing.")
         if data.kind == "fact" and str(data.source_id) not in permitted_facts(db, actor.id):
-            raise Problem(409, "FACT_NOT_ELIGIBLE", "O fato perdeu validade durante a indexação.")
+            raise Problem(409, "FACT_NOT_ELIGIBLE", "The fact lost validity during indexing.")
         for chunk, vector in enumerate(result["result"]["vectors"]):
             db.execute(
                 "INSERT INTO ai_embeddings VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
@@ -146,9 +146,7 @@ def current_vectors(db: Connection, owner: UUID, kind: str) -> list[Row]:
         ).fetchall()
     )
     if len(rows) > 5000:
-        raise Problem(
-            409, "INDEX_CAPACITY", "Índice local excede 5000 trechos; arquive vagas antigas."
-        )
+        raise Problem(409, "INDEX_CAPACITY", "Local index exceeds 5000 snippets; archive old jobs.")
     if kind == "fact":
         allowed = permitted_facts(db, owner)
         rows = [r for r in rows if str(r["source_id"]) in allowed]
@@ -192,7 +190,7 @@ def search(data: SearchInput, actor: Actor, request: Request) -> Row:
                 "similarity": round(score, 4),
                 "label": row["data"].get("title")
                 or row["data"].get("claim")
-                or "Vaga aguardando revisão",
+                or "Job awaiting review",
             }
     return {
         "items": sorted(ranked.values(), key=lambda r: r["similarity"], reverse=True)[:10],

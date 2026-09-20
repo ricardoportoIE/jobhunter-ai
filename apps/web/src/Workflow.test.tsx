@@ -7,7 +7,6 @@ import { Inbox, ImportJob } from "./Inbox";
 import { MatchResult } from "./JobDetail";
 import ProfilePage from "./ProfilePage";
 import type { Match, Profile } from "./types";
-
 vi.mock("./api", async (original) => ({
   ...(await original<typeof import("./api")>()),
   api: vi.fn(),
@@ -23,19 +22,19 @@ const profile: Profile = {
   markets: [],
   work_modes: [],
 };
-
 describe("interactive workflow", () => {
   it("shows an authentication failure without exposing the password", async () => {
     mocked
       .mockRejectedValueOnce(new ApiError(401, "Inicie sessão."))
-      .mockRejectedValueOnce(
-        new ApiError(401, "Utilizador ou senha inválidos."),
-      );
+      .mockRejectedValueOnce(new ApiError(401, "Invalid user or password."));
     render(<App />);
-    await userEvent.type(await screen.findByLabelText("Senha"), "test-secret");
-    await userEvent.click(screen.getByRole("button", { name: "Entrar" }));
+    await userEvent.type(
+      await screen.findByLabelText("Password"),
+      "test-secret",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Log in" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Utilizador ou senha inválidos.",
+      "Invalid user or password.",
     );
     expect(screen.queryByText("test-secret")).not.toBeInTheDocument();
   });
@@ -47,11 +46,9 @@ describe("interactive workflow", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Banco indisponível",
     );
-    await userEvent.click(
-      screen.getByRole("button", { name: "Tentar novamente" }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(
-      await screen.findByText("Nenhuma vaga nesta seleção"),
+      await screen.findByText("No vacancies in this selection"),
     ).toBeInTheDocument();
   });
   it("imports raw text and sends a stable retry key", async () => {
@@ -59,16 +56,16 @@ describe("interactive workflow", () => {
     render(<ImportJob />);
     await userEvent.click(screen.getByRole("button", { name: "Paste text" }));
     await userEvent.type(
-      screen.getByLabelText("Texto original da vaga"),
+      screen.getByLabelText("Original job text"),
       "Python required",
     );
     await userEvent.click(
-      screen.getByRole("button", { name: "Importar e revisar" }),
+      screen.getByRole("button", { name: "Import and review" }),
     );
     await screen.findByRole("alert");
     const first = mocked.mock.calls.at(-1);
     await userEvent.click(
-      screen.getByRole("button", { name: "Importar e revisar" }),
+      screen.getByRole("button", { name: "Import and review" }),
     );
     await waitFor(() =>
       expect(mocked.mock.calls.at(-1)?.[3]).toEqual(first?.[3]),
@@ -96,7 +93,7 @@ describe("interactive workflow", () => {
           requirement_id: "a",
           text: content,
           status: "unknown",
-          reason: "Desconhecido",
+          reason: "Unknown",
         },
       ],
       breakdown: [],
@@ -106,11 +103,9 @@ describe("interactive workflow", () => {
     const { container } = render(<MatchResult match={match} />);
     expect(screen.getByText("100%")).toBeInTheDocument();
     expect(screen.getByText("30%")).toBeInTheDocument();
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Análise desatualizada",
-    );
+    expect(screen.getByRole("alert")).toHaveTextContent("Outdated analysis");
     expect(container.querySelector("img")).toBeNull();
-    expect(screen.getByText(content + " · Desconhecido")).toBeInTheDocument();
+    expect(screen.getByText(content + " · Unknown")).toBeInTheDocument();
   });
   it("uses optimistic version when saving a profile", async () => {
     mocked.mockResolvedValue({});
@@ -123,12 +118,10 @@ describe("interactive workflow", () => {
         refresh={refresh}
       />,
     );
-    fireEvent.change(screen.getByLabelText("Nome de apresentação"), {
+    fireEvent.change(screen.getByLabelText("Display name"), {
       target: { value: "Fictício" },
     });
-    await userEvent.click(
-      screen.getByRole("button", { name: "Salvar perfil" }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Save profile" }));
     await waitFor(() => expect(refresh).toHaveBeenCalled());
     expect(mocked).toHaveBeenCalledWith(
       "/candidate/profile",

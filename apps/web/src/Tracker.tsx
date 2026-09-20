@@ -1,9 +1,9 @@
+import { t, localisedLabels, dateLocale } from "./i18n";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { optional, value } from "./forms";
 import { useTask } from "./useTask";
 import { ErrorState, Field, Loading } from "./ui";
-
 type Application = {
   id: string;
   version: number;
@@ -16,18 +16,23 @@ type Application = {
     channel: string;
     receipt_ref: string;
   } | null;
-  events: { id: string; to_status: string; at: string; note: string }[];
+  events: {
+    id: string;
+    to_status: string;
+    at: string;
+    note: string;
+  }[];
 };
-const labels: Record<string, string> = {
-  SHORTLISTED: "Na shortlist",
-  RESEARCHED: "Pesquisada",
-  SUBMITTED: "Enviada manualmente",
-  INTERVIEWING: "Em entrevista",
-  OFFERED: "Oferta recebida",
-  REJECTED: "Rejeitada",
-  WITHDRAWN: "Retirada",
-  EXPIRED: "Expirada",
-};
+const labels: Record<string, string> = localisedLabels({
+  SHORTLISTED: "In shortlist",
+  RESEARCHED: "Searched",
+  SUBMITTED: "Manually submitted",
+  INTERVIEWING: "In interview",
+  OFFERED: "Offer received",
+  REJECTED: "Rejected",
+  WITHDRAWN: "Withdrawn",
+  EXPIRED: "Expired",
+});
 const transitions: Record<string, string[]> = {
   SHORTLISTED: ["RESEARCHED", "SUBMITTED", "WITHDRAWN", "EXPIRED"],
   RESEARCHED: ["SUBMITTED", "WITHDRAWN", "EXPIRED"],
@@ -38,7 +43,6 @@ const transitions: Record<string, string[]> = {
   WITHDRAWN: [],
   EXPIRED: [],
 };
-
 export default function Tracker() {
   const [data, setData] = useState<{
     items: Application[];
@@ -49,9 +53,10 @@ export default function Tracker() {
   const [offset, setOffset] = useState(0);
   useEffect(() => {
     let active = true;
-    api<{ items: Application[]; total: number }>(
-      `/applications?limit=20&offset=${offset}`,
-    )
+    api<{
+      items: Application[];
+      total: number;
+    }>(`/applications?limit=20&offset=${offset}`)
       .then((value) => {
         if (active) {
           setData(value);
@@ -67,11 +72,12 @@ export default function Tracker() {
   }, [refresh, offset]);
   return (
     <>
-      <p className="eyebrow">ACOMPANHAMENTO</p>
-      <h1>Suas candidaturas</h1>
+      <p className="eyebrow">{t("FOLLOW-UP")}</p>
+      <h1>{t("Your applications")}</h1>
       <p>
-        Registre o que aconteceu e mantenha um histórico. O envio é feito por
-        você, fora da aplicação.
+        {t(
+          "Record what happened and keep a history. Submission is done by you, outside the application.",
+        )}
       </p>
       {error ? (
         <ErrorState error={error} retry={() => setRefresh(refresh + 1)} />
@@ -81,9 +87,9 @@ export default function Tracker() {
         <>
           {!data.items.length && (
             <section className="empty">
-              <h2>Sua shortlist está vazia</h2>
-              <p>Adicione uma oportunidade a partir do resultado da análise.</p>
-              <a href="#inbox">Explorar Inbox →</a>
+              <h2>{t("Your shortlist is empty")}</h2>
+              <p>{t("Add an opportunity from the analysis result.")}</p>
+              <a href="#inbox">{t("Explore Inbox \u2192")}</a>
             </section>
           )}
           {data.items.map((item) => (
@@ -98,13 +104,13 @@ export default function Tracker() {
               disabled={!offset}
               onClick={() => setOffset(Math.max(0, offset - 20))}
             >
-              Anterior
+              {t("Previous")}
             </button>
             <button
               disabled={offset + 20 >= data.total}
               onClick={() => setOffset(offset + 20)}
             >
-              Próxima
+              {t("Next")}
             </button>
           </div>
         </>
@@ -126,32 +132,38 @@ function ApplicationCard({
       <span className="tag">{labels[item.status]}</span>
       <h2>
         <a href={`#job/${item.job_id}`}>
-          {item.job_title || "Oportunidade sem título"}
+          {item.job_title || t("Untitled opportunity")}
         </a>
       </h2>
-      <p>{item.company_name || "Empresa não informada"}</p>
+      <p>{item.company_name || t("Company not provided")}</p>
       <details>
-        <summary>Linha do tempo ({item.events.length} eventos)</summary>
+        <summary>
+          {t("Timeline (")}
+          {item.events.length}
+          {t(" events)")}
+        </summary>
         <ol className="timeline">
           {item.events.map((event) => (
             <li key={event.id}>
               <strong>{labels[event.to_status]}</strong>
-              <p>{new Date(event.at).toLocaleString("pt-PT")}</p>
+              <p>{new Date(event.at).toLocaleString(dateLocale())}</p>
               {event.note && <p>{event.note}</p>}
             </li>
           ))}
         </ol>
         {item.submission && (
           <p>
-            Envio registrado:{" "}
-            {new Date(item.submission.submitted_at).toLocaleString("pt-PT")} ·{" "}
-            {item.submission.channel} · {item.submission.receipt_ref}
+            {t("Submission recorded:")}{" "}
+            {new Date(item.submission.submitted_at).toLocaleString(
+              dateLocale(),
+            )}{" "}
+            · {item.submission.channel} · {item.submission.receipt_ref}
           </p>
         )}
       </details>
       {target && (
         <details className="transition-form">
-          <summary>Registrar atualização</summary>
+          <summary>{t("Record update")}</summary>
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -169,10 +181,10 @@ function ApplicationCard({
                   receipt_ref: optional(data, "receipt_ref"),
                 });
                 changed();
-              }, "Evento registrado.");
+              }, t("Event recorded."));
             }}
           >
-            <Field label="Novo estado">
+            <Field label={t("New state")}>
               <select
                 value={target}
                 onChange={(event) => setTarget(event.target.value)}
@@ -184,38 +196,42 @@ function ApplicationCard({
                 ))}
               </select>
             </Field>
-            <Field label="Nota sobre a atualização">
+            <Field label={t("Update note")}>
               <textarea name="note" maxLength={3000} rows={2} />
             </Field>
             {target === "SUBMITTED" && (
               <fieldset>
-                <legend>Registro de envio manual</legend>
-                <Field label="Data e hora do envio">
+                <legend>{t("Manual submission record")}</legend>
+                <Field label={t("Date and time of submission")}>
                   <input type="datetime-local" name="submitted_at" required />
                 </Field>
-                <Field label="Canal utilizado">
+                <Field label={t("Channel used")}>
                   <input
                     name="channel"
                     required
-                    placeholder="Ex.: portal da empresa"
+                    placeholder={t("E.g.: company portal")}
                   />
                 </Field>
-                <Field label="Referência do comprovante">
+                <Field label={t("Supporting record reference")}>
                   <input
                     name="receipt_ref"
                     required
-                    placeholder="Ex.: confirmação recebida / número do processo"
+                    placeholder={t(
+                      "E.g.: confirmation received / process number",
+                    )}
                   />
                 </Field>
                 <label className="check">
                   <input type="checkbox" name="manual_confirmation" required />
-                  Confirmo que eu já enviei esta candidatura fora da aplicação.
+                  {t(
+                    "I confirm that I have already submitted this application outside the app.",
+                  )}
                 </label>
               </fieldset>
             )}
             {task.feedback}
             <button className="primary" disabled={task.busy}>
-              Salvar atualização
+              {t("Save update")}
             </button>
           </form>
         </details>

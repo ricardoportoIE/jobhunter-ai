@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
-
 test("profile → import → review → match → evidence → manual tracker → export", async ({
   page,
 }, testInfo) => {
@@ -8,112 +7,116 @@ test("profile → import → review → match → evidence → manual tracker �
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
-  await page.getByLabel("Utilizador", { exact: true }).focus();
+  await page.getByLabel("User", { exact: true }).focus();
   await page.keyboard.press("Tab");
-  await expect(page.getByLabel("Senha", { exact: true })).toBeFocused();
+  await expect(page.getByLabel("Password", { exact: true })).toBeFocused();
   await page.keyboard.insertText("synthetic-browser-test-only");
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { name: "Sua Inbox" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your Inbox" })).toBeVisible();
   await page
-    .getByRole("link", { name: "Perfil e evidências", exact: true })
+    .getByRole("link", { name: "Profile and evidence", exact: true })
     .focus();
   await page.keyboard.press("Enter");
-  await page.getByRole("link", { name: "Ir para o conteúdo" }).focus();
+  await page.getByRole("link", { name: "Go to content" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("main")).toBeFocused();
   await expect(page).toHaveURL(/#profile$/);
-  await page.getByRole("button", { name: /Evidências \(/ }).click();
-  await page.getByLabel("Referência da fonte").fill(`${prefix} projeto`);
-  await page.getByLabel("Localizador", { exact: true }).fill("README, seção 1");
+  await page.getByRole("button", { name: /Evidence \(/ }).click();
+  await page.getByLabel("Source reference").fill(`${prefix} projeto`);
+  await page.getByLabel("Locator", { exact: true }).fill("README, seção 1");
   await page
-    .getByLabel("Trecho ou declaração")
+    .getByLabel("Excerpt or statement")
     .fill(
       `${prefix}: API Python demonstrativa, sem experiência comercial declarada.`,
     );
-  await page.getByLabel("Revisei a fonte e o trecho registrado.").check();
-  await page.getByRole("button", { name: "Salvar evidência" }).click();
+  await page
+    .getByLabel("I reviewed the source and the recorded excerpt.")
+    .check();
+  await page.getByRole("button", { name: "Save evidence" }).click();
   await expect(
     page.getByRole("heading", { name: `${prefix} projeto`, exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /Fatos \(/ }).click();
+  await page.getByRole("button", { name: /Facts \(/ }).click();
   await page
-    .getByLabel("Afirmação factual")
+    .getByLabel("Factual statement")
     .fill(`${prefix} desenvolveu uma API Python de estudo.`);
-  await page.getByLabel("Estado do fato").selectOption("verified");
-  await page.getByLabel(`${prefix} projeto · Revisada`).check();
+  await page.getByLabel("Fact status").selectOption("verified");
+  await page.getByLabel(`${prefix} projeto · Reviewed`).check();
   await page.getByLabel("Matching", { exact: true }).check();
   await page
-    .getByLabel("Confirmo a revisão deste fato e suas evidências.")
+    .getByLabel("I confirm the review of this fact and its evidence.")
     .check();
-  await page.getByRole("button", { name: "Salvar fato", exact: true }).click();
+  await page.getByRole("button", { name: "Save fact", exact: true }).click();
   await expect(
     page.getByRole("heading", {
       name: `${prefix} desenvolveu uma API Python de estudo.`,
       exact: true,
     }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Perfil", exact: true }).click();
+  await page.getByRole("button", { name: "Profile", exact: true }).click();
   await page
-    .getByRole("button", { name: "Confirmar revisão e publicar versão" })
+    .getByRole("button", { name: "Confirm review and publish version" })
     .click();
   await expect(page.getByRole("status")).toHaveText(
-    "Versão do perfil revisada e preservada.",
+    "Profile version reviewed and preserved.",
   );
-  await page.getByRole("link", { name: "Importar vaga", exact: true }).click();
+  await page.getByRole("link", { name: "Import vacancy", exact: true }).click();
   await page.getByRole("button", { name: "Paste text" }).click();
   await page
-    .getByLabel("Texto original da vaga")
+    .getByLabel("Original job text")
     .fill(
       `${prefix} Junior Python\nPython required. Personal projects accepted.\n<script>window.__injected = true</script>`,
     );
-  await page.getByLabel("Fonte", { exact: true }).fill("Demonstração fictícia");
-  await page.getByLabel("Localidade do anúncio (opcional)").fill("Dublin");
-  await page.getByRole("button", { name: "Importar e revisar" }).click();
   await page
-    .getByLabel("Título", { exact: true })
+    .getByLabel("Source", { exact: true })
+    .fill("Demonstração fictícia");
+  await page.getByLabel("Advert location (optional)").fill("Dublin");
+  await page.getByRole("button", { name: "Import and review" }).click();
+  await page
+    .getByLabel("Title", { exact: true })
     .fill(`${prefix} Junior Python`);
-  await page.getByLabel("Empresa", { exact: true }).fill("Empresa fictícia");
-  await page.getByLabel("Localidade", { exact: true }).fill("Dublin");
+  await page.getByLabel("Company", { exact: true }).fill("Empresa fictícia");
+  await page.getByLabel("Location", { exact: true }).fill("Dublin");
   await page
-    .getByRole("combobox", { name: "País", exact: true })
+    .getByRole("combobox", { name: "Country", exact: true })
     .selectOption("IE");
-  await page.getByLabel("Nível confirmado da vaga").fill("junior");
-  await page.getByRole("button", { name: "Adicionar requisito" }).click();
-  await page.getByLabel("Descrição do requisito").fill("Python");
-  await page.getByLabel("Local no anúncio").fill("linha 2");
+  await page.getByLabel("Confirmed vacancy level").fill("junior");
+  await page.getByRole("button", { name: "Add requirement" }).click();
+  await page.getByLabel("Requirement description").fill("Python");
+  await page.getByLabel("Location in the advert").fill("linha 2");
   await page
-    .getByLabel("Confirmo a revisão dos campos e requisitos acima.")
+    .getByLabel("I confirm the review of the fields and requirements above.")
     .check();
-  await page.getByRole("button", { name: "Salvar revisão da vaga" }).click();
-  await expect(page.getByText("PARSED · VERSÃO 2")).toBeVisible();
-  await page.getByRole("button", { name: "2. Avaliar requisitos" }).click();
+  await page.getByRole("button", { name: "Save vacancy review" }).click();
+  await expect(page.getByText("PARSED · VERSION 2")).toBeVisible();
+  await page.getByRole("button", { name: "2. Assess requirements" }).click();
   await page
-    .getByRole("combobox", { name: "Atendimento: Python", exact: true })
+    .getByRole("combobox", { name: "Attainment: Python", exact: true })
     .selectOption("met");
   await page
-    .getByLabel("Justificativa: Python")
+    .getByLabel("Justification: Python")
     .fill("Projeto fictício revisado evidencia o requisito.");
   await page
-    .getByRole("group", { name: "Fatos que sustentam esta avaliação" })
+    .getByRole("group", { name: "Facts supporting this assessment" })
     .getByLabel(`${prefix} desenvolveu uma API Python de estudo.`, {
       exact: true,
     })
     .check();
   await page
     .getByLabel(
-      "Confirmo estas avaliações e a validade das referências selecionadas.",
+      "I confirm these assessments and the validity of the selected references.",
     )
     .check();
-  await page.getByRole("button", { name: "Calcular compatibilidade" }).click();
+  await page.getByRole("button", { name: "Calculate compatibility" }).click();
   await expect(page.getByText("100%", { exact: true })).toBeVisible();
   await expect(page.getByText("30%", { exact: true })).toBeVisible();
   await page
-    .getByText("Competências técnicas · peso 30 · cobertura 100%", {
+    .getByText("Technical skills · weight 30 · coverage 100%", {
       exact: true,
     })
     .click();
   await page
-    .getByText(`Ver evidência: ${prefix} projeto`, { exact: true })
+    .getByText(`View evidence: ${prefix} projeto`, { exact: true })
     .click();
   await expect(
     page.getByText(
@@ -131,40 +134,42 @@ test("profile → import → review → match → evidence → manual tracker �
     path: testInfo.outputPath("matching.png"),
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Adicionar à shortlist" }).click();
-  await expect(page.getByRole("status")).toHaveText("Adicionada à shortlist.");
-  await page.getByRole("link", { name: "Candidaturas", exact: true }).click();
+  await page.getByRole("button", { name: "Add to shortlist" }).click();
+  await expect(page.getByRole("status")).toHaveText("Added to shortlist.");
+  await page.getByRole("link", { name: "Applications", exact: true }).click();
   const card = page.getByRole("article").filter({
     has: page.getByRole("link", {
       name: `${prefix} Junior Python`,
       exact: true,
     }),
   });
-  await card.getByText("Registrar atualização", { exact: true }).click();
-  await card.getByLabel("Novo estado").selectOption("SUBMITTED");
-  await card.getByLabel("Data e hora do envio").fill("2026-09-18T12:00");
-  await card.getByLabel("Canal utilizado").fill("Portal fictício");
+  await card.getByText("Record update", { exact: true }).click();
+  await card.getByLabel("New state").selectOption("SUBMITTED");
+  await card.getByLabel("Date and time of submission").fill("2026-09-18T12:00");
+  await card.getByLabel("Channel used").fill("Portal fictício");
   await card
-    .getByLabel("Referência do comprovante")
+    .getByLabel("Supporting record reference")
     .fill("Comprovante de teste");
   await card
-    .getByLabel("Confirmo que eu já enviei esta candidatura fora da aplicação.")
+    .getByLabel(
+      "I confirm that I have already submitted this application outside the app.",
+    )
     .check();
-  await card.getByRole("button", { name: "Salvar atualização" }).click();
-  await expect(card.locator(".tag")).toHaveText("Enviada manualmente");
-  await card.getByText("Linha do tempo (2 eventos)", { exact: true }).click();
+  await card.getByRole("button", { name: "Save update" }).click();
+  await expect(card.locator(".tag")).toHaveText("Manually submitted");
+  await card.getByText("Timeline (2 events)", { exact: true }).click();
   await expect(
     card.getByText("Comprovante de teste", { exact: false }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Privacidade", exact: true }).click();
+  await page.getByRole("link", { name: "Privacy", exact: true }).click();
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Baixar exportação" }).click();
+  await page.getByRole("button", { name: "Download export" }).click();
   const download = await downloadPromise;
   const exported = await readFile((await download.path())!, "utf-8");
   expect(exported).toContain(prefix);
   expect(exported).not.toContain("password_hash");
   expect(exported).not.toContain("synthetic-browser-test-only");
-  await page.getByRole("button", { name: "Sair", exact: true }).click();
-  await expect(page.getByLabel("Senha", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Log out", exact: true }).click();
+  await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });

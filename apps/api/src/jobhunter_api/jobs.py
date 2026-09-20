@@ -109,7 +109,7 @@ def import_job(data: JobImport, actor: Actor, request: Request, response: Respon
         payload_hash = fingerprint(data.model_dump())
         key = request.headers.get("idempotency-key", "implicit:" + payload_hash)
         if not key.strip() or len(key) > 200:
-            raise Problem(422, "INVALID_KEY", "Chave de idempotência inválida.")
+            raise Problem(422, "INVALID_KEY", "Invalid idempotency key.")
         previous = db.execute(
             "SELECT payload_hash,response FROM idempotency "
             "WHERE owner_id=%s AND operation='import' AND key=%s",
@@ -118,7 +118,9 @@ def import_job(data: JobImport, actor: Actor, request: Request, response: Respon
         if previous:
             if previous["payload_hash"] != payload_hash:
                 raise Problem(
-                    409, "IDEMPOTENCY_CONFLICT", "A chave já foi usada com outro conteúdo."
+                    409,
+                    "IDEMPOTENCY_CONFLICT",
+                    "The key has already been used with different content.",
                 )
             response.status_code = 200
             return dict(previous["response"])
@@ -128,9 +130,7 @@ def import_job(data: JobImport, actor: Actor, request: Request, response: Respon
             (actor.id, keys),
         ).fetchall()
         if len(duplicates) > 1:
-            raise Problem(
-                409, "DUPLICATE_CONFLICT", "As referências apontam para vagas diferentes."
-            )
+            raise Problem(409, "DUPLICATE_CONFLICT", "References point to different jobs.")
         if duplicates:
             existing = get_record(db, actor.id, "job", duplicates[0]["job_id"])
             old_location = existing["data"].get("location_hint")
@@ -142,7 +142,7 @@ def import_job(data: JobImport, actor: Actor, request: Request, response: Respon
                 raise Problem(
                     409,
                     "LOCATION_CONFLICT",
-                    "Mesma referência com localidades diferentes; revise a origem.",
+                    "Same reference with different locations; review the source.",
                 )
             result = public(existing)
             response.status_code = 200
@@ -183,7 +183,7 @@ def jobs(
     archived: bool = False,
 ) -> Row:
     if len(q) > 200:
-        raise Problem(422, "INVALID_INPUT", "Pesquisa muito longa.")
+        raise Problem(422, "INVALID_INPUT", "Search too long.")
     with connect(settings_for(request)) as db:
         conditions = (
             "owner_id=%s AND kind='job' AND NOT deleted AND "

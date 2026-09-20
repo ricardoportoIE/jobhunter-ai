@@ -1,8 +1,8 @@
+import { t } from "./i18n";
 import { useState } from "react";
 import { api } from "./api";
 import type { Job } from "./types";
 import { useTask } from "./useTask";
-
 type Candidate = {
   job: Job;
   lexical_similarity: number;
@@ -25,7 +25,7 @@ export default function DuplicateReview({
       target_id: item.job.id,
       target_version: item.job.version,
       decision,
-      reason: "Comparação confirmada pelo utilizador na interface.",
+      reason: t("Comparison confirmed by user in interface."),
       review_confirmed: true,
     });
     setItems(
@@ -36,11 +36,11 @@ export default function DuplicateReview({
   }
   return (
     <section className="panel ai-panel">
-      <h2>Possíveis duplicados</h2>
+      <h2>{t("Possible duplicates")}</h2>
       <p>
-        Compara texto e embeddings já disponíveis, sem nova chamada à IA. Uma
-        confirmação arquiva esta vaga e preserva a outra como referência; o
-        histórico é mantido.
+        {t(
+          "Compares text and embeddings already available, without new AI call. A confirmation archives this job and preserves the other as reference; history is maintained.",
+        )}
       </p>
       <button
         disabled={task.busy}
@@ -48,44 +48,49 @@ export default function DuplicateReview({
           void task.run(async () => {
             setItems(
               (
-                await api<{ items: Candidate[] }>(
-                  `/ai/jobs/${job.id}/duplicates`,
-                )
+                await api<{
+                  items: Candidate[];
+                }>(`/ai/jobs/${job.id}/duplicates`)
               ).items,
             );
-          }, "Comparação concluída.")
+          }, t("Comparison completed."))
         }
       >
-        Comparar com outras vagas
+        {t("Compare with other jobs")}
       </button>
       {task.feedback}
       {items && !items.length && (
-        <p>Nenhum possível duplicado nesta comparação.</p>
+        <p>{t("No possible duplicates in this comparison.")}</p>
       )}
       {items?.map((item) => (
         <article key={item.job.id}>
           <h3>
             <a href={`#job/${item.job.id}`}>
-              {item.job.title || "Vaga sem título"}
+              {item.job.title || t("Untitled job")}
             </a>
           </h3>
           <p>
-            {item.job.company_name || "Empresa desconhecida"} ·{" "}
-            {item.job.location || "Local desconhecido"}
+            {item.job.company_name || t("Unknown company")} ·{" "}
+            {item.job.location || t("Unknown location")}
           </p>
           <p>
-            Similaridade textual: {item.lexical_similarity.toFixed(3)} ·
-            Semântica: {item.semantic_similarity?.toFixed(3) ?? "Não indexada"}
+            {t("Textual similarity: ")}
+            {item.lexical_similarity.toFixed(3)}
+            {t(" \u00B7 Semantic similarity: ")}
+            {item.semantic_similarity?.toFixed(3) ?? t("Not indexed")}
           </p>
-          {item.shared_identity && <p>Há uma referência de origem em comum.</p>}
+          {item.shared_identity && (
+            <p>{t("There is a common source reference.")}</p>
+          )}
           {!!item.conflicts.length && (
             <p>
-              Empresa ou localidade divergem. Revise os campos antes de
-              confirmar.
+              {t(
+                "Company or location differ. Review fields before confirming.",
+              )}
             </p>
           )}
           <details>
-            <summary>Ver texto para comparar</summary>
+            <summary>{t("View text to compare")}</summary>
             <p className="preserve">{item.job.raw_text}</p>
           </details>
           <div className="actions">
@@ -94,22 +99,22 @@ export default function DuplicateReview({
               onClick={() =>
                 void task.run(
                   () => decide(item, "duplicate"),
-                  "Duplicado confirmado; esta vaga foi arquivada.",
+                  t("Duplicate confirmed; this job has been archived."),
                 )
               }
             >
-              Confirmar duplicada e arquivar esta vaga
+              {t("Confirm duplicate and archive this job")}
             </button>
             <button
               disabled={task.busy}
               onClick={() =>
                 void task.run(
                   () => decide(item, "distinct"),
-                  "Vagas distintas registradas.",
+                  t("Distinct jobs recorded."),
                 )
               }
             >
-              São vagas distintas
+              {t("They are distinct vacancies")}
             </button>
           </div>
         </article>

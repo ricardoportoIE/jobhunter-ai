@@ -5,7 +5,6 @@ import { api } from "./api";
 import ResearchPanel from "./ResearchPanel";
 import { ClarificationList } from "./Clarifications";
 import type { Job } from "./types";
-
 vi.mock("./api", () => ({ api: vi.fn() }));
 it("shows both conclusions when evaluations disagree", () => {
   render(
@@ -34,23 +33,23 @@ it("shows both conclusions when evaluations disagree", () => {
       ]}
     />,
   );
-  expect(screen.getByText("Luna · Atendido")).toBeInTheDocument();
-  expect(screen.getByText("mini · Não atendido")).toBeInTheDocument();
+  expect(screen.getByText("Luna · Met")).toBeInTheDocument();
+  expect(screen.getByText("mini · Not met")).toBeInTheDocument();
 });
 it("requires renewed consent after changing a public research question", async () => {
   vi.mocked(api).mockResolvedValue([]);
   render(<ResearchPanel job={{ id: "public", version: 1 } as Job} />);
   const button = screen.getByRole("button", {
-    name: "Pesquisar fontes públicas",
+    name: "Search public sources",
   });
   expect(button).toBeDisabled();
   await userEvent.type(
-    screen.getByLabelText("Pergunta pública"),
+    screen.getByLabelText("Public question"),
     "Where are the current permit rules?",
   );
   await userEvent.click(screen.getByRole("checkbox"));
   expect(button).toBeEnabled();
-  await userEvent.type(screen.getByLabelText("Pergunta pública"), " New text");
+  await userEvent.type(screen.getByLabelText("Public question"), " New text");
   expect(button).toBeDisabled();
   expect(vi.mocked(api).mock.calls.every((call) => call[1] !== "POST")).toBe(
     true,

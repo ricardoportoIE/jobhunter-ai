@@ -1,3 +1,4 @@
+import { t } from "./i18n";
 import { useTask } from "./useTask";
 import { lines, optional, value } from "./forms";
 import { useState } from "react";
@@ -5,7 +6,6 @@ import { api } from "./api";
 import type { Evidence, Fact, Profile } from "./types";
 import { Field } from "./ui";
 import CvImport from "./CvImport";
-
 type Props = {
   profile: Profile;
   facts: Fact[];
@@ -26,15 +26,18 @@ export default function ProfilePage({
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">SUA BASE FACTUAL</p>
-          <h1>Perfil e evidências</h1>
+          <p className="eyebrow">{t("YOUR FACTUAL BASE")}</p>
+          <h1>{t("Profile and evidence")}</h1>
           <p>
-            Versão {profile.version} ·{" "}
-            {profile.status === "reviewed" ? "Revisado" : "Revisão pendente"}
+            {t("Version ")}
+            {profile.version} ·{" "}
+            {profile.status === "reviewed"
+              ? t("Reviewed")
+              : t("Review pending")}
           </p>
         </div>
       </div>
-      <nav className="tabs" aria-label="Seções do perfil">
+      <nav className="tabs" aria-label={t("Profile sections")}>
         {(["profile", "facts", "evidence"] as const).map((key) => (
           <button
             key={key}
@@ -43,9 +46,9 @@ export default function ProfilePage({
           >
             {
               {
-                profile: "Perfil",
-                facts: `Fatos (${facts.length})`,
-                evidence: `Evidências (${evidence.length})`,
+                profile: t("Profile"),
+                facts: t("Facts ({0})", [facts.length]),
+                evidence: t("Evidence ({0})", [evidence.length]),
               }[key]
             }
           </button>
@@ -55,7 +58,7 @@ export default function ProfilePage({
       {tab === "profile" && <CvImport profile={profile} refresh={refresh} />}
       {tab === "profile" && (
         <section className="panel">
-          <h2>Direção da procura</h2>
+          <h2>{t("Search direction")}</h2>
           <form
             key={profile.version}
             onSubmit={(event) => {
@@ -74,27 +77,27 @@ export default function ProfilePage({
               });
             }}
           >
-            <Field label="Nome de apresentação">
+            <Field label={t("Display name")}>
               <input
                 name="display_name"
                 defaultValue={profile.display_name ?? ""}
                 maxLength={200}
               />
             </Field>
-            <Field label="Funções pretendidas (separadas por vírgula)">
+            <Field label={t("Desired roles (comma-separated)")}>
               <input
                 name="target_roles"
                 defaultValue={profile.target_roles.join(", ")}
               />
             </Field>
-            <Field label="Localidades (separadas por vírgula)">
+            <Field label={t("Locations (comma-separated)")}>
               <input
                 name="locations"
                 defaultValue={profile.locations.join(", ")}
               />
             </Field>
             <fieldset>
-              <legend>Mercados</legend>
+              <legend>{t("Markets")}</legend>
               {["IE", "GB"].map((market) => (
                 <label className="check" key={market}>
                   <input
@@ -103,12 +106,12 @@ export default function ProfilePage({
                     value={market}
                     defaultChecked={profile.markets.includes(market)}
                   />
-                  {market === "IE" ? "Irlanda" : "Reino Unido"}
+                  {market === "IE" ? t("Ireland") : t("United Kingdom")}
                 </label>
               ))}
             </fieldset>
             <fieldset>
-              <legend>Modalidades</legend>
+              <legend>{t("Working arrangements")}</legend>
               {["hybrid", "remote", "onsite"].map((mode) => (
                 <label className="check" key={mode}>
                   <input
@@ -119,22 +122,23 @@ export default function ProfilePage({
                   />
                   {
                     {
-                      hybrid: "Híbrido",
-                      remote: "Remoto",
-                      onsite: "Presencial",
+                      hybrid: t("Hybrid"),
+                      remote: t("Remote"),
+                      onsite: t("On-site"),
                     }[mode]
                   }
                 </label>
               ))}
             </fieldset>
             <button className="primary" disabled={task.busy}>
-              Salvar perfil
+              {t("Save profile")}
             </button>
           </form>
           <div className="review-callout">
             <p>
-              Revise os fatos e suas fontes antes de publicar uma versão.
-              Qualquer edição invalida análises anteriores.
+              {t(
+                "Review the facts and their sources before publishing a version. Any edit invalidates previous analyses.",
+              )}
             </p>
             <button
               disabled={task.busy}
@@ -144,10 +148,10 @@ export default function ProfilePage({
                     expected_version: profile.version,
                   });
                   await refresh();
-                }, "Versão do perfil revisada e preservada.");
+                }, t("Profile version reviewed and preserved."));
               }}
             >
-              Confirmar revisão e publicar versão
+              {t("Confirm review and publish version")}
             </button>
           </div>
         </section>
@@ -155,7 +159,7 @@ export default function ProfilePage({
       {tab === "evidence" && (
         <div className="split">
           <section className="panel">
-            <h2>{editingEvidence ? "Editar evidência" : "Nova evidência"}</h2>
+            <h2>{editingEvidence ? t("Edit evidence") : t("New evidence")}</h2>
             <form
               key={editingEvidence?.id ?? "new"}
               onSubmit={(event) => {
@@ -182,7 +186,7 @@ export default function ProfilePage({
                 });
               }}
             >
-              <Field label="Tipo de fonte">
+              <Field label={t("Source type")}>
                 <select
                   name="source_type"
                   defaultValue={
@@ -190,12 +194,12 @@ export default function ProfilePage({
                   }
                 >
                   {Object.entries({
-                    candidate_attestation: "Declaração do candidato",
+                    candidate_attestation: t("Candidate statement"),
                     cv: "CV",
-                    repository: "Repositório",
-                    certificate: "Certificado",
-                    employment_record: "Registro profissional",
-                    other: "Outra",
+                    repository: t("Repository"),
+                    certificate: t("Certificate"),
+                    employment_record: t("Professional record"),
+                    other: t("Other"),
                   }).map(([key, label]) => (
                     <option key={key} value={key}>
                       {label}
@@ -203,23 +207,23 @@ export default function ProfilePage({
                   ))}
                 </select>
               </Field>
-              <Field label="Referência da fonte">
+              <Field label={t("Source reference")}>
                 <input
                   name="source_ref"
                   required
                   defaultValue={editingEvidence?.source_ref}
-                  placeholder="URL ou identificação do documento"
+                  placeholder={t("URL or document ID")}
                 />
               </Field>
-              <Field label="Localizador">
+              <Field label={t("Locator")}>
                 <input
                   name="locator"
                   required
                   defaultValue={editingEvidence?.locator}
-                  placeholder="Página, seção ou arquivo"
+                  placeholder={t("Page, section or file")}
                 />
               </Field>
-              <Field label="Trecho ou declaração">
+              <Field label={t("Excerpt or statement")}>
                 <textarea
                   name="content"
                   required
@@ -231,22 +235,22 @@ export default function ProfilePage({
               <Sensitivity current={editingEvidence?.sensitivity} />
               <label className="check">
                 <input type="checkbox" name="review_confirmed" />
-                Revisei a fonte e o trecho registrado.
+                {t("I reviewed the source and the recorded excerpt.")}
               </label>
               <button className="primary" disabled={task.busy}>
-                Salvar evidência
+                {t("Save evidence")}
               </button>
               {editingEvidence && (
                 <button type="button" onClick={() => setEditingEvidence(null)}>
-                  Cancelar edição
+                  {t("Cancel editing")}
                 </button>
               )}
             </form>
           </section>
           <section className="panel">
-            <h2>Evidências registradas</h2>
+            <h2>{t("Recorded evidence")}</h2>
             {!evidence.length && (
-              <p>Comece registrando a fonte que sustenta um fato.</p>
+              <p>{t("Start by recording the source that supports a fact.")}</p>
             )}
             {evidence.map((item) => (
               <article
@@ -256,16 +260,20 @@ export default function ProfilePage({
               >
                 <h3>{item.source_ref}</h3>
                 <p>
-                  {item.locator} · {item.reviewed_at ? "Revisada" : "Pendente"}
+                  {item.locator} ·{" "}
+                  {item.reviewed_at ? t("Reviewed") : t("Pending")}
                 </p>
                 <details>
-                  <summary>Ver conteúdo e referência</summary>
+                  <summary>{t("View content and reference")}</summary>
                   <p className="preserve">{item.content}</p>
-                  <p className="muted">Hash do trecho: {item.content_sha256}</p>
+                  <p className="muted">
+                    {t("Snippet hash: ")}
+                    {item.content_sha256}
+                  </p>
                 </details>
                 <div className="actions">
                   <button onClick={() => setEditingEvidence(item)}>
-                    Editar evidência
+                    {t("Edit evidence")}
                   </button>
                   <button
                     onClick={() => {
@@ -278,7 +286,7 @@ export default function ProfilePage({
                       });
                     }}
                   >
-                    Remover evidência
+                    {t("Remove evidence")}
                   </button>
                 </div>
               </article>
@@ -289,7 +297,7 @@ export default function ProfilePage({
       {tab === "facts" && (
         <div className="split">
           <section className="panel">
-            <h2>{editingFact ? "Editar fato" : "Novo fato"}</h2>
+            <h2>{editingFact ? t("Edit fact") : t("New fact")}</h2>
             <form
               key={editingFact?.id ?? "new"}
               onSubmit={(event) => {
@@ -323,7 +331,7 @@ export default function ProfilePage({
                 });
               }}
             >
-              <Field label="Afirmação factual">
+              <Field label={t("Factual statement")}>
                 <textarea
                   required
                   name="claim"
@@ -332,20 +340,20 @@ export default function ProfilePage({
                   defaultValue={editingFact?.claim}
                 />
               </Field>
-              <Field label="Categoria">
+              <Field label={t("Category")}>
                 <select
                   name="category"
                   defaultValue={editingFact?.category ?? "skill"}
                 >
                   {Object.entries({
-                    skill: "Competência",
-                    experience: "Experiência",
-                    education: "Formação",
-                    project: "Projeto",
-                    certification: "Certificação",
-                    achievement: "Realização",
-                    preference: "Preferência",
-                    constraint: "Restrição",
+                    skill: t("Skill"),
+                    experience: t("Experience"),
+                    education: t("Education"),
+                    project: t("Project"),
+                    certification: t("Certification"),
+                    achievement: t("Achievement"),
+                    preference: t("Preference"),
+                    constraint: t("Restriction"),
                   }).map(([key, label]) => (
                     <option key={key} value={key}>
                       {label}
@@ -353,20 +361,20 @@ export default function ProfilePage({
                   ))}
                 </select>
               </Field>
-              <Field label="Estado do fato">
+              <Field label={t("Fact status")}>
                 <select
                   name="status"
                   defaultValue={editingFact?.status ?? "unverified"}
                 >
-                  <option value="unverified">Não verificado</option>
-                  <option value="verified">Verificado</option>
-                  <option value="expired">Expirado</option>
-                  <option value="revoked">Revogado</option>
+                  <option value="unverified">{t("Not verified")}</option>
+                  <option value="verified">{t("Verified")}</option>
+                  <option value="expired">{t("Expired")}</option>
+                  <option value="revoked">{t("Revoked")}</option>
                 </select>
               </Field>
               <fieldset>
-                <legend>Evidências de suporte</legend>
-                {!evidence.length && <p>Registre uma evidência primeiro.</p>}
+                <legend>{t("Supporting evidence")}</legend>
+                {!evidence.length && <p>{t("Record evidence first.")}</p>}
                 {evidence.map((item) => (
                   <label className="check" key={item.id}>
                     <input
@@ -378,17 +386,17 @@ export default function ProfilePage({
                       )}
                     />
                     {item.source_ref} ·{" "}
-                    {item.reviewed_at ? "Revisada" : "Pendente"}
+                    {item.reviewed_at ? t("Reviewed") : t("Pending")}
                   </label>
                 ))}
               </fieldset>
               <fieldset>
-                <legend>Usos permitidos</legend>
+                <legend>{t("Allowed uses")}</legend>
                 {Object.entries({
                   matching: "Matching",
                   cv: "CV",
-                  cover_letter: "Carta",
-                  application_form: "Formulário",
+                  cover_letter: t("Letter"),
+                  application_form: t("Form"),
                 }).map(([key, label]) => (
                   <label className="check" key={key}>
                     <input
@@ -402,14 +410,14 @@ export default function ProfilePage({
                 ))}
               </fieldset>
               <div className="form-grid">
-                <Field label="Válido desde (UTC)">
+                <Field label={t("Valid from (UTC)")}>
                   <input
                     type="date"
                     name="valid_from"
                     defaultValue={editingFact?.valid_from?.slice(0, 10)}
                   />
                 </Field>
-                <Field label="Válido até (UTC, exclusivo)">
+                <Field label={t("Valid until (UTC, exclusive)")}>
                   <input
                     type="date"
                     name="valid_until"
@@ -420,32 +428,35 @@ export default function ProfilePage({
               <Sensitivity current={editingFact?.sensitivity} />
               <label className="check">
                 <input type="checkbox" name="review_confirmed" />
-                Confirmo a revisão deste fato e suas evidências.
+                {t("I confirm the review of this fact and its evidence.")}
               </label>
               <button className="primary" disabled={task.busy}>
-                Salvar fato
+                {t("Save fact")}
               </button>
               {editingFact && (
                 <button type="button" onClick={() => setEditingFact(null)}>
-                  Cancelar edição
+                  {t("Cancel editing")}
                 </button>
               )}
             </form>
           </section>
           <section className="panel">
-            <h2>Fatos registrados</h2>
-            {!facts.length && <p>Nenhum fato cadastrado.</p>}
+            <h2>{t("Recorded facts")}</h2>
+            {!facts.length && <p>{t("No facts recorded.")}</p>}
             {facts.map((item) => (
               <article className="record" key={item.id}>
                 <h3>{item.claim}</h3>
                 <p>
                   {item.status} ·{" "}
-                  {item.allowed_uses.join(", ") || "Sem usos autorizados"}
+                  {item.allowed_uses.join(", ") || t("No authorised uses")}
                 </p>
-                <p>{item.evidence_ids.length} evidência(s)</p>
+                <p>
+                  {item.evidence_ids.length}
+                  {t(" evidence(s)")}
+                </p>
                 <div className="actions">
                   <button onClick={() => setEditingFact(item)}>
-                    Editar fato
+                    {t("Edit fact")}
                   </button>
                   <button
                     onClick={() => {
@@ -458,7 +469,7 @@ export default function ProfilePage({
                       });
                     }}
                   >
-                    Remover fato
+                    {t("Remove fact")}
                   </button>
                 </div>
               </article>
@@ -471,11 +482,11 @@ export default function ProfilePage({
 }
 function Sensitivity({ current }: { current?: string }) {
   return (
-    <Field label="Sensibilidade">
+    <Field label={t("Sensitivity")}>
       <select name="sensitivity" defaultValue={current ?? "private"}>
-        <option value="public">Público</option>
-        <option value="private">Privado</option>
-        <option value="sensitive">Sensível</option>
+        <option value="public">{t("Public")}</option>
+        <option value="private">{t("Private")}</option>
+        <option value="sensitive">{t("Sensitive")}</option>
       </select>
     </Field>
   );

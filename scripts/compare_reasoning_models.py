@@ -383,7 +383,17 @@ def main() -> None:
                 if row.get("validated"):
                     payload, _, schema = task_input(case, args.protocol)
                     schema.model_validate(row["raw"])
-                    assert row["validated"] == validate_result(case, payload, row["raw"])
+                    current = validate_result(case, payload, row["raw"])
+                    # Normalise this exact system label for historical comparison only.
+                    # Raw model responses, statuses and evidence references stay untouched.
+                    for assessment in current.get("assessments", []):
+                        if assessment["reason"] == (
+                            "Requires specific human evaluation of experience or strategy."
+                        ):
+                            assessment["reason"] = (
+                                "Requer avaliação humana específica de experiência ou estratégia."
+                            )
+                    assert row["validated"] == current
         print("Comparison report checked offline; no API calls.")
         return
     if not args.live:

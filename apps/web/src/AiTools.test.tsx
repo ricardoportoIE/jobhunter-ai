@@ -4,7 +4,6 @@ import { expect, it, vi } from "vitest";
 import { api } from "./api";
 import { AiJobTools } from "./AiTools";
 import type { Job } from "./types";
-
 vi.mock("./api", () => ({ api: vi.fn() }));
 const mocked = vi.mocked(api);
 it("only retries a failed paid operation after an explicit click", async () => {
@@ -27,15 +26,17 @@ it("only retries a failed paid operation after an explicit click", async () => {
   render(
     <AiJobTools job={{ id: "retry", version: 1 } as Job} saved={vi.fn()} />,
   );
-  await userEvent.click(screen.getByRole("button", { name: "Extrair com IA" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Extract with AI" }),
+  );
   await screen.findByText("Confira os créditos da API.");
   expect(attempts).toBe(1);
   await userEvent.click(
     screen.getByRole("button", {
-      name: "Tentar novamente após corrigir a causa",
+      name: "Try again after fixing the cause",
     }),
   );
-  await screen.findByText("Extração disponível para conferência.");
+  await screen.findByText("Extraction available for review.");
   expect(attempts).toBe(2);
   expect(mocked.mock.calls.at(-1)?.[3]?.["Idempotency-Key"]).toBeTruthy();
 });
@@ -59,17 +60,17 @@ it("keeps extraction a draft until the user explicitly fills the review form", a
   const { container } = render(
     <AiJobTools job={{ id: "job", version: 2 } as Job} saved={saved} />,
   );
-  await userEvent.click(screen.getByRole("button", { name: "Extrair com IA" }));
-  expect(
-    await screen.findByText(/Conferência prioritária/),
-  ).toBeInTheDocument();
+  await userEvent.click(
+    screen.getByRole("button", { name: "Extract with AI" }),
+  );
+  expect(await screen.findByText(/Priority review/)).toBeInTheDocument();
   expect(container.querySelector("img")).toBeNull();
   expect(saved).not.toHaveBeenCalled();
   expect(mocked.mock.calls.some(([path]) => path.endsWith("/draft"))).toBe(
     false,
   );
   await userEvent.click(
-    screen.getByRole("button", { name: "Preencher rascunho para revisão" }),
+    screen.getByRole("button", { name: "Fill in draft for review" }),
   );
   await waitFor(() => expect(saved).toHaveBeenCalledOnce());
   expect(mocked).toHaveBeenCalledWith("/ai/jobs/job/draft", "POST", {

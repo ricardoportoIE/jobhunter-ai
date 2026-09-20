@@ -6,6 +6,7 @@ import re
 
 from pydantic import BaseModel
 
+from jobhunter_api.cv_import import CVExtraction
 from jobhunter_api.inference import Completion
 from jobhunter_api.job_parser import ParsedJob
 from jobhunter_api.package_domain import StrategyOutput
@@ -25,8 +26,25 @@ class BrowserFixtureProvider:
         effort: Effort | None = None,
     ) -> Completion:
         payload = json.loads(data)
-        if schema is ParsedJob:
+        if schema is CVExtraction:
             result: Row = {
+                "display_name": "Alex Example",
+                "warnings": [],
+                "facts": [
+                    {
+                        "claim": "Built a Python API in 2025.",
+                        "category": "project",
+                        "quote": "Built a Python API in 2025.",
+                    },
+                    {
+                        "claim": "Postgraduate Diploma in Computing.",
+                        "category": "education",
+                        "quote": "Postgraduate Diploma in Computing.",
+                    },
+                ],
+            }
+        elif schema is ParsedJob:
+            result = {
                 field: {"value": None, "quote": None, "confidence": 0}
                 for field in ParsedJob.model_fields
                 if field not in {"requirements", "risk_flags"}

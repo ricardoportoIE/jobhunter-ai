@@ -1,13 +1,19 @@
+import { t, localisedLabels } from "./i18n";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Job } from "./types";
 import { useAiTask } from "./useAiTask";
 import { ErrorState, Loading } from "./ui";
-
 export type AiStatus = {
   configured: boolean;
   model: string;
-  tasks?: Record<string, { model: string; effort: string | null }>;
+  tasks?: Record<
+    string,
+    {
+      model: string;
+      effort: string | null;
+    }
+  >;
   budget: {
     spent_eur: string;
     reserved_eur: string;
@@ -16,41 +22,48 @@ export type AiStatus = {
     alerts: number[];
   };
 };
-type Citation = { quote: string; confidence: number };
+type Citation = {
+  quote: string;
+  confidence: number;
+};
 export type Extraction = {
   run_id: string;
   stale?: boolean;
   result: {
     fields: Record<string, unknown>;
     citations: Record<string, Citation>;
-    requirements: { text: string; citation: Citation }[];
+    requirements: {
+      text: string;
+      citation: Citation;
+    }[];
     risk_flags: string[];
     job_version: number;
   };
 };
-const labels: Record<string, string> = {
-  title: "Título",
-  company_name: "Empresa",
-  location: "Localidade",
-  country: "País",
-  work_mode: "Modalidade",
-  employment_type: "Contrato",
-  seniority: "Nível",
-  work_authorisation: "Autorização",
+const labels: Record<string, string> = localisedLabels({
+  title: "Title",
+  company_name: "Company",
+  location: "Location",
+  country: "Country",
+  work_mode: "Working arrangement",
+  employment_type: "Contract",
+  seniority: "Level",
+  work_authorisation: "Authorisation",
   sponsorship: "Sponsorship",
-  salary: "Salário",
-};
+  salary: "Salary",
+});
 function Quote({ citation }: { citation?: Citation }) {
   return citation ? (
     <>
       <blockquote>{citation.quote}</blockquote>
       <small>
-        Confiança declarada pela IA: {Math.round(citation.confidence * 100)}%
-        {citation.confidence < 0.75 ? " · Conferência prioritária" : ""}
+        {t("Confidence declared by AI: ")}
+        {Math.round(citation.confidence * 100)}%
+        {citation.confidence < 0.75 ? t(" \u00B7 Priority review") : ""}
       </small>
     </>
   ) : (
-    <small>Sem informação no anúncio.</small>
+    <small>{t("No information in the listing.")}</small>
   );
 }
 export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
@@ -72,12 +85,12 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
   const stale = extraction && extraction.result.job_version !== job.version;
   return (
     <section className="panel ai-panel">
-      <p className="eyebrow">ASSISTENTE DE LEITURA</p>
-      <h2>Extrair campos com IA</h2>
+      <p className="eyebrow">{t("READING ASSISTANT")}</p>
+      <h2>{t("Extract fields with AI")}</h2>
       <p>
-        Envia o texto desta vaga à OpenAI. A extração fica como sugestão até
-        você revisar. Confiança indica a estimativa do modelo; não é uma
-        probabilidade validada.
+        {t(
+          "Sends this job text to OpenAI. Extraction remains a suggestion until you review. Confidence indicates the model's estimate; it is not a validated probability.",
+        )}
       </p>
       <button
         disabled={task.busy}
@@ -93,18 +106,20 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
                 headers,
               ),
             );
-          }, "Extração disponível para conferência.")
+          }, t("Extraction available for review."))
         }
       >
-        {task.busy ? "Processando…" : "Extrair com IA"}
+        {task.busy ? t("Processing\u2026") : t("Extract with AI")}
       </button>
       {task.feedback}
       {extraction && (
         <details open={!stale}>
-          <summary>Conferir sugestões e trechos de origem</summary>
+          <summary>{t("Check suggestions and source excerpts")}</summary>
           {stale && (
             <p role="status">
-              Esta extração corresponde a uma versão anterior da vaga.
+              {t(
+                "This extraction corresponds to a previous version of the job.",
+              )}
             </p>
           )}
           <div className="ai-fields">
@@ -119,7 +134,7 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
                   <h3>{labels[name] || name}</h3>
                   <p>
                     {value === null
-                      ? "Desconhecido"
+                      ? t("Unknown")
                       : typeof value === "object"
                         ? Object.entries(value as Record<string, unknown>)
                             .filter(([, v]) => v !== null)
@@ -131,7 +146,7 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
                 </article>
               ))}
           </div>
-          <h3>Requisitos sugeridos</h3>
+          <h3>{t("Suggested requirements")}</h3>
           {extraction.result.requirements.map((item, index) => (
             <article key={index}>
               <p>
@@ -152,19 +167,20 @@ export function AiJobTools({ job, saved }: { job: Job; saved: () => void }) {
                   run_id: extraction.run_id,
                 });
                 saved();
-              }, "Rascunho preenchido. Revise os campos abaixo e confirme a revisão.")
+              }, t("Draft filled. Review the fields below and confirm the review."))
             }
           >
-            Preencher rascunho para revisão
+            {t("Fill in draft for review")}
           </button>
         </details>
       )}
     </section>
   );
 }
-
 type Run = {
-  execution_config?: { effort?: string | null };
+  execution_config?: {
+    effort?: string | null;
+  };
   usage?: {
     reasoning_tokens: number;
     cached_input_tokens: number;
@@ -181,25 +197,28 @@ type Run = {
   latency_ms: number | null;
   error_code: string | null;
 };
-const operations: Record<string, string> = {
-  suggest_review: "Segunda avaliação",
-  research: "Pesquisa pública",
-  strategy: "Estratégia de candidatura",
-  parse: "Extração",
-  suggest: "Sugestão de matching",
-  embed: "Indexação ou busca",
-};
-const states: Record<string, string> = {
-  succeeded: "Concluída",
-  running: "Em andamento",
-  failed: "Não concluída",
-  invalid: "Resposta rejeitada",
-  uncertain: "Custo a conferir",
-};
+const operations: Record<string, string> = localisedLabels({
+  suggest_review: "Second assessment",
+  research: "Public search",
+  strategy: "Application strategy",
+  parse: "Extraction",
+  cv_extract: "CV extraction",
+  ui_translate: "Interface translation",
+  suggest: "Matching suggestion",
+  embed: "Indexing or search",
+});
+const states: Record<string, string> = localisedLabels({
+  succeeded: "Completed",
+  running: "In progress",
+  failed: "Not completed",
+  invalid: "Response rejected",
+  uncertain: "Cost to check",
+});
 export function AiActivity() {
-  const [data, setData] = useState<{ status: AiStatus; runs: Run[] } | null>(
-    null,
-  );
+  const [data, setData] = useState<{
+    status: AiStatus;
+    runs: Run[];
+  } | null>(null);
   const [error, setError] = useState("");
   const [refresh, setRefresh] = useState(0);
   useEffect(() => {
@@ -224,16 +243,16 @@ export function AiActivity() {
   const { status, runs } = data;
   return (
     <>
-      <p className="eyebrow">CONTROLE DE USO</p>
-      <h1>Atividade de IA</h1>
+      <p className="eyebrow">{t("USAGE CONTROL")}</p>
+      <h1>{t("AI activity")}</h1>
       <section className="panel">
         <p>
           {status.configured
-            ? "OpenAI configurada"
-            : "Chave ainda não configurada"}{" "}
+            ? t("OpenAI configured")
+            : t("Key not yet configured")}{" "}
           · {status.model}
         </p>
-        <h2>Orçamento mensal</h2>
+        <h2>{t("Monthly budget")}</h2>
         {status.tasks && (
           <ul>
             {Object.entries(status.tasks).map(([task, policy]) => (
@@ -245,31 +264,38 @@ export function AiActivity() {
           </ul>
         )}
         <p>
-          Consumo contabilizado: €{Number(status.budget.spent_eur).toFixed(4)} ·
-          Reservado: €{Number(status.budget.reserved_eur).toFixed(4)} · Limite:
-          €{status.budget.limit_eur}
+          {t("Accounted usage: \u20AC")}
+          {Number(status.budget.spent_eur).toFixed(4)}
+          {t(" \u00B7 Reserved: \u20AC")}
+          {Number(status.budget.reserved_eur).toFixed(4)}
+          {t(" \u00B7 Limit: \u20AC")}
+          {status.budget.limit_eur}
         </p>
         <p>
-          Estimativa conservadora do projeto; não é a fatura da conta. O
-          controle combinado também preserva €15 para AWS dentro do teto de €25.
+          {t(
+            "Conservative project estimate; not the account invoice. Combined control also preserves \u20AC15 for AWS within the \u20AC25 cap.",
+          )}
         </p>
         {status.budget.alerts.map((level) => (
           <p key={level} role="status">
-            Uso de IA atingiu {level}% do limite.
+            {t("AI usage reached ")}
+            {level}
+            {t("% of the limit.")}
           </p>
         ))}
         {status.budget.unreconciled && (
           <p role="alert">
-            Novas chamadas bloqueadas: há custo desconhecido. Confira o uso no
-            provedor e reconcilie pela administração local.
+            {t(
+              "New calls are blocked because a cost is unknown. Check provider usage and reconcile it through local administration.",
+            )}
           </p>
         )}
         <button onClick={() => setRefresh(refresh + 1)}>
-          Atualizar atividade
+          {t("Update activity")}
         </button>
       </section>
-      <h2>Últimas execuções</h2>
-      {!runs.length && <p>Nenhuma chamada realizada.</p>}
+      <h2>{t("Recent runs")}</h2>
+      {!runs.length && <p>{t("No calls made.")}</p>}
       {runs.map((run) => (
         <article className="panel" key={run.id}>
           <h3>
@@ -284,19 +310,26 @@ export function AiActivity() {
           </p>
           {run.usage && (
             <p>
-              Raciocínio: {run.usage.reasoning_tokens} tokens · Entrada em
-              cache: {run.usage.cached_input_tokens} tokens · Buscas web:{" "}
-              {run.usage.web_search_calls}
+              {t("Reasoning: ")}
+              {run.usage.reasoning_tokens}
+              {t(" tokens \u00B7 Cached input: ")}
+              {run.usage.cached_input_tokens}
+              {t(" tokens \u00B7 Web searches:")} {run.usage.web_search_calls}
             </p>
           )}
           <p>
             €{Number(run.actual_eur ?? run.reserved_eur).toFixed(6)}
             {run.actual_eur === null ? " reservados" : " contabilizados"} ·
-            {run.input_tokens ?? "?"} tokens de entrada ·{" "}
-            {run.output_tokens ?? "?"} de saída ·{run.latency_ms ?? "?"} ms
+            {run.input_tokens ?? "?"}
+            {t(" input tokens \u00B7")} {run.output_tokens ?? "?"}
+            {t(" output tokens \u00B7")}
+            {run.latency_ms ?? "?"} ms
           </p>
           {run.error_code && <p>{run.error_code}</p>}
-          <small>Execução: {run.id}</small>
+          <small>
+            {t("Execution: ")}
+            {run.id}
+          </small>
         </article>
       ))}
     </>

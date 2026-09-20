@@ -67,9 +67,9 @@ class ReliableMatch(SuggestedMatch):
     clarifications: list[Clarification] = Field(default_factory=list, max_length=20)
 
 
-RELIABLE_VERSION = "evidence-matching-1.2"
+RELIABLE_VERSION = "evidence-matching-1.3-en-GB"
 RELIABLE_PROMPT = (
-    MATCH_PROMPT
+    MATCH_PROMPT.replace("Explain in Portuguese", "Explain in British English")
     + """
 Check for contradictions between evidence, title and body, and missing decisive information.
 Return these in clarifications; never silently pick the more favourable assertion. For an
@@ -142,7 +142,7 @@ def grounded(data: Row, payload: Row) -> Row:
             assessment.update(
                 status="unknown",
                 confidence=0,
-                reason="Requer avaliação humana específica de experiência ou estratégia.",
+                reason="Requires specific human evaluation of experience or strategy.",
             )
         assessment["fact_ids"] = sorted(set(cited))
     return {
@@ -171,13 +171,13 @@ def suggest(job_id: UUID, data: SuggestInput, actor: Actor, request: Request) ->
         owner_lock(db, actor.id)
         job, candidate = get_record(db, actor.id, "job", job_id), profile(db, actor.id)
         if job["version"] != data.job_version or candidate["version"] != data.profile_version:
-            raise Problem(409, "VERSION_CONFLICT", "Atualize a vaga e o perfil antes de usar IA.")
+            raise Problem(409, "VERSION_CONFLICT", "Update the job and profile before using AI.")
         if job["data"]["status"] == "DISCOVERED" or candidate["data"]["status"] != "reviewed":
-            raise Problem(409, "REVIEW_REQUIRED", "Reveja a vaga e publique o perfil primeiro.")
+            raise Problem(409, "REVIEW_REQUIRED", "Review the job and publish the profile first.")
         allowed = permitted_facts(db, actor.id)
         ids = [str(identity) for identity in data.fact_ids]
         if len(ids) != len(set(ids)) or any(identity not in allowed for identity in ids):
-            raise Problem(422, "FACT_NOT_ELIGIBLE", "Selecione fatos válidos e não sensíveis.")
+            raise Problem(422, "FACT_NOT_ELIGIBLE", "Select valid and non-sensitive facts.")
         ids.sort()
         facts = [
             {
@@ -208,7 +208,9 @@ def suggest(job_id: UUID, data: SuggestInput, actor: Actor, request: Request) ->
             "vacancy_text": job["data"].get("raw_text"),
         }
     if not payload["requirements"]:
-        raise Problem(409, "REQUIREMENTS_MISSING", "Estruture requisitos antes de pedir sugestões.")
+        raise Problem(
+            409, "REQUIREMENTS_MISSING", "Structure requirements before requesting suggestions."
+        )
     if not facts:
         return {
             "run_id": None,
@@ -225,7 +227,7 @@ def suggest(job_id: UUID, data: SuggestInput, actor: Actor, request: Request) ->
                         }
                         for r in payload["requirements"]
                     ],
-                    "limitations": ["Sem evidências selecionadas; nenhuma chamada paga realizada."],
+                    "limitations": ["No evidence selected; no paid call made."],
                 },
                 payload,
             ),

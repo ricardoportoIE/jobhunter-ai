@@ -46,9 +46,7 @@ def candidates(job_id: UUID, actor: Actor, request: Request) -> Row:
             (actor.id, job_id),
         ).fetchall()
         if len(others) > 500:
-            raise Problem(
-                409, "DEDUPE_CAPACITY", "Arquive vagas antigas para comparar até 500 vagas."
-            )
+            raise Problem(409, "DEDUPE_CAPACITY", "Archive old jobs to compare up to 500 jobs.")
         vectors: dict[str, list[list[float]]] = {}
         for row in current_vectors(db, actor.id, "job"):
             vectors.setdefault(str(row["source_id"]), []).append(row["vector"])
@@ -113,7 +111,7 @@ class DuplicateDecision(Version):
 @router.post("/{job_id}/duplicates")
 def decide(job_id: UUID, data: DuplicateDecision, actor: Actor, request: Request) -> Row:
     if job_id == data.target_id:
-        raise Problem(422, "INVALID_DUPLICATE", "Escolha outra vaga para comparar.")
+        raise Problem(422, "INVALID_DUPLICATE", "Choose another job to compare.")
     with connect(settings_for(request)) as db:
         owner_lock(db, actor.id)
         job = get_record(db, actor.id, "job", job_id)
@@ -131,14 +129,14 @@ def decide(job_id: UUID, data: DuplicateDecision, actor: Actor, request: Request
         ):
             return public(previous)
         if job["version"] != data.expected_version or target["version"] != data.target_version:
-            raise Problem(409, "VERSION_CONFLICT", "Atualize as duas vagas antes de decidir.")
+            raise Problem(409, "VERSION_CONFLICT", "Update both jobs before deciding.")
         if data.decision == "duplicate":
             if conflicts(job["data"], target["data"]):
                 raise Problem(
-                    409, "DUPLICATE_CONFLICT", "Revise divergências de empresa/local primeiro."
+                    409, "DUPLICATE_CONFLICT", "Review company/location discrepancies first."
                 )
             if target["data"]["archived"] or target["data"].get("duplicate_of"):
-                raise Problem(409, "INVALID_TARGET", "Escolha uma vaga principal ativa.")
+                raise Problem(409, "INVALID_TARGET", "Choose an active main job.")
             update(
                 db,
                 job,

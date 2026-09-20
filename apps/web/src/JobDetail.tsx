@@ -1,3 +1,4 @@
+import { t, systemMessage } from "./i18n";
 import { useTask } from "./useTask";
 import { AiJobTools } from "./AiTools";
 import DuplicateReview from "./DuplicateReview";
@@ -27,7 +28,6 @@ import {
   type Requirement,
 } from "./types";
 import { ErrorState, Field, Loading } from "./ui";
-
 export default function JobDetail({
   id,
   profile,
@@ -48,7 +48,11 @@ export default function JobDetail({
     let active = true;
     Promise.all([
       api<Job>(`/jobs/${id}`),
-      api<{ id: string }[]>(`/jobs/${id}/matches`),
+      api<
+        {
+          id: string;
+        }[]
+      >(`/jobs/${id}/matches`),
     ])
       .then(async ([item, matches]) => {
         const latest = matches[0]
@@ -73,44 +77,46 @@ export default function JobDetail({
   return (
     <>
       <a className="back" href="#inbox">
-        ← Voltar à Inbox
+        {t("\u2190 Back to Inbox")}
       </a>
       <div className="page-heading">
         <div>
           <p className="eyebrow">
-            {job.status} · VERSÃO {job.version}
+            {job.status}
+            {t(" \u00B7 VERSION ")}
+            {job.version}
           </p>
-          <h1>{job.title || "Revisar oportunidade"}</h1>
+          <h1>{job.title || t("Review opportunity")}</h1>
           <p>
-            {job.company_name || "Empresa não informada"} ·{" "}
-            {job.location || "Local não informado"}
+            {job.company_name || t("Company not provided")} ·{" "}
+            {job.location || t("Location not provided")}
           </p>
         </div>
       </div>
-      <nav className="tabs" aria-label="Etapas da oportunidade">
+      <nav className="tabs" aria-label={t("Opportunity stages")}>
         <button
           aria-pressed={tab === "review"}
           onClick={() => setTab("review")}
         >
-          1. Revisar vaga
+          {t("1. Review job")}
         </button>
         <button
           aria-pressed={tab === "analyse"}
           onClick={() => setTab("analyse")}
         >
-          2. Avaliar requisitos
+          {t("2. Assess requirements")}
         </button>
         <button
           aria-pressed={tab === "result"}
           onClick={() => setTab("result")}
         >
-          3. Resultado e evidências
+          {t("3. Outcome and evidence")}
         </button>
         <button
           aria-pressed={tab === "package"}
           onClick={() => setTab("package")}
         >
-          4. Pacote de candidatura
+          {t("4. Application package")}
         </button>
       </nav>
       {tab === "package" && (
@@ -159,16 +165,17 @@ export default function JobDetail({
           <MatchResult match={match} />
         ) : (
           <section className="empty">
-            <h2>Análise ainda não realizada</h2>
+            <h2>{t("Analysis not yet performed")}</h2>
             <p>
-              Revise a vaga e avalie seus requisitos para obter um resultado.
+              {t(
+                "Review the vacancy and assess its requirements to get a result.",
+              )}
             </p>
           </section>
         ))}
     </>
   );
 }
-
 function JobReview({ job, saved }: { job: Job; saved: () => void }) {
   const [requirements, setRequirements] = useState<Requirement[]>(
     job.requirements,
@@ -183,7 +190,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
   return (
     <div className="split review-layout">
       <section className="panel">
-        <h2>Campos estruturados</h2>
+        <h2>{t("Structured fields")}</h2>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -232,41 +239,41 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
             });
           }}
         >
-          <Field label="Título">
+          <Field label={t("Title")}>
             <input name="title" defaultValue={job.title ?? ""} />
           </Field>
-          <Field label="Empresa">
+          <Field label={t("Company")}>
             <input name="company_name" defaultValue={job.company_name ?? ""} />
           </Field>
           <div className="form-grid">
-            <Field label="Localidade">
+            <Field label={t("Location")}>
               <input name="location" defaultValue={job.location ?? ""} />
             </Field>
-            <Field label="País">
+            <Field label={t("Country")}>
               <select name="country" defaultValue={job.country ?? ""}>
-                <option value="">Desconhecido</option>
-                <option value="IE">Irlanda</option>
-                <option value="GB">Reino Unido</option>
-                <option value="OTHER">Outro</option>
+                <option value="">{t("Unknown")}</option>
+                <option value="IE">{t("Ireland")}</option>
+                <option value="GB">{t("United Kingdom")}</option>
+                <option value="OTHER">{t("Other")}</option>
               </select>
             </Field>
-            <Field label="Modalidade">
+            <Field label={t("Working arrangement")}>
               <select name="work_mode" defaultValue={job.work_mode ?? ""}>
-                <option value="">Desconhecida</option>
-                <option value="hybrid">Híbrido</option>
-                <option value="onsite">Presencial</option>
-                <option value="remote">Remoto</option>
+                <option value="">{t("Unknown")}</option>
+                <option value="hybrid">{t("Hybrid")}</option>
+                <option value="onsite">{t("On-site")}</option>
+                <option value="remote">{t("Remote")}</option>
               </select>
             </Field>
-            <Field label="Contrato / horário">
+            <Field label={t("Contract / hours")}>
               <input
                 name="employment_type"
                 defaultValue={job.employment_type ?? ""}
-                placeholder="Ex.: full-time"
+                placeholder={t("E.g.: full-time")}
               />
             </Field>
           </div>
-          <Field label="Nível confirmado da vaga">
+          <Field label={t("Confirmed vacancy level")}>
             <input
               name="seniority"
               defaultValue={job.seniority ?? ""}
@@ -274,9 +281,9 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
             />
           </Field>
           <fieldset>
-            <legend>Salário — deixe vazio se ausente</legend>
+            <legend>{t("Salary \u2014 leave empty if absent")}</legend>
             <div className="form-grid">
-              <Field label="Mínimo">
+              <Field label={t("Minimum")}>
                 <input
                   type="number"
                   min="0"
@@ -285,7 +292,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                   defaultValue={job.salary?.minimum ?? ""}
                 />
               </Field>
-              <Field label="Máximo">
+              <Field label={t("Maximum")}>
                 <input
                   type="number"
                   min="0"
@@ -294,7 +301,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                   defaultValue={job.salary?.maximum ?? ""}
                 />
               </Field>
-              <Field label="Moeda">
+              <Field label={t("Currency")}>
                 <input
                   name="currency"
                   pattern="[A-Z]{3}"
@@ -302,49 +309,55 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                   defaultValue={job.salary?.currency ?? ""}
                 />
               </Field>
-              <Field label="Período">
+              <Field label={t("Period")}>
                 <select name="period" defaultValue={job.salary?.period ?? ""}>
-                  <option value="">Desconhecido</option>
-                  <option value="year">Ano</option>
-                  <option value="month">Mês</option>
-                  <option value="day">Dia</option>
-                  <option value="hour">Hora</option>
+                  <option value="">{t("Unknown")}</option>
+                  <option value="year">{t("Year")}</option>
+                  <option value="month">{t("Month")}</option>
+                  <option value="day">{t("Day")}</option>
+                  <option value="hour">{t("Hour")}</option>
                 </select>
               </Field>
             </div>
           </fieldset>
-          <Field label="Sponsorship declarado">
+          <Field label={t("Declared sponsorship")}>
             <select name="sponsorship" defaultValue={job.sponsorship ?? ""}>
-              <option value="">Desconhecido</option>
-              <option value="available">Disponível</option>
-              <option value="unavailable">Explicitamente indisponível</option>
-              <option value="conditional">Condicional</option>
+              <option value="">{t("Unknown")}</option>
+              <option value="available">{t("Available")}</option>
+              <option value="unavailable">{t("Explicitly unavailable")}</option>
+              <option value="conditional">{t("Conditional")}</option>
             </select>
           </Field>
-          <Field label="Autorização / restrições no anúncio">
+          <Field label={t("Authorisation / restrictions in advert")}>
             <textarea
               name="work_authorisation"
               defaultValue={job.work_authorisation ?? ""}
               rows={2}
             />
           </Field>
-          <Field label="Pontos de revisão (um por linha)">
+          <Field label={t("Review points (one per line)")}>
             <textarea
               name="risk_flags"
               rows={3}
               defaultValue={job.risk_flags.join("\n")}
-              placeholder="Ex.: título e descrição apresentam funções diferentes"
+              placeholder={t(
+                "E.g.: title and description show different roles",
+              )}
             />
           </Field>
-          <h3>Requisitos</h3>
+          <h3>{t("Requirements")}</h3>
           <p className="muted">
-            Transcreva os critérios relevantes e onde aparecem no anúncio.
-            Ausência de informação continua desconhecida.
+            {t(
+              "Transcribe the relevant criteria and where they appear in the advert. Absence of information remains unknown.",
+            )}
           </p>
           {requirements.map((req, index) => (
             <fieldset key={req.id}>
-              <legend>Requisito {index + 1}</legend>
-              <Field label="Descrição do requisito">
+              <legend>
+                {t("Requirement ")}
+                {index + 1}
+              </legend>
+              <Field label={t("Requirement description")}>
                 <input
                   required
                   value={req.text}
@@ -353,7 +366,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                   }
                 />
               </Field>
-              <Field label="Categoria do requisito">
+              <Field label={t("Requirement category")}>
                 <select
                   value={req.category}
                   onChange={(event) =>
@@ -367,7 +380,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                   ))}
                 </select>
               </Field>
-              <Field label="Importância">
+              <Field label={t("Importance")}>
                 <select
                   value={req.importance}
                   onChange={(event) =>
@@ -377,11 +390,11 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                     })
                   }
                 >
-                  <option value="required">Obrigatório</option>
-                  <option value="preferred">Desejável</option>
+                  <option value="required">{t("Mandatory")}</option>
+                  <option value="preferred">{t("Desirable")}</option>
                 </select>
               </Field>
-              <Field label="Local no anúncio">
+              <Field label={t("Location in the advert")}>
                 <input
                   required
                   value={req.source_locator}
@@ -398,7 +411,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                     change(req.id, { is_eliminatory: event.target.checked })
                   }
                 />
-                Eliminatório explicitamente confirmado
+                {t("Explicitly confirmed disqualifying requirement")}
               </label>
               {req.category === "work_authorisation_hours" && (
                 <label className="check">
@@ -411,7 +424,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                       })
                     }
                   />
-                  Possibilidade futura de autorização / sponsorship
+                  {t("Future possibility of authorisation / sponsorship")}
                 </label>
               )}
               <button
@@ -422,7 +435,8 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                   )
                 }
               >
-                Remover requisito {index + 1}
+                {t("Remove requirement ")}
+                {index + 1}
               </button>
             </fieldset>
           ))}
@@ -444,7 +458,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
               ])
             }
           >
-            Adicionar requisito
+            {t("Add requirement")}
           </button>
           <label className="check">
             <input
@@ -453,16 +467,17 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
               defaultChecked={job.archived}
               aria-describedby="archive-help"
             />
-            Arquivar esta oportunidade
+            {t("Archive this opportunity")}
           </label>
           <details className="help-disclosure" id="archive-help">
             <summary>
-              <span aria-hidden="true">ⓘ</span> What does archiving do?
+              <span aria-hidden="true">ⓘ</span>
+              {t(" What does archiving do?")}
             </summary>
             <p>
-              Archiving hides this opportunity from the active Inbox. It keeps
-              the job, evidence and application history. Find it with the
-              archived filter and clear this checkbox to restore it.
+              {t(
+                "Archiving hides this opportunity from the active Inbox. It keeps the job, evidence and application history. Find it with the archived filter and clear this checkbox to restore it.",
+              )}
             </p>
           </details>
           <label className="check">
@@ -475,37 +490,41 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
               onInvalid={() => setReviewError(true)}
               onChange={() => setReviewError(false)}
             />
-            Confirmo a revisão dos campos e requisitos acima.
+            {t("I confirm the review of the fields and requirements above.")}
           </label>
           <p id="job-review-help" role={reviewError ? "alert" : undefined}>
             {reviewError
-              ? "Confirm the review checkbox before saving the job review."
-              : "Review confirmation is required to save. Check the fields and requirements, then tick the confirmation box."}
+              ? t("Confirm the review checkbox before saving the job review.")
+              : t(
+                  "Review confirmation is required to save. Check the fields and requirements, then tick the confirmation box.",
+                )}
           </p>
           {task.feedback}
           <button className="primary" disabled={task.busy}>
-            Salvar revisão da vaga
+            {t("Save vacancy review")}
           </button>
         </form>
       </section>
       <aside className="panel source">
-        <h2>Anúncio original</h2>
-        <p>Fonte: {job.source_name}</p>
+        <h2>{t("Original advert")}</h2>
+        <p>
+          {t("Source: ")}
+          {job.source_name}
+        </p>
         {job.source_url && (
           <a href={job.source_url} target="_blank" rel="noopener noreferrer">
-            Abrir referência externa ↗
+            {t("Open external reference \u2197")}
           </a>
         )}
         <p className="preserve">{job.raw_text}</p>
         <details>
-          <summary>Integridade do texto</summary>
+          <summary>{t("Text integrity")}</summary>
           <p className="muted">SHA-256: {job.content_sha256}</p>
         </details>
       </aside>
     </div>
   );
 }
-
 function AnalysisForm({
   job,
   profile,
@@ -541,17 +560,18 @@ function AnalysisForm({
   if (job.status === "DISCOVERED" || profile.status !== "reviewed")
     return (
       <section className="empty">
-        <h2>Revisão necessária</h2>
+        <h2>{t("Review required")}</h2>
         <p>
-          Confirme a revisão da vaga e publique a versão do perfil antes de
-          analisar.
+          {t(
+            "Confirm the job review and publish the profile version before analysing.",
+          )}
         </p>
-        <a href="#profile">Revisar perfil →</a>
+        <a href="#profile">{t("Review profile \u2192")}</a>
       </section>
     );
   return (
     <section className="panel narrow">
-      <h2>Avalie o atendimento de cada requisito</h2>
+      <h2>{t("Assess each requirement")}</h2>
       <AiMatching
         job={job}
         profile={profile}
@@ -579,9 +599,9 @@ function AnalysisForm({
         }}
       />
       <p>
-        Somente fatos verificados e autorizados para matching podem sustentar
-        respostas positivas. Uma avaliação manual não cria experiência
-        profissional.
+        {t(
+          "Only verified and authorised facts for matching can support positive responses. A manual review does not create professional experience.",
+        )}
       </p>
       <form
         onSubmit={(event) => {
@@ -600,17 +620,18 @@ function AnalysisForm({
                 ),
                 assessments: assessments.map((a) => ({
                   ...a,
-                  reason: a.reason || "Informação ainda desconhecida.",
+                  reason: a.reason || t("Information still unknown."),
                 })),
               }),
             );
-          }, "Análise concluída.");
+          }, t("Analysis completed."));
         }}
       >
         {!job.requirements.length && (
           <p>
-            Nenhum requisito estruturado: o resultado terá score desconhecido e
-            cobertura zero.
+            {t(
+              "No structured requirements: the result will have unknown score and zero coverage.",
+            )}
           </p>
         )}
         {job.requirements.map((req) => {
@@ -620,10 +641,12 @@ function AnalysisForm({
               <legend>{req.text}</legend>
               <p className="muted">
                 {categories[req.category]} ·{" "}
-                {req.importance === "required" ? "Obrigatório" : "Desejável"}
-                {req.is_eliminatory ? " · Eliminatório" : ""}
+                {req.importance === "required"
+                  ? t("Mandatory")
+                  : t("Desirable")}
+                {req.is_eliminatory ? t(" \u00B7 Disqualifying") : ""}
               </p>
-              <Field label={`Atendimento: ${req.text}`}>
+              <Field label={t("Attainment: {0}", [req.text])}>
                 <select
                   value={entry.status}
                   onChange={(event) =>
@@ -637,7 +660,7 @@ function AnalysisForm({
                   ))}
                 </select>
               </Field>
-              <Field label={`Justificativa: ${req.text}`}>
+              <Field label={t("Justification: {0}", [req.text])}>
                 <textarea
                   rows={2}
                   required={entry.status !== "unknown"}
@@ -649,7 +672,7 @@ function AnalysisForm({
                 />
               </Field>
               <fieldset>
-                <legend>Fatos que sustentam esta avaliação</legend>
+                <legend>{t("Facts supporting this assessment")}</legend>
                 {facts
                   .filter(
                     (fact) =>
@@ -676,7 +699,7 @@ function AnalysisForm({
                   (f) =>
                     f.status === "verified" &&
                     f.allowed_uses.includes("matching"),
-                ) && <p>Nenhum fato verificado disponível.</p>}
+                ) && <p>{t("No verified facts available.")}</p>}
               </fieldset>
             </fieldset>
           );
@@ -688,75 +711,78 @@ function AnalysisForm({
             checked={confirmed}
             onChange={(event) => setConfirmed(event.target.checked)}
           />
-          Confirmo estas avaliações e a validade das referências selecionadas.
+          {t(
+            "I confirm these assessments and the validity of the selected references.",
+          )}
         </label>
         {task.feedback}
         <button className="primary" disabled={task.busy}>
-          Calcular compatibilidade
+          {t("Calculate compatibility")}
         </button>
       </form>
     </section>
   );
 }
-
 export function MatchResult({ match }: { match: Match }) {
   return (
     <section className="match-result">
       {match.stale && (
         <p role="alert">
-          Análise desatualizada: o perfil, a vaga ou a validade de um fato
-          mudou. Revise e calcule novamente.
+          {t(
+            "Outdated analysis: the profile, job or fact validity has changed. Review and recalculate.",
+          )}
         </p>
       )}
       <div className="score-grid">
         <div>
-          <span>Compatibilidade</span>
+          <span>{t("Compatibility")}</span>
           <strong>{match.score === null ? "—" : `${match.score}%`}</strong>
           <small>
             {match.score === null
-              ? "Dados insuficientes"
-              : "Atendimento dos critérios conhecidos"}
+              ? t("Insufficient data")
+              : t("Attainment against known criteria")}
           </small>
         </div>
         <div>
-          <span>Cobertura</span>
+          <span>{t("Coverage")}</span>
           <strong>{Math.round(match.coverage * 100)}%</strong>
-          <small>Quanto dos requisitos foi avaliado</small>
+          <small>{t("Proportion of requirements assessed")}</small>
         </div>
         <div>
-          <span>Recomendação</span>
+          <span>{t("Recommendation")}</span>
           <h2>{recommendations[match.recommendation]}</h2>
           <small>{gates[match.employment_gate]}</small>
         </div>
       </div>
       <section className="panel">
-        <h2>Bloqueios e lacunas</h2>
+        <h2>{t("Blockers and gaps")}</h2>
         <ClarificationList issues={match.clarifications ?? []} />
         {match.clarification_resolutions?.map((item) => (
           <p key={item.key}>
-            Esclarecimento registrado: {item.note} · Fonte:{" "}
-            {item.source_reference}
+            {t("Clarification recorded: ")}
+            {item.note}
+            {t(" \u00B7 Source:")} {item.source_reference}
           </p>
         ))}
         {match.blockers.map((b, i) => (
           <p className="blocker" key={i}>
-            {b.reason}
+            {systemMessage(b.reason)}
           </p>
         ))}
         {!match.gaps.length && !match.blockers.length && (
-          <p>Nenhuma lacuna entre os critérios avaliados.</p>
+          <p>{t("No gap between the assessed criteria.")}</p>
         )}
         {match.gaps.map((gap) => (
           <article className="record" key={gap.requirement_id}>
             <h3>
               {gap.text} · {outcomes[gap.status]}
             </h3>
-            <p>{gap.reason}</p>
+            <p>{systemMessage(gap.reason)}</p>
           </article>
         ))}
         {match.review_flags.length > 0 && (
           <p className="muted">
-            Pontos de revisão:{" "}
+            {t("Review points:")}{" "}
             {match.review_flags
               .map((flag) => reviewFlags[flag] ?? flag)
               .join(", ")}
@@ -764,24 +790,28 @@ export function MatchResult({ match }: { match: Match }) {
         )}
       </section>
       <section className="panel">
-        <h2>Como o resultado foi calculado</h2>
+        <h2>{t("How the result was calculated")}</h2>
         {match.breakdown.map((category) => (
           <details className="category" key={category.category}>
             <summary>
-              {categories[category.category]} · peso {category.weight} ·
-              cobertura {Math.round(category.coverage * 100)}%
+              {categories[category.category]}
+              {t(" \u00B7 weight ")}
+              {category.weight}
+              {t(" \u00B7 coverage ")}
+              {Math.round(category.coverage * 100)}%
             </summary>
             {!category.assessments.length && (
-              <p>Sem critérios estruturados nesta categoria.</p>
+              <p>{t("No structured criteria in this category.")}</p>
             )}
             {category.assessments.map((item) => (
               <article key={item.requirement_id} className="record">
                 <p>
-                  <strong>{outcomes[item.status]}</strong> · {item.reason}
+                  <strong>{outcomes[item.status]}</strong> ·{" "}
+                  {systemMessage(item.reason)}
                 </p>
                 {item.fact_ids.map((id) => (
                   <p key={id}>
-                    Fato:{" "}
+                    {t("Fact:")}{" "}
                     {match.profile_snapshot.facts.find((fact) => fact.id === id)
                       ?.claim || id}
                   </p>
@@ -792,11 +822,16 @@ export function MatchResult({ match }: { match: Match }) {
                   );
                   return evidence ? (
                     <details key={id}>
-                      <summary>Ver evidência: {evidence.source_ref}</summary>
+                      <summary>
+                        {t("View evidence: ")}
+                        {evidence.source_ref}
+                      </summary>
                       <p>{evidence.locator}</p>
                       <p className="preserve">{evidence.content}</p>
                       <p className="muted">
-                        Versão {evidence.version} preservada nesta análise.
+                        {t("Version ")}
+                        {evidence.version}
+                        {t(" preserved in this analysis.")}
                       </p>
                     </details>
                   ) : null;

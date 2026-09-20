@@ -56,6 +56,16 @@ def main() -> None:
     fixture = BrowserFixtureProvider()
     with (
         patch("jobhunter_api.job_parser.get_provider", return_value=fixture),
+        patch("jobhunter_api.cv_import.get_provider", return_value=fixture),
+        patch("jobhunter_api.job_url.get_provider", return_value=fixture),
+        patch(
+            "jobhunter_api.job_url.fetch_vacancy",
+            side_effect=lambda url: (
+                url,
+                "Junior Python Developer\nExample Labs\nDublin\nPython is required.\n"
+                "Personal projects accepted. Apply through the public careers portal.",
+            ),
+        ),
         patch("jobhunter_api.ai_matching.get_provider", return_value=fixture),
         patch("jobhunter_api.packages.get_provider", return_value=fixture),
         patch("jobhunter_api.semantic.embedding_provider", return_value=fixture),

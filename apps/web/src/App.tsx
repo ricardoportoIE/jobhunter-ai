@@ -1,8 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Workspace from "./Workspace";
 import { api, ApiError, setSession, type Session } from "./api";
-
+import LanguageSelector from "./LanguageSelector";
+import { useLocale, t } from "./i18n";
 export default function App() {
+  useLocale();
   const [session, updateSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -11,7 +13,7 @@ export default function App() {
     const expired = () => {
       setSession(null);
       updateSession(null);
-      setError("Sessão expirada. Entre novamente.");
+      setError(t("Session expired. Please log in again."));
     };
     window.addEventListener("session-expired", expired);
     return () => window.removeEventListener("session-expired", expired);
@@ -24,7 +26,7 @@ export default function App() {
       })
       .catch((reason: unknown) => {
         if (!(reason instanceof ApiError && reason.status === 401))
-          setError("Serviço indisponível. Tente entrar novamente.");
+          setError(t("Service unavailable. Please try logging in again."));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -41,7 +43,9 @@ export default function App() {
       setSession(value);
       updateSession(value);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Erro ao entrar.");
+      setError(
+        reason instanceof Error ? reason.message : t("Error logging in."),
+      );
     } finally {
       setBusy(false);
     }
@@ -49,21 +53,24 @@ export default function App() {
   if (loading)
     return (
       <main className="login">
-        <p role="status">Verificando sessão…</p>
+        <LanguageSelector />
+        <p role="status">{t("Checking session\u2026")}</p>
       </main>
     );
   if (!session)
     return (
       <main className="login">
+        <LanguageSelector />
         <p className="eyebrow">JOBHUNTER AI · LOCAL</p>
         <h1>
-          Seu próximo passo
+          {t("Your next step")}
           <br />
-          começa aqui.
+          {t("starts here.")}
         </h1>
         <p>
-          Entre para organizar seu perfil e avaliar oportunidades com
-          evidências.
+          {t(
+            "Log in to organise your profile and assess opportunities with evidence.",
+          )}
         </p>
         <form
           onSubmit={(event) => {
@@ -71,7 +78,7 @@ export default function App() {
           }}
         >
           <label>
-            Utilizador
+            {t("User")}
             <input
               name="username"
               autoComplete="username"
@@ -80,7 +87,7 @@ export default function App() {
             />
           </label>
           <label>
-            Senha
+            {t("Password")}
             <input
               name="password"
               type="password"
@@ -89,16 +96,21 @@ export default function App() {
               maxLength={256}
             />
           </label>
-          {error && <p role="alert">{error}</p>}
-          <button disabled={busy}>{busy ? "Entrando…" : "Entrar"}</button>
+          {error && <p role="alert">{t(error)}</p>}
+          <button disabled={busy}>
+            {busy ? t("Logging in\u2026") : t("Log in")}
+          </button>
         </form>
-        <p className="muted">Use a credencial criada na configuração local.</p>
+        <p className="muted">
+          {t("Use the credential created in local setup.")}
+        </p>
       </main>
     );
   return (
     <>
       <div className="session-bar">
-        <span>Sessão local ativa</span>
+        <LanguageSelector />
+        <span>{t("Active local session")}</span>
         <button
           onClick={() => {
             void api("/session", "DELETE")
@@ -106,12 +118,12 @@ export default function App() {
                 setSession(null);
                 updateSession(null);
               })
-              .catch(() => setError("Não foi possível sair. Tente novamente."));
+              .catch(() => setError(t("Could not log out. Please try again.")));
           }}
         >
-          Sair
+          {t("Log out")}
         </button>
-        {error && <span role="alert">{error}</span>}
+        {error && <span role="alert">{t(error)}</span>}
       </div>
       <Workspace />
     </>

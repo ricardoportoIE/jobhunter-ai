@@ -1,7 +1,7 @@
+import { t, systemMessage } from "./i18n";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { outcomes, type Assessment, type Job, type Profile } from "./types";
-
 export type Clarification = {
   key: string;
   code: string;
@@ -25,7 +25,7 @@ export function ClarificationList({ issues }: { issues: Clarification[] }) {
     <>
       {issues.map((issue) => (
         <article className="record" key={issue.key}>
-          <p>{issue.message}</p>
+          <p>{systemMessage(issue.message)}</p>
           {issue.alternatives?.map((answer) => (
             <blockquote key={answer.run_id}>
               <strong>
@@ -57,7 +57,7 @@ export default function Clarifications({
   const [issues, setIssues] = useState<Clarification[]>([]);
   const [error, setError] = useState("");
   const signature = JSON.stringify(
-    assessments.map((a) => ({ ...a, reason: "Revisão em curso" })),
+    assessments.map((a) => ({ ...a, reason: t("Review in progress") })),
   );
   useEffect(() => {
     let active = true;
@@ -93,16 +93,16 @@ export default function Clarifications({
     ]);
   }
   return (
-    <section className="ai-panel" aria-label="Esclarecimentos">
-      <h3>Esclarecimentos e divergências</h3>
+    <section className="ai-panel" aria-label={t("Clarifications")}>
+      <h3>{t("Clarifications and discrepancies")}</h3>
       <p>
-        Uma divergência não elimina a vaga do escopo. Registre a fonte e a
-        conclusão antes de priorizar. Uma nota não comprova um requisito
-        eliminatório ainda desconhecido.
+        {t(
+          "A disagreement does not remove the job from scope. Record the source and conclusion before prioritising. A note does not establish that an unknown disqualifying requirement is met.",
+        )}
       </p>
       {error && <p role="alert">{error}</p>}
       {!issues.length && !error && (
-        <p>Nenhum esclarecimento sinalizado nesta revisão.</p>
+        <p>{t("No clarifications flagged in this review.")}</p>
       )}
       {issues.map((issue) => (
         <div key={issue.key}>
@@ -110,7 +110,7 @@ export default function Clarifications({
           {!issue.requires_assessment_change && (
             <>
               <label>
-                Conclusão da revisão
+                {t("Review completion")}
                 <textarea
                   minLength={20}
                   maxLength={3000}
@@ -123,7 +123,7 @@ export default function Clarifications({
                 />
               </label>
               <label>
-                Fonte ou referência consultada
+                {t("Source or reference consulted")}
                 <input
                   maxLength={2000}
                   value={

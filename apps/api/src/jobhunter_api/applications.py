@@ -74,9 +74,7 @@ def shortlist(data: Shortlist, actor: Actor, request: Request, response: Respons
                 or match["profile_version"] != candidate["version"]
                 or invalid_fact
             ):
-                raise Problem(
-                    409, "STALE_MATCH", "Atualize a análise antes de usar este resultado."
-                )
+                raise Problem(409, "STALE_MATCH", "Update the analysis before using this result.")
         now = datetime.now(UTC).isoformat()
         return public(
             insert(
@@ -139,7 +137,7 @@ def transition(application_id: UUID, data: Event, actor: Actor, request: Request
     payload_hash = fingerprint(data.model_dump(mode="json"))
     key = request.headers.get("idempotency-key", "implicit:" + payload_hash)
     if not key.strip() or len(key) > 200:
-        raise Problem(422, "INVALID_KEY", "Chave de idempotência inválida.")
+        raise Problem(422, "INVALID_KEY", "Invalid idempotency key.")
     operation = "application-event:" + str(application_id)
     with connect(settings_for(request)) as db:
         owner_lock(db, actor.id)
@@ -150,13 +148,11 @@ def transition(application_id: UUID, data: Event, actor: Actor, request: Request
         ).fetchone()
         if previous:
             if previous["payload_hash"] != payload_hash:
-                raise Problem(409, "IDEMPOTENCY_CONFLICT", "A chave já registra outro evento.")
+                raise Problem(409, "IDEMPOTENCY_CONFLICT", "The key already records another event.")
             return dict(previous["response"])
         old = current["data"]["status"]
         if data.to_status not in TRANSITIONS[old]:
-            raise Problem(
-                409, "INVALID_TRANSITION", "Transição não permitida a partir deste estado."
-            )
+            raise Problem(409, "INVALID_TRANSITION", "Transition not allowed from this state.")
         submission = current["data"].get("submission")
         if data.to_status == "SUBMITTED":
             if (
@@ -168,12 +164,14 @@ def transition(application_id: UUID, data: Event, actor: Actor, request: Request
                 raise Problem(
                     422,
                     "MANUAL_CONFIRMATION_REQUIRED",
-                    "Confirme o envio manual, data, canal e comprovante.",
+                    "Confirm manual submission, date, channel and receipt.",
                 )
             if data.submitted_at.tzinfo is None or data.submitted_at > datetime.now(
                 UTC
             ) + timedelta(minutes=5):
-                raise Problem(422, "INVALID_DATE", "Informe a data real do envio com fuso horário.")
+                raise Problem(
+                    422, "INVALID_DATE", "Provide the actual submission date with timezone."
+                )
             submission = {
                 "origin": "manual_record",
                 "channel": data.channel,

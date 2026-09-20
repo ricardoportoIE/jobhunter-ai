@@ -41,7 +41,7 @@ def source_conflicts(job: Row) -> list[Row]:
             {
                 "code": "TITLE_BODY_CONFLICT",
                 "requirement_id": None,
-                "message": "Título e descrição divergem. Confirme a função e o nível da vaga.",
+                "message": "Title and description differ. Confirm the job role and level.",
             }
         )
     for flag in job.get("risk_flags", []):
@@ -54,7 +54,10 @@ def source_conflicts(job: Row) -> list[Row]:
             {
                 "code": "UNTRUSTED_INSTRUCTIONS",
                 "requirement_id": None,
-                "message": "Há comandos dirigidos à IA no anúncio. Confira os requisitos na fonte.",
+                "message": (
+                    "There are AI-directed commands in the ad. "
+                    "Check the requirements at the source."
+                ),
             }
         )
     return issues
@@ -120,7 +123,7 @@ def collect(
                     {
                         "code": "ASSESSMENT_DISAGREEMENT",
                         "requirement_id": req["id"],
-                        "message": "As avaliações divergem sobre as mesmas evidências. Esclareça.",
+                        "message": "Evaluations differ on the same evidence. Clarify.",
                         "alternatives": answers,
                     }
                 )
@@ -140,7 +143,7 @@ def collect(
                         "code": "DECISIVE_INFORMATION_MISSING",
                         "requires_assessment_change": True,
                         "requirement_id": req["id"],
-                        "message": "Requisito eliminatório ainda não confirmado: " + req["text"],
+                        "message": "Disqualifying requirement not yet confirmed: " + req["text"],
                     }
                 )
     unique = {}
@@ -165,9 +168,7 @@ def apply_gate(result: Row, issues: list[Row], resolutions: list[Resolution], ac
     if len({r.key for r in resolutions}) != len(resolutions) or any(
         r.key not in known for r in resolutions
     ):
-        raise Problem(
-            409, "CLARIFICATIONS_CHANGED", "Atualize os esclarecimentos antes de confirmar."
-        )
+        raise Problem(409, "CLARIFICATIONS_CHANGED", "Update clarifications before confirming.")
     resolved = {r.key for r in resolutions}
     pending = [
         issue

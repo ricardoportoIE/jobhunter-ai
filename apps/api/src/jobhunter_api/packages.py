@@ -60,10 +60,10 @@ def download(
         check_current(db, actor.id, payload["snapshot"])
         if row["version"] != expected_version or payload["status"] != "APPROVED":
             raise Problem(
-                409, "APPROVAL_REQUIRED", "Aprove a versão atual do pacote antes de baixar."
+                409, "APPROVAL_REQUIRED", "Approve the current package version before downloading."
             )
         if payload["review"]["content_hash"] != fingerprint(payload["content"]):
-            raise Problem(409, "CONTENT_CHANGED", "Conteúdo diferente da revisão aprovada.")
+            raise Problem(409, "CONTENT_CHANGED", "Content differs from the approved revision.")
         content, media = artifact(public(row), filename)
     return Response(
         content,
@@ -113,14 +113,12 @@ def strategy(job_id: UUID, data: StrategyRequest, actor: Actor, request: Request
     letter = [f["id"] for f in snapshot["facts"] if "cover_letter" in f["allowed_uses"]][:5]
     if not cv or not letter:
         raise Problem(
-            422, "DOCUMENT_FACTS_REQUIRED", "Selecione fatos autorizados para CV e cover letter."
+            422, "DOCUMENT_FACTS_REQUIRED", "Select authorised facts for CV and cover letter."
         )
     run_id = None
     if data.use_ai:
         if not data.external_processing_confirmed:
-            raise Problem(
-                422, "CONSENT_REQUIRED", "Confirme o envio dos fatos e perguntas à OpenAI."
-            )
+            raise Problem(422, "CONSENT_REQUIRED", "Confirm sending facts and questions to OpenAI.")
         response = structured(
             settings,
             get_provider(settings),
@@ -142,12 +140,12 @@ def strategy(job_id: UUID, data: StrategyRequest, actor: Actor, request: Request
                 {
                     "requirement_id": r["id"],
                     "fact_ids": [],
-                    "explanation": "Revisar evidências e lacunas manualmente.",
+                    "explanation": "Review evidence and gaps manually.",
                 }
                 for r in snapshot["job"]["requirements"]
             ],
             "answers": [{"question_index": i, "fact_ids": []} for i in range(len(data.questions))],
-            "risks": ["Estratégia manual: seleção sem avaliação de relevância por IA."],
+            "risks": ["Manual strategy: selection without AI relevance evaluation."],
             "interview_points": [],
         }
     signature = fingerprint({"snapshot": snapshot, "result": result, "run_id": run_id})
@@ -216,7 +214,7 @@ def approve_strategy(strategy_id: UUID, data: Selection, actor: Actor, request: 
         try:
             validate_strategy(selection, snapshot)
         except ValueError:
-            raise Problem(422, "INVALID_SELECTION", "Seleção fora dos usos autorizados.") from None
+            raise Problem(422, "INVALID_SELECTION", "Selection outside authorised uses.") from None
         checkpoint(db, row)
         return public(
             update(
@@ -245,9 +243,9 @@ def generate(job_id: UUID, data: Generate, actor: Actor, request: Request) -> Ro
         owner_lock(db, actor.id)
         plan = get_record(db, actor.id, "strategy", data.strategy_id)
         if plan["data"]["job_id"] != str(job_id):
-            raise Problem(404, "NOT_FOUND", "Estratégia não encontrada nesta vaga.")
+            raise Problem(404, "NOT_FOUND", "Strategy not found in this job.")
         if plan["version"] != data.strategy_version or plan["data"]["status"] != "APPROVED":
-            raise Problem(409, "STRATEGY_REVIEW_REQUIRED", "Aprove a versão atual da estratégia.")
+            raise Problem(409, "STRATEGY_REVIEW_REQUIRED", "Approve the current strategy version.")
         snapshot, selection = plan["data"]["snapshot"], plan["data"]["selection"]
         check_current(db, actor.id, snapshot)
         previous = db.execute(
@@ -305,10 +303,10 @@ def revise(package_id: UUID, data: Revise, actor: Actor, request: Request) -> Ro
             k not in {str(i) for i in range(len(snapshot["questions"]))}
             for k in data.manual_answers
         ):
-            raise Problem(422, "INVALID_QUESTION", "Resposta vinculada a pergunta inexistente.")
+            raise Problem(422, "INVALID_QUESTION", "Answer linked to non-existent question.")
         if data.manual_answers and not data.attest_answers:
             raise Problem(
-                422, "ATTESTATION_REQUIRED", "Confirme a veracidade das respostas manuais."
+                422, "ATTESTATION_REQUIRED", "Confirm the truthfulness of manual answers."
             )
         selection = {
             **row["data"]["selection"],
@@ -319,7 +317,7 @@ def revise(package_id: UUID, data: Revise, actor: Actor, request: Request) -> Ro
             validate_strategy(selection, snapshot)
         except ValueError:
             raise Problem(
-                422, "INVALID_SELECTION", "Fatos sem autorização para este documento."
+                422, "INVALID_SELECTION", "Facts not authorised for this document."
             ) from None
         content = compose(snapshot, selection, data.manual_answers)
         checkpoint(db, row)
@@ -362,13 +360,13 @@ def review(package_id: UUID, data: Review, actor: Actor, request: Request) -> Ro
         )
         if data.decision == "approve":
             if not checked["valid"]:
-                raise Problem(422, "VALIDATION_FAILED", "Resolva as pendências antes de aprovar.")
+                raise Problem(422, "VALIDATION_FAILED", "Resolve pending issues before approving.")
             if (
                 any(a["classification"] == "SENSITIVE" for a in payload["content"]["answers"])
                 and not data.sensitive_review_confirmed
             ):
                 raise Problem(
-                    422, "SENSITIVE_REVIEW_REQUIRED", "Confirme a revisão das respostas sensíveis."
+                    422, "SENSITIVE_REVIEW_REQUIRED", "Confirm review of sensitive answers."
                 )
         checkpoint(db, row)
         return public(
@@ -422,7 +420,7 @@ def diff(package_id: UUID, actor: Actor, request: Request, from_version: int = Q
             (actor.id, package_id, from_version),
         ).fetchone()
         if not previous:
-            raise Problem(404, "NOT_FOUND", "Versão anterior não encontrada.")
+            raise Problem(404, "NOT_FOUND", "Previous version not found.")
         a = json.dumps(previous["data"]["content"], ensure_ascii=False, indent=2).splitlines()
         b = json.dumps(row["data"]["content"], ensure_ascii=False, indent=2).splitlines()
         return {

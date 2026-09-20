@@ -1,5 +1,6 @@
 import json
 import socket
+import time
 from unittest.mock import patch
 
 import pytest
@@ -8,7 +9,53 @@ from test_job_parser import RAW, parsed
 
 from jobhunter_api.errors import Problem
 from jobhunter_api.inference import Completion
-from jobhunter_api.job_url import fetch_vacancy, page_text, public_target, safe_address
+from jobhunter_api.job_url import (
+    fetch_vacancy,
+    page_text,
+    public_target,
+    request_page,
+    safe_address,
+)
+
+
+def test_connection_pins_public_ip_and_preserves_tls_hostname() -> None:
+    with (
+        patch(
+            "socket.getaddrinfo",
+            return_value=[(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("93.184.216.34", 443))],
+        ),
+        patch("socket.create_connection") as connect_socket,
+        patch("ssl.create_default_context") as tls,
+        patch("http.client.HTTPSConnection") as connection,
+    ):
+        response = connection.return_value.getresponse.return_value
+        response.status = 200
+        response.getheaders.return_value = [("Content-Type", "text/html")]
+        response.read1.side_effect = [b"public vacancy", b""]
+        assert request_page("https://careers.example.com/job", time.monotonic() + 25)[2] == (
+            b"public vacancy"
+        )
+        assert connect_socket.call_args.args == (("93.184.216.34", 443),)
+        tls.return_value.wrap_socket.assert_called_once_with(
+            connect_socket.return_value, server_hostname="careers.example.com"
+        )
+        assert connection.return_value.request.call_args.kwargs["headers"]["Host"] == (
+            "careers.example.com"
+        )
+
+
+def test_mixed_public_private_dns_answers_are_rejected() -> None:
+    with (
+        patch(
+            "socket.getaddrinfo",
+            return_value=[
+                (socket.AF_INET, socket.SOCK_STREAM, 6, "", (address, 443))
+                for address in ["93.184.216.34", "127.0.0.1"]
+            ],
+        ),
+        pytest.raises(Problem, match="URL_NOT_ALLOWED"),
+    ):
+        public_target("https://careers.example.com/job")
 
 
 @pytest.mark.parametrize(

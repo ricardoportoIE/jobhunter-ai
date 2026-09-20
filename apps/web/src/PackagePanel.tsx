@@ -1,9 +1,9 @@
+import { t, localisedLabels } from "./i18n";
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import type { Evidence, Fact, Job, Profile } from "./types";
 import { useTask } from "./useTask";
 import { useAiTask } from "./useAiTask";
-
 type Claim = {
   text: string;
   fact_id: string;
@@ -20,7 +20,11 @@ type Answer = {
 type Selection = {
   cv_fact_ids: string[];
   letter_fact_ids: string[];
-  focus: { requirement_id: string; fact_ids: string[]; explanation: string }[];
+  focus: {
+    requirement_id: string;
+    fact_ids: string[];
+    explanation: string;
+  }[];
   risks: string[];
   interview_points: string[];
 };
@@ -55,25 +59,26 @@ type Package = Strategy & {
     cover_letter: Claim[];
     answers: Answer[];
   };
-  review: { note: string } | null;
+  review: {
+    note: string;
+  } | null;
 };
-const statusLabel: Record<string, string> = {
-  NEEDS_REVIEW: "Aguardando revisão",
-  APPROVED: "Aprovado",
-  REJECTED: "Rejeitado",
-};
-const answerLabel: Record<string, string> = {
-  SENSITIVE: "Sensível — revisão específica",
-  BLOCKED: "Sem evidência — resposta pendente",
-  REVIEW_REQUIRED: "Revisão necessária",
-  AUTO_APPROVABLE: "Baseada em fato aprovado — conferir",
-};
-const errorLabel: Record<string, string> = {
-  UNANSWERED_QUESTIONS: "Há perguntas sem resposta.",
-  CONTENT_NOT_REPRODUCIBLE: "Conteúdo não corresponde às fontes.",
-  UNSUPPORTED_CONTROL_CHARACTERS: "Corrija caracteres inválidos nos fatos.",
-};
-
+const statusLabel: Record<string, string> = localisedLabels({
+  NEEDS_REVIEW: "Awaiting review",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+});
+const answerLabel: Record<string, string> = localisedLabels({
+  SENSITIVE: "Sensitive \u2014 specific review",
+  BLOCKED: "No evidence \u2014 response pending",
+  REVIEW_REQUIRED: "Review required",
+  AUTO_APPROVABLE: "Based on approved fact \u2014 verify",
+});
+const errorLabel: Record<string, string> = localisedLabels({
+  UNANSWERED_QUESTIONS: "There are unanswered questions.",
+  CONTENT_NOT_REPRODUCIBLE: "Content does not match sources.",
+  UNSUPPORTED_CONTROL_CHARACTERS: "Correct invalid characters in facts.",
+});
 export default function PackagePanel({
   job,
   profile,
@@ -129,22 +134,23 @@ export default function PackagePanel({
   return (
     <section className="package-workspace">
       <div className="panel">
-        <h2>Preparar candidatura</h2>
+        <h2>{t("Prepare application")}</h2>
         <p>
-          Escolha as evidências, revise a estratégia e aprove o pacote antes de
-          baixar. Nenhuma candidatura é enviada.
+          {t(
+            "Choose the evidence, review the strategy and approve the package before downloading. No application is sent.",
+          )}
         </p>
         {!ready && (
           <p role="alert">
-            Publique o perfil e revise uma vaga ativa para começar.
+            {t("Publish the profile and review an active vacancy to start.")}
           </p>
         )}
         {!profile.display_name && (
-          <p role="alert">Preencha seu nome na página de perfil.</p>
+          <p role="alert">{t("Fill in your name on the profile page.")}</p>
         )}
         {loadError && (
           <p role="alert">
-            {loadError} <button onClick={reload}>Atualizar pacotes</button>
+            {loadError} <button onClick={reload}>{t("Update packages")}</button>
           </p>
         )}
         <form
@@ -172,11 +178,11 @@ export default function PackagePanel({
                 headers,
               );
               reload();
-            }, "Estratégia preparada para revisão.");
+            }, t("Strategy prepared for review."));
           }}
         >
           <fieldset>
-            <legend>Fatos autorizados para documentos</legend>
+            <legend>{t("Facts authorised for documents")}</legend>
             {available.map((fact) => (
               <label className="check" key={fact.id}>
                 <input
@@ -195,29 +201,35 @@ export default function PackagePanel({
                   {fact.claim}
                   <small className="muted">
                     {" "}
-                    Usos: {fact.allowed_uses.join(", ")}
+                    {t("Uses: ")}
+                    {fact.allowed_uses.join(", ")}
                   </small>
                 </span>
               </label>
             ))}
             {!available.length && (
-              <p>Autorize fatos para CV e cover letter na base do candidato.</p>
+              <p>
+                {t(
+                  "Authorise facts for CV and cover letter in the candidate base.",
+                )}
+              </p>
             )}
           </fieldset>
           <label>
-            Contato para os documentos — uma linha por item, até quatro
+            {t("Contact for documents \u2014 one line per item, up to four")}
             <textarea
               value={contacts}
               onChange={(e) => setContacts(e.target.value)}
-              placeholder="Email, telefone ou link profissional"
+              placeholder={t("Email, phone or professional link")}
             />
           </label>
           <p className="muted">
-            O contato fica local e será incluído nos documentos após sua
-            revisão.
+            {t(
+              "The contact is local and will be included in documents after your review.",
+            )}
           </p>
           <label>
-            Perguntas do formulário — uma por linha
+            {t("Form questions \u2014 one per line")}
             <textarea
               value={questions}
               onChange={(e) => {
@@ -235,7 +247,7 @@ export default function PackagePanel({
                 setConsent(false);
               }}
             />
-            Usar IA para priorizar fatos e apontar lacunas
+            {t("Use AI to prioritise facts and highlight gaps")}
           </label>
           {useAi && (
             <label className="check">
@@ -244,8 +256,9 @@ export default function PackagePanel({
                 checked={consent}
                 onChange={(e) => setConsent(e.target.checked)}
               />
-              Autorizo enviar os fatos selecionados, suas evidências e perguntas
-              à OpenAI.
+              {t(
+                "I authorise sending selected facts, their evidence and questions to OpenAI.",
+              )}
             </label>
           )}
           {task.feedback}
@@ -255,7 +268,7 @@ export default function PackagePanel({
               task.busy || !ready || !selected.length || (useAi && !consent)
             }
           >
-            Preparar estratégia
+            {t("Prepare strategy")}
           </button>
         </form>
       </div>
@@ -273,7 +286,6 @@ export default function PackagePanel({
     </section>
   );
 }
-
 function FactSelection({
   facts,
   cv,
@@ -290,10 +302,10 @@ function FactSelection({
   return (
     <div className="package-columns">
       {[
-        { use: "cv", label: "Fatos do CV", ids: cv, change: setCv },
+        { use: "cv", label: t("Facts from the CV"), ids: cv, change: setCv },
         {
           use: "cover_letter",
-          label: "Fatos da cover letter",
+          label: t("Facts from the cover letter"),
           ids: letter,
           change: setLetter,
         },
@@ -325,7 +337,7 @@ function FactSelection({
                 <button
                   type="button"
                   disabled={index === 0}
-                  aria-label={`Mover fato ${index + 1} para cima em ${label}`}
+                  aria-label={t("Move fact {0} up in {1}", [index + 1, label])}
                   onClick={() => {
                     const next = [...ids];
                     [next[index - 1], next[index]] = [
@@ -345,7 +357,6 @@ function FactSelection({
     </div>
   );
 }
-
 function StrategyReview({
   strategy,
   job,
@@ -361,13 +372,15 @@ function StrategyReview({
   const [confirmed, setConfirmed] = useState(false);
   return (
     <section className="panel">
-      <h2>Revisar estratégia</h2>
+      <h2>{t("Review strategy")}</h2>
       <p>
-        {statusLabel[strategy.status]} · versão {strategy.version}
+        {statusLabel[strategy.status]}
+        {t(" \u00B7 version ")}
+        {strategy.version}
       </p>
       {strategy.stale && (
         <p role="alert">
-          Estratégia desatualizada. Prepare uma nova com as fontes atuais.
+          {t("Outdated strategy. Prepare a new one with current sources.")}
         </p>
       )}
       {strategy.selection.focus.map((f) => (
@@ -394,7 +407,7 @@ function StrategyReview({
       ))}
       {strategy.selection.interview_points.length > 0 && (
         <details>
-          <summary>Pontos para preparar a entrevista</summary>
+          <summary>{t("Interview preparation points")}</summary>
           <ul>
             {strategy.selection.interview_points.map((r, i) => (
               <li key={i}>{r}</li>
@@ -403,8 +416,8 @@ function StrategyReview({
         </details>
       )}
       <p>
-        Contato:{" "}
-        {strategy.snapshot.contact_lines.join(" · ") || "não informado"}
+        {t("Contact:")}{" "}
+        {strategy.snapshot.contact_lines.join(" · ") || t("not informed")}
       </p>
       <FactSelection
         facts={strategy.snapshot.facts}
@@ -425,7 +438,7 @@ function StrategyReview({
           checked={confirmed}
           onChange={(e) => setConfirmed(e.target.checked)}
         />
-        Revisei a seleção, a estratégia e o contato dos documentos.
+        {t("I reviewed the selection, strategy and document contact.")}
       </label>
       {task.feedback}
       <div className="actions">
@@ -449,7 +462,7 @@ function StrategyReview({
             })
           }
         >
-          Aprovar estratégia
+          {t("Approve strategy")}
         </button>
         <button
           className="primary"
@@ -469,16 +482,15 @@ function StrategyReview({
                 strategy_version: strategy.version,
               });
               saved();
-            }, "Pacote gerado para revisão.")
+            }, t("Package generated for review."))
           }
         >
-          Gerar pacote
+          {t("Generate package")}
         </button>
       </div>
     </section>
   );
 }
-
 function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
   const task = useTask();
   const [cv, setCv] = useState(item.selection.cv_fact_ids);
@@ -489,9 +501,12 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
   const [sensitiveReviewed, setSensitiveReviewed] = useState(false);
   const [note, setNote] = useState("");
   const [difference, setDifference] = useState("");
-  const [history, setHistory] = useState<{ version: number; status: string }[]>(
-    [],
-  );
+  const [history, setHistory] = useState<
+    {
+      version: number;
+      status: string;
+    }[]
+  >([]);
   const [fromVersion, setFromVersion] = useState("1");
   const sensitive = item.content.answers.some(
     (a) => a.classification === "SENSITIVE",
@@ -513,21 +528,24 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
     });
   return (
     <section className="panel package-review">
-      <h2>Revisar pacote</h2>
+      <h2>{t("Review package")}</h2>
       <p>
-        {statusLabel[item.status]} · versão {item.version}
+        {statusLabel[item.status]}
+        {t(" \u00B7 version ")}
+        {item.version}
       </p>
       {item.stale && (
         <p role="alert">
-          Fontes desatualizadas. Aprovação e downloads bloqueados; prepare uma
-          nova estratégia.
+          {t(
+            "Outdated sources. Approval and downloads blocked; prepare a new strategy.",
+          )}
         </p>
       )}
       <p>
         {item.validation.all_claims_traceable
-          ? "Alegações vinculadas aos fatos aprovados."
-          : "Há problemas de rastreabilidade."}{" "}
-        Confira relevância, idioma e apresentação.
+          ? t("Claims linked to approved facts.")
+          : t("There are traceability issues.")}{" "}
+        {t("Check relevance, language and presentation.")}
       </p>
       {item.validation.errors.map((e) => (
         <p role="alert" key={e}>
@@ -535,7 +553,7 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
         </p>
       ))}
       <div className="package-columns">
-        <section className="document-preview" aria-label="Prévia do CV">
+        <section className="document-preview" aria-label={t("CV preview")}>
           <h3>{item.content.name}</h3>
           <p>{item.content.contact_lines.join(" · ")}</p>
           <p>Application for {item.content.job_title}</p>
@@ -545,9 +563,9 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
         </section>
         <section
           className="document-preview"
-          aria-label="Prévia da cover letter"
+          aria-label={t("Cover letter preview")}
         >
-          <h3>Cover letter</h3>
+          <h3>{t("Cover letter")}</h3>
           <p>Dear Hiring Team,</p>
           <p>
             I am applying for the {item.content.job_title} position at{" "}
@@ -569,11 +587,14 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
         </section>
       </div>
       <details>
-        <summary>Conferir origem de cada alegação</summary>
+        <summary>{t("Check the source of each claim")}</summary>
         {item.snapshot.facts.map((f) => (
           <article className="record" key={f.id}>
             <p>{f.claim}</p>
-            <small>Fato versão {f.version}</small>
+            <small>
+              {t("Fact version ")}
+              {f.version}
+            </small>
             {f.evidence_ids.map((id) => (
               <p className="preserve" key={id}>
                 {item.snapshot.evidence.find((e) => e.id === id)?.content}
@@ -583,10 +604,11 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
         ))}
       </details>
       <details>
-        <summary>Ajustar seleção e ordem dos documentos</summary>
+        <summary>{t("Adjust selection and order of documents")}</summary>
         <p>
-          Para alterar datas, cargos ou alegações, corrija a base do candidato e
-          gere outra estratégia.
+          {t(
+            "To change dates, roles or claims, correct the candidate base and generate another strategy.",
+          )}
         </p>
         <FactSelection
           facts={item.snapshot.facts}
@@ -604,13 +626,13 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
       </details>
       {item.content.answers.length > 0 && (
         <section>
-          <h3>Respostas do formulário</h3>
+          <h3>{t("Form responses")}</h3>
           {item.content.answers.map((a) => (
             <label key={a.question_index}>
               {a.question}
               <small className="muted">{answerLabel[a.classification]}</small>
               <textarea
-                aria-label={`Resposta: ${a.question}`}
+                aria-label={t("Answer: {0}", [a.question])}
                 value={answers[String(a.question_index)] ?? a.text}
                 onChange={(e) => {
                   setAnswers({
@@ -630,8 +652,9 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
               checked={attest}
               onChange={(e) => setAttest(e.target.checked)}
             />
-            Declaro que as respostas manuais são verdadeiras e autorizo
-            incluí-las neste pacote.
+            {t(
+              "I declare that the manual answers are true and authorise their inclusion in this package.",
+            )}
           </label>
         </section>
       )}
@@ -658,19 +681,19 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
                 attest_answers: attest,
               });
               saved();
-            }, "Nova versão salva; revise antes de aprovar.")
+            }, t("New version saved; review before approval."))
           }
         >
-          Salvar nova versão
+          {t("Save new version")}
         </button>
         <button
           onClick={() =>
             void task.run(async () => {
               setHistory(await api(`/packages/${item.id}/history`));
-            }, "Histórico carregado.")
+            }, t("History loaded."))
           }
         >
-          Ver histórico e diferenças
+          {t("View history and differences")}
         </button>
       </div>
       {history.length > 0 && (
@@ -683,7 +706,7 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
           {history.some((h) => h.version < item.version) && (
             <>
               <label>
-                Comparar com versão
+                {t("Compare with version")}
                 <select
                   value={fromVersion}
                   onChange={(e) => setFromVersion(e.target.value)}
@@ -692,7 +715,8 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
                     .filter((h) => h.version < item.version)
                     .map((h) => (
                       <option key={h.version} value={h.version}>
-                        Versão {h.version}
+                        {t("Version ")}
+                        {h.version}
                       </option>
                     ))}
                 </select>
@@ -700,16 +724,16 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
               <button
                 onClick={() =>
                   void task.run(async () => {
-                    const result = await api<{ diff: string }>(
-                      `/packages/${item.id}/diff?from_version=${fromVersion}`,
-                    );
+                    const result = await api<{
+                      diff: string;
+                    }>(`/packages/${item.id}/diff?from_version=${fromVersion}`);
                     setDifference(
-                      result.diff || "Nenhuma diferença no conteúdo.",
+                      result.diff || t("No difference in content."),
                     );
                   })
                 }
               >
-                Mostrar diferenças
+                {t("Show differences")}
               </button>
               <pre className="package-diff">{difference}</pre>
             </>
@@ -717,7 +741,7 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
         </div>
       )}
       <label>
-        Nota da revisão
+        {t("Review note")}
         <textarea value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
       <label className="check">
@@ -726,7 +750,9 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
           checked={reviewed}
           onChange={(e) => setReviewed(e.target.checked)}
         />
-        Conferi os fatos, o inglês e a apresentação desta versão.
+        {t(
+          "I checked the facts, the English and the presentation of this version.",
+        )}
       </label>
       {sensitive && (
         <label className="check">
@@ -735,12 +761,13 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
             checked={sensitiveReviewed}
             onChange={(e) => setSensitiveReviewed(e.target.checked)}
           />
-          Revisei especificamente salário, autorização, disponibilidade e demais
-          respostas sensíveis presentes.
+          {t(
+            "I specifically reviewed salary, authorisation, availability and other sensitive responses present.",
+          )}
         </label>
       )}
       {dirty && (
-        <p role="status">Salve as alterações antes de revisar esta versão.</p>
+        <p role="status">{t("Save changes before reviewing this version.")}</p>
       )}
       {task.feedback}
       <div className="actions">
@@ -756,18 +783,23 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
           }
           onClick={() => actReview("approve")}
         >
-          Aprovar pacote para download
+          {t("Approve package for download")}
         </button>
         <button
           disabled={task.busy || item.stale || dirty || !reviewed}
           onClick={() => actReview("reject")}
         >
-          Rejeitar pacote
+          {t("Reject package")}
         </button>
       </div>
-      {item.review?.note && <p>Última revisão: {item.review.note}</p>}
+      {item.review?.note && (
+        <p>
+          {t("Last review: ")}
+          {item.review.note}
+        </p>
+      )}
       {item.status === "APPROVED" && !item.stale && !dirty && (
-        <nav className="actions" aria-label="Downloads do pacote">
+        <nav className="actions" aria-label={t("Package downloads")}>
           {[
             "cv.docx",
             "cv.pdf",
@@ -781,7 +813,7 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
               key={name}
               href={`/api/v1/packages/${item.id}/download/${name}?expected_version=${item.version}`}
             >
-              {name === "bundle.zip" ? "Baixar pacote ZIP" : name}
+              {name === "bundle.zip" ? t("Download ZIP package") : name}
             </a>
           ))}
         </nav>

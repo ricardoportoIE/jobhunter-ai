@@ -1,11 +1,14 @@
+import { t } from "./i18n";
 import { useRef } from "react";
 import { useTask } from "./useTask";
-
 type Action = (headers: Record<string, string>) => Promise<void>;
 export function useAiTask(enabled = true) {
   const task = useTask();
-  const last = useRef<{ action: Action; message: string } | null>(null);
-  async function run(action: Action, message = "Operação concluída.") {
+  const last = useRef<{
+    action: Action;
+    message: string;
+  } | null>(null);
+  async function run(action: Action, message = t("Operation completed.")) {
     last.current = { action, message };
     await task.run(() => action({}), message);
   }
@@ -29,7 +32,7 @@ export function useAiTask(enabled = true) {
                 );
             }}
           >
-            Tentar novamente após corrigir a causa
+            {t("Try again after fixing the cause")}
           </button>
         )}
       </>
