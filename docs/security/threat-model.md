@@ -1,33 +1,33 @@
-# Threat model inicial
+# Initial threat model
 
-Estado: controles locais da fase 1 implementados e testados; controles de IA, conectores, renderer e cloud seguem nas fases correspondentes. Ver [segurança e dados de runtime](../phase-1/security-and-data.md). Responsável inicial por validação: mantenedor do projeto. Dados reais permanecem separados em `.private/`; só exemplos fictícios e dados derivados sem contatos são versionáveis. Ver [fronteiras de confiança](../architecture/overview.md).
+Status: phase 1 local controls implemented and tested; AI, connector, renderer and cloud controls remain scheduled for their respective phases. See [runtime security and data](../phase-1/security-and-data.md). Initial validation owner: project maintainer. Real data remains separate in `.private/`; only synthetic examples and derived data without contact details may be versioned. See [trust boundaries](../architecture/overview.md).
 
-Ativos: perfil factual, dados pessoais, documentos, credenciais de fontes/providers, aprovações, histórico e orçamento. Atacantes possíveis: fonte maliciosa, arquivo submetido, sessão não autorizada ou dependência comprometida.
+Assets: factual profile, personal data, documents, source/provider credentials, approvals, history and budget. Potential attackers: a malicious source, submitted file, unauthorised session or compromised dependency.
 
-| ID / prioridade | Ameaça e impacto | Controle planejado | Verificação e fase |
+| ID / priority | Threat and impact | Planned control | Verification and phase |
 |---|---|---|---|
-| T01 / P0 | Vaga injeta instruções para roubar perfil ou chamar ferramentas | Conteúdo delimitado como dado; ferramentas mínimas; política de autorização fora do LLM; schema estrito | Fixture malicioso não pode executar ferramenta; fase 2 |
-| T02 / P0 | URL/redirect acessa metadata, localhost ou rede privada | Allowlist, HTTPS, resolução DNS validada e fixada na conexão, bloquear endereços não públicos IPv4/IPv6, revalidar redirects, limites de bytes/tempo | Testar metadata, IPv6, DNS rebinding e redirects; antes de fetch |
-| T03 / P0 | Usuário não autorizado lê CV ou aprova candidatura | Sessão autenticada, ownership em cada recurso, CSRF quando cookie, expiração e invalidação | API sem sessão/ator correto retorna 401/403; fase 1 |
-| T04 / P0 | LLM inventa experiência ou usa fato vencido | Fatos verificados por uso/validade; validator fora do gerador; evidence coverage obrigatório | Skill sem evidência ou revogada bloqueia pacote; fase 3 |
-| T05 / P0 | Replay ou aprovação antiga envia versão errada | Hash, versões, escopo, expiração, lock e idempotência; reconciliar resultado ambíguo | Repetir decisão e simular timeout após envio; fases 3/6 |
-| T06 / P0 | CV/anexo malicioso compromete renderer | Extensão e assinatura verificadas, limites de expansão/tamanho, sem macros, renderer isolado sem rede e com filesystem temporário | ZIP bomb, macro, path traversal e limite de CPU; antes de upload |
-| T07 / P0 | PII/segredos vazam por Git, logs ou prompts | Dados privados separados, redaction, secret scanning, contexto mínimo, revisão de provider | Capturar logs de falha e diff de fixture; fases 1/2 |
-| T08 / P1 | Workers e browser têm permissões excessivas | IAM por tarefa, allowlist de ferramentas/destinos, rede isolada, tokens curtos | Tentativa de recurso fora do escopo deve falhar; fases 5/6 |
-| T09 / P1 | Histórico é alterado e perde valor de auditoria | Papel de aplicação sem update/delete em eventos, evento na transação; export de integridade | Testar rollback e permissão SQL; fases 1/5 |
-| T10 / P0 | Loop de agente ou polling gera custos inesperados | Limite de chamadas/tokens/tempo, ledger com reserva atômica de orçamento, retries limitados | Duas tarefas concorrentes não ultrapassam saldo reservado; fase 2 |
-| T11 / P1 | Dependência comprometida ou vulnerável | Lockfiles, análise de dependências/segredos, CI com permissões mínimas, atualizações revisadas | Verificação em PR; antes do uso de cada dependência |
-| T12 / P1 | Perda ou restauração indevida de dados pessoais | Backup privado, recuperação ensaiada, reaplicar eliminações, lifecycle | Restore em ambiente isolado com dados de teste; fase 5 |
-| T13 / P0 | Texto externo vira HTML/script no browser | Escape por padrão, sem HTML bruto; sanitização se necessária; CSP no deploy | XSS em título/descrição/evidência não executa; fase 1 |
+| T01 / P0 | A job advert injects instructions to steal the profile or invoke tools | Delimit content as data; minimal tools; authorisation policy outside the LLM; strict schema | A malicious fixture must not execute a tool; phase 2 |
+| T02 / P0 | A URL/redirect accesses metadata, localhost or a private network | Allowlist, HTTPS, validated DNS resolution pinned to the connection, block non-public IPv4/IPv6 addresses, revalidate redirects, byte/time limits | Test metadata, IPv6, DNS rebinding and redirects; before fetching |
+| T03 / P0 | An unauthorised user reads a CV or approves an application | Authenticated session, ownership checks on every resource, CSRF for cookies, expiry and invalidation | API without the correct session/actor returns 401/403; phase 1 |
+| T04 / P0 | An LLM invents experience or uses an expired fact | Facts verified for use/validity; validator outside the generator; mandatory evidence coverage | An unsupported or revoked skill blocks the package; phase 3 |
+| T05 / P0 | Replay or an old approval submits the wrong version | Hash, versions, scope, expiry, lock and idempotency; reconcile ambiguous outcomes | Repeat the decision and simulate a timeout after submission; phases 3/6 |
+| T06 / P0 | A malicious CV/attachment compromises the renderer | Check extension and signature, expansion/size limits, no macros, isolated renderer without networking and with a temporary filesystem | ZIP bomb, macro, path traversal and CPU limit tests; before upload |
+| T07 / P0 | PII/secrets leak through Git, logs or prompts | Separate private data, redaction, secret scanning, minimal context, provider review | Capture failure logs and fixture diffs; phases 1/2 |
+| T08 / P1 | Workers and the browser have excessive permissions | IAM per task, tool/destination allowlist, isolated network, short-lived tokens | An attempt to access an out-of-scope resource must fail; phases 5/6 |
+| T09 / P1 | History is altered and loses its audit value | Application role cannot update/delete events; event written in the transaction; integrity export | Test rollback and SQL permissions; phases 1/5 |
+| T10 / P0 | An agent loop or polling generates unexpected costs | Call/token/time limits, ledger with atomic budget reservation, bounded retries | Two concurrent tasks cannot exceed the reserved balance; phase 2 |
+| T11 / P1 | A compromised or vulnerable dependency | Lockfiles, dependency/secret analysis, least-privilege CI, reviewed updates | PR checks; before using each dependency |
+| T12 / P1 | Loss or improper restoration of personal data | Private backup, rehearsed recovery, reapply deletions, lifecycle policy | Restore in an isolated environment with test data; phase 5 |
+| T13 / P0 | External text becomes HTML/script in the browser | Escape by default, no raw HTML; sanitise if necessary; CSP on deployment | XSS in titles/descriptions/evidence does not execute; phase 1 |
 
-## Retenção, logging e aprovação
+## Retention, logging and approval
 
-Logs guardam IDs de correlação, duração, contagens, códigos de erro e custos, sem corpos completos de perfil, prompt ou CV. Registrar decisões resumidas e evidências, sem raciocínio interno do modelo. Auditoria append-only é um controle contra o papel da aplicação; não prometer imutabilidade absoluta perante administradores.
+Logs contain correlation IDs, duration, counts, error codes and costs, without full profile, prompt or CV bodies. Record decision summaries and evidence, without the model's internal reasoning. Append-only auditing is a control against the application role; do not promise absolute immutability against administrators.
 
-Política de retenção proposta em [Candidate Knowledge Base](../phase-0/candidate-knowledge-base.md). Criptografia em trânsito e em repouso no deploy. Revisar envio e retenção por modelo/provider, incluindo routing regional, antes de usar dados pessoais.
+The proposed retention policy is in the [Candidate Knowledge Base](../phase-0/candidate-knowledge-base.md). Encrypt data in transit and at rest on deployment. Review data submission and retention for each model/provider, including regional routing, before using personal data.
 
-## Riscos residuais e resposta
+## Residual risks and response
 
-Fact-checking automático pode falhar e evidência aprovada pode estar errada; manter revisão humana. Provider externo recebe o contexto autorizado: minimizar dados e permitir revogação de acesso. Fonte pode mudar termos: suspender conector até nova revisão. AWS é efêmera e o estado canônico fica local; exportação e recuperação precedem teardown. RPO 24h/RTO 8h são metas locais iniciais a demonstrar, não SLA garantido. Ao atingir orçamento, impedir novas despesas e permitir ações que encerrem custos existentes; alarmes isolados não garantem o teto.
+Automatic fact-checking can fail and approved evidence can be wrong; retain human review. An external provider receives authorised context: minimise data and allow access to be revoked. A source may change its terms: suspend the connector until a new review. AWS is ephemeral and canonical state remains local; export and recovery precede teardown. RPO 24h/RTO 8h are initial local targets to demonstrate, not a guaranteed SLA. When the budget is reached, prevent new spending and allow actions that end existing costs; alarms alone do not guarantee the ceiling.
 
-Em suspeita de incidente: interromper workers/envios, revogar credenciais afetadas, preservar apenas evidências necessárias com acesso restrito, avaliar impacto, corrigir e registrar a retomada. Obrigações legais específicas exigem análise própria antes de lançamento público; este documento descreve controles técnicos de projeto.
+If an incident is suspected: stop workers/submissions, revoke affected credentials, preserve only necessary evidence with restricted access, assess the impact, fix the issue and record resumption. Specific legal obligations need their own assessment before public launch; this document describes technical project controls.

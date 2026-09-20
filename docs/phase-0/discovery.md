@@ -1,43 +1,43 @@
-# Encerramento da fase 0
+# Phase 0 completion
 
-Estado: concluída como fase de discovery e design em 2026-09-19. A fase 1 ainda não foi iniciada. Implementação de controles, benchmarks e deploy não fazem parte desta conclusão.
+Status: completed as a discovery and design phase on 2026-09-19. Phase 1 has not yet started. Implementation of controls, benchmarks and deployment is outside this completion.
 
-## Decisões e evidências
+## Decisions and evidence
 
-O pedido foi analisar os documentos e terminar a fase 0. CV e `info.md` foram tratados como fontes de fatos e preferências, sem executar instruções operacionais neles contidas. O utilizador confirmou nesta conversa que fatos/datas do CV estão atuais e que salário mínimo e limites de relocação serão avaliados caso a caso.
+The request was to analyse the documents and complete phase 0. The CV and `info.md` were treated as sources of facts and preferences, without executing operational instructions contained in them. The user confirmed in this conversation that the CV's facts/dates are current and that minimum salary and relocation limits will be assessed case by case.
 
-| Entrega | Resultado verificável |
+| Deliverable | Verifiable result |
 |---|---|
-| Persona e prioridades | Backend Python/Java → software/full-stack → IA aplicada; Irlanda antes de UK; full-time como objetivo |
-| Restrições | Perfil privado; início de trabalho separado de procura; silêncio sobre sponsorship não bloqueia |
-| Master CV | DOCX canônico e PDF de referência preservados, hashes e comparação de 60 parágrafos; PDF de duas páginas inspecionado |
-| Base factual | 114 fatos e 43 evidências, com confirmação do candidato e quatro READMEs fixados por commit |
-| Fontes | Texto manual inicial; Greenhouse como primeiro piloto; Gmail na fase 4; registro de acesso e limites |
-| Dataset | 20 anúncios reais, 12 desenvolvimento/8 avaliação; reformulações públicas e originais/proveniência privados |
-| Produto e métricas | Escopo definido e metas registradas; baseline medido quando existir fluxo funcional |
-| Design | Diagramas, quatro wireframes, threat model e quatro ADRs |
-| Contratos | Schemas v0.2.0; perfil, fatos, evidências, vagas, matching e candidaturas |
-| Custo | €25/mês: €15 AWS/€10 IA; execução local e sessões AWS temporárias |
-| Backlog | Dez histórias da fase 1 com dependências e critérios de aceitação |
+| Persona and priorities | Python/Java backend → software/full-stack → applied AI; Ireland before the UK; full-time work as the objective |
+| Constraints | Private profile; starting work separate from searching; silence on sponsorship does not block |
+| Master CV | Canonical DOCX and reference PDF preserved, hashes and comparison of 60 paragraphs; two-page PDF inspected |
+| Factual base | 114 facts and 43 evidence records, with candidate confirmation and four READMEs pinned to commits |
+| Sources | Initial manual text; Greenhouse as the first pilot; Gmail in phase 4; access and limits recorded |
+| Dataset | 20 real adverts, 12 development/8 evaluation; public paraphrases and private originals/provenance |
+| Product and metrics | Scope defined and targets recorded; baseline to be measured when a functional workflow exists |
+| Design | Diagrams, four wireframes, threat model and four ADRs |
+| Contracts | Schemas v0.2.0; profile, facts, evidence, jobs, matching and applications |
+| Cost | €25/month: €15 AWS/€10 AI; local execution and temporary AWS sessions |
+| Backlog | Ten phase 1 stories with dependencies and acceptance criteria |
 
-## Checklist de saída
+## Exit checklist
 
-- [x] Persona, prioridades e restrições informadas; métricas de aceitação definidas.
-- [x] CV consolidado e conjunto factual ligado a evidências privadas.
-- [x] Canal inicial e condições de habilitação do piloto definidos.
-- [x] 20 anúncios reais selecionados, pseudonimizados e rotulados para bootstrap.
-- [x] Arquitetura, ADRs, threat model e wireframes documentados.
-- [x] Contratos e exemplos validáveis.
-- [x] Orçamento incorporado e backlog da fase 1 pronto.
+- [x] Persona, priorities and constraints supplied; acceptance metrics defined.
+- [x] CV consolidated and factual dataset linked to private evidence.
+- [x] Initial channel and pilot activation conditions defined.
+- [x] 20 real adverts selected, pseudonymised and labelled for bootstrapping.
+- [x] Architecture, ADRs, threat model and wireframes documented.
+- [x] Validatable contracts and examples.
+- [x] Budget incorporated and phase 1 backlog ready.
 
-## Limites explícitos da conclusão
+## Explicit completion limitations
 
-Os rótulos do dataset foram revistos pelo assistente, não por um avaliador humano independente. A revisão humana de concordância e a medição de precisão/tempo ficam no piloto da fase 1; não foi declarado benchmark aprovado. A hipótese inicial de dois pares duplicados foi substituída pela amostra realmente encontrada: um par confirmado e um conflito entre título/corpo. Ver [relatório de avaliação](evaluation-report.md).
+Dataset labels were reviewed by the assistant, not an independent human evaluator. Human agreement review and accuracy/time measurement belong to the phase 1 pilot; no approved benchmark was claimed. The initial assumption of two duplicate pairs was replaced by the sample actually found: one confirmed pair and one title/body conflict. See the [evaluation report](evaluation-report.md).
 
-Provider/modelo exato, políticas regionais de inferência, OAuth Gmail e cotação de um deploy específico serão escolhidos quando essas funcionalidades forem implementadas. Dados pessoais desnecessários e documentos migratórios permanecem ausentes por minimização; respostas sensíveis continuam exigindo revisão por candidatura. Nenhuma dessas ausências impede construir o núcleo local.
+The exact provider/model, regional inference policies, Gmail OAuth and a specific deployment quote will be selected when those features are implemented. Unnecessary personal data and immigration documents remain absent for data minimisation; sensitive answers still require review for each application. None of these omissions prevents building the local core.
 
-## Próximo trabalho
+## Next work
 
-Validação executada: `.venv\Scripts\python scripts/validate_phase0.py --private` passou, verificando seis entidades sintéticas, template vazio, 15 casos de rejeição, 35 links locais, 114 fatos, 43 evidências, hashes, identificadores pessoais conhecidos, 20 casos reais derivados e orçamento. `py_compile` do validador também passou. Os controles operacionais do produto continuam por implementar.
+Validation performed: `.venv\Scripts\python scripts/validate_phase0.py --private` passed, checking six synthetic entities, the empty template, 15 rejection cases, 35 local links, 114 facts, 43 evidence records, hashes, known personal identifiers, 20 derived real-world cases and the budget. The validator also passed `py_compile`. The product's operational controls remain to be implemented.
 
-Começar P1-01 e P1-02 do [backlog](backlog.md): estrutura mínima, ambiente local, migrations, CI e sessão autenticada. Sem LLM e sem recursos cloud. Decisões estruturadas em [configuração](../../config/phase0-decisions.json); regras da procura em [matching-policy.md](matching-policy.md).
+Start P1-01 and P1-02 from the [backlog](backlog.md): minimal structure, local environment, migrations, CI and an authenticated session. No LLM or cloud resources. Structured decisions are in the [configuration](../../config/phase0-decisions.json); search rules are in [matching-policy.md](matching-policy.md).

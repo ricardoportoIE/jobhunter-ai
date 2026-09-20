@@ -1,39 +1,39 @@
-# Dataset inicial e revisão
+# Initial dataset and review
 
-Atualização da fase 1: [baseline executado nos 20 casos e divergências](../phase-1/evaluation-results.md). O texto abaixo registra a preparação original da fase 0; não foi convertido retroativamente em gold humano.
+Phase 1 update: [baseline run on the 20 cases and disagreements](../phase-1/evaluation-results.md). The text below records the original phase 0 preparation; it has not been retroactively converted into human gold-standard labels.
 
-Vinte anúncios reais foram lidos por GET na API pública Job Board do Greenhouse durante esta fase. A cópia versionável contém reformulações curtas e aliases de empregadores; originais, URLs, IDs externos, timestamps e SHA-256 ficam no manifesto privado `.private/evaluation/provenance.json`. Não foram coletados dados de candidatos nem enviados formulários.
+Twenty real adverts were read through GET requests to Greenhouse's public Job Board API during this phase. The versionable copy contains short paraphrases and employer aliases; originals, URLs, external IDs, timestamps and SHA-256 hashes remain in the private manifest `.private/evaluation/provenance.json`. No candidate data was collected and no forms were submitted.
 
-O [dataset](../../data/evals/real-cases.json) contém 12 casos de desenvolvimento e 8 de avaliação. Rótulos foram elaborados pelo assistente após leitura documental: **não são um gold set validado por humanos nem resultados de execução do algoritmo**. Essa distinção permite terminar a preparação de dados na fase 0 e medir/calibrar na fase 1.
+The [dataset](../../data/evals/real-cases.json) contains 12 development cases and 8 evaluation cases. Labels were drafted by the assistant after documentary review: **they are neither a human-validated gold set nor algorithm execution results**. This distinction allows data preparation to finish in phase 0 and measurement/calibration to take place in phase 1.
 
-## Cobertura observada
+## Observed coverage
 
-| Casos | Comportamento que deve ser preservado |
+| Cases | Behaviour to preserve |
 |---|---|
-| REAL-01/02 | Graduate com limite ambíguo de experiência; pedir interpretação em vez de converter experiência de outra carreira em anos de SWE |
-| REAL-03/04 | Internship exige estudos em andamento; formação concluída não prova matrícula atual |
-| REAL-05/06/07 | Experiência comercial explicitamente requerida; portfólio não vira emprego comercial |
-| REAL-08/09/20 | Nível Staff/Senior excluído, mesmo com tecnologias compatíveis |
-| REAL-10 | Junior aceita projetos pessoais; sponsorship ausente não bloqueia |
-| REAL-11/13 | Mesma função em dois boards; duplicata entre fontes, com diferença de boilerplate |
-| REAL-12 | Título software engineer e corpo data engineer; revisão obrigatória e possível duplicata |
-| REAL-14 | Janela de graduação, início futuro e tecnologia sem evidência |
-| REAL-15 | Vaga de múltiplos níveis e regras próprias de clearance; não excluir por uma palavra isolada |
-| REAL-16 | Suporte B2B exigido não é comprovado automaticamente por suporte interno |
-| REAL-17 | Sponsorship condicional e conflito de datas no anúncio |
-| REAL-18 | MSc obrigatório; não equiparar postgraduate diploma a mestrado |
-| REAL-19 | Controle negativo fora de IE/UK, nível senior e negativa de sponsorship |
+| REAL-01/02 | Graduate role with an ambiguous experience limit; request interpretation rather than converting another career's experience into SWE years |
+| REAL-03/04 | Internship requires ongoing studies; completed education does not prove current enrolment |
+| REAL-05/06/07 | Commercial experience explicitly required; portfolio work does not become commercial employment |
+| REAL-08/09/20 | Staff/Senior level excluded even with matching technologies |
+| REAL-10 | Junior role accepts personal projects; absent sponsorship information does not block |
+| REAL-11/13 | Same role on two boards; cross-source duplicate with different boilerplate |
+| REAL-12 | Software engineer title and data engineer body; mandatory review and possible duplicate |
+| REAL-14 | Graduation window, future start date and technology without evidence |
+| REAL-15 | Multiple-level role and specific clearance rules; do not exclude on an isolated word |
+| REAL-16 | Required B2B support is not automatically substantiated by internal support |
+| REAL-17 | Conditional sponsorship and conflicting dates in the advert |
+| REAL-18 | Mandatory MSc; do not equate a postgraduate diploma with a master's degree |
+| REAL-19 | Negative control outside IE/UK, senior level and no sponsorship |
 
-São 8 anúncios localizados na Irlanda, 11 no Reino Unido e 1 fora dos mercados-alvo para controle negativo. Dez registros vêm do mesmo empregador; a amostra é intencional e pequena, não representativa do mercado. Ela não é uma shortlist recomendada para candidatura.
+There are 8 adverts in Ireland, 11 in the United Kingdom and 1 outside the target markets as a negative control. Ten records come from the same employer; the sample is purposive and small, not representative of the market. It is not a recommended application shortlist.
 
-## Deduplicação e separação
+## Deduplication and splits
 
-Descrições semelhantes, duplicatas e conflitos ficam no mesmo split. O agrupamento inclui o bloco REAL-10/11/12/13, os pares de graduate e internship em diferentes cidades. Existe uma duplicata confirmada de função entre boards; a hipótese inicial de coletar dois pares confirmados não foi forçada. O segundo par encontrado apresenta conflito de conteúdo e serve como teste de revisão, não merge automático.
+Similar descriptions, duplicates and conflicts remain in the same split. Grouping includes REAL-10/11/12/13 and the graduate and internship pairs in different cities. There is one confirmed duplicate role across boards; the initial aim of collecting two confirmed pairs was not forced. The second pair found has conflicting content and serves as a review test, not an automatic merge.
 
-Uma URL encontrada em pesquisa devolveu 404 na API oficial e foi substituída por um anúncio acessível. Resultados de busca não provam que uma vaga continua aberta. Antes de uma candidatura real, reler prazo, conteúdo e disponibilidade.
+A URL found in search returned 404 from the official API and was replaced with an accessible advert. Search results do not prove that a vacancy remains open. Before a real application, reread the deadline, content and availability.
 
-## Publicação e validação
+## Publication and validation
 
-Não publicar anúncios integrais nem contatos pessoais presentes em boilerplate. Os textos públicos são reformulações analíticas limitadas. Pseudonimização reduz identificadores diretos, mas títulos e características ainda podem permitir reidentificação; não alegar anonimização irreversível.
+Do not publish full adverts or personal contact details present in boilerplate. Public texts are limited analytical paraphrases. Pseudonymisation reduces direct identifiers, but titles and characteristics may still allow re-identification; do not claim irreversible anonymisation.
 
-Validar contagem, IDs, splits, grupos sem vazamento, flags, ausência de score fabricado e rastreabilidade local dos snapshots. A revisão humana de concordância e os baselines de precisão/tempo pertencem ao piloto funcional, ainda não executado.
+Validate counts, IDs, splits, groups without leakage, flags, absence of fabricated scores and local snapshot traceability. Human agreement review and accuracy/time baselines belong to the functional pilot, which has not yet run.

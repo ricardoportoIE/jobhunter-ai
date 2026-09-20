@@ -1,19 +1,19 @@
 # P3 — Application Package Generator
 
-Implementação autorizada em 2026-09-20, com commits locais por etapa.
+Implementation authorised on 2026-09-20, with local commits per stage.
 
-| Etapa | Escopo | Estado |
+| Stage | Scope | Status |
 |---|---|---|
-| P3-01 | Contratos, permissões de uso e snapshots | Implementado: `12c9e19` |
-| P3-02 | Estratégia, revisão e geração versionada | Implementado: `7a8e16b` |
-| P3-03 | CV, cover letter, respostas e downloads DOCX/PDF/JSON | Implementado: `b52dde7` |
-| P3-04 | Tela de aprovação, diferenças e evidências | Implementado: `3f61251` |
-| P3-05 | Testes reais, segurança, renderização e documentação | Concluído; commit `test(P3-05)` no histórico local |
+| P3-01 | Contracts, usage permissions and snapshots | Implemented: `12c9e19` |
+| P3-02 | Strategy, review and versioned generation | Implemented: `7a8e16b` |
+| P3-03 | CV, cover letter, answers and DOCX/PDF/JSON downloads | Implemented: `b52dde7` |
+| P3-04 | Approval screen, differences and evidence | Implemented: `3f61251` |
+| P3-05 | Live tests, security, rendering and documentation | Completed; `test(P3-05)` commit in local history |
 
-Princípio: a IA seleciona fatos e explica a estratégia. Alegações nos documentos são
-extraídas literalmente da base aprovada, preservando datas, empregadores e cargos.
-Uma correção factual é feita na base canónica e exige nova geração. Modelos em British English.
-Contatos e respostas manuais são declarações explícitas do utilizador, guardadas localmente.
-Estratégia e pacote exigem revisões separadas. Aprovação não envia candidatura.
+Principle: AI selects facts and explains the strategy. Document claims are extracted
+literally from the approved base, preserving dates, employers and roles. Factual corrections
+are made in the canonical base and require regeneration. Templates use British English.
+Contact details and manual answers are explicit user declarations, stored locally.
+Strategy and package require separate reviews. Approval does not submit an application.
 
-Veja [como usar](operations.md) e [validação e limites](validation.md).
+See [usage](operations.md) and [validation and limitations](validation.md).

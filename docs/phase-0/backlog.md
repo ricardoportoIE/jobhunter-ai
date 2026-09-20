@@ -1,50 +1,50 @@
-# Backlog executável da fase 1
+# Actionable phase 1 backlog
 
-Escopo: núcleo local sem LLM. IDs são referências locais, não issues publicadas. Prioridade P0 = primeiro fluxo; P1 = completar a fase. Tamanho S/M/L é relativo, não estimativa de dias.
+Scope: local core without an LLM. IDs are local references, not published issues. Priority P0 = first workflow; P1 = complete the phase. S/M/L sizes are relative, not estimates in days.
 
-**P1-01 a P1-10 implementados localmente, com commits por etapa.** [Registro das entregas](../phase-1/progress.md) e [avaliação executada](../phase-1/evaluation-results.md). A revisão humana das divergências continua separada da validação técnica. O workflow de CI está configurado; execução no GitHub depende de hospedar o repositório.
+**P1-01 to P1-10 implemented locally, with commits at each stage.** [Delivery record](../phase-1/progress.md) and [completed evaluation](../phase-1/evaluation-results.md). Human review of disagreements remains separate from technical validation. The CI workflow is configured; running it on GitHub requires hosting the repository there.
 
-| ID / prioridade / tamanho | História e entrega | Depende de | Critérios de aceitação |
+| ID / priority / size | Story and deliverable | Depends on | Acceptance criteria |
 |---|---|---|---|
-| P1-01 / P0 / M | Como desenvolvedor, inicio API, web e PostgreSQL localmente | Revisão do ADR-001 | Docker Compose com healthchecks; .env.example sem segredos; versões/lockfiles; lint, types, testes e build em CI; portas locais |
-| P1-02 / P0 / M | Como utilizador único, acesso meus dados com sessão autenticada | P1-01 | Login local, senha hash e secret fora do Git; sessão expira; ownership em endpoints; 401/403 e CSRF quando cookie testados |
-| P1-03 / P0 / M | Registro fatos e evidências e publico versão do perfil | P1-02 | CRUD, migrations, validade/usos; fato verified exige revisão/evidência; revisão produz snapshot; exemplo fictício seed |
-| P1-04 / P0 / M | Importo texto de vaga com origem e reviso requisitos | P1-02 | Conteúdo bruto com hash; URL não dispara fetch; campos desconhecidos null; confirmação manual precede PARSED; limites de tamanho e XSS |
-| P1-05 / P0 / S | Evito repetir a mesma vaga/candidatura | P1-04 | ID externo+fonte, URL canônica e hash normalizado; teste de falso merge; import idempotente e conflito em payload diferente |
-| P1-06 / P0 / L | Vejo score, coverage, gaps e blockers explicáveis | P1-03, P1-04 | ADR-003 v0.2; null sem dados; blocker confirmado vence score; sponsorship desconhecido não bloqueia procura; employment_gate separado; snapshots persistidos |
-| P1-07 / P0 / M | Exploro Inbox e detalhe com evidências | P1-05, P1-06 | Filtros, estados vazio/erro/loading, links às evidências; score e coverage juntos; edição invalida análise; navegação por teclado |
-| P1-08 / P1 / M | Acompanho shortlist e candidaturas manuais | P1-07 | Transições autorizadas, linha do tempo; registro manual autenticado e confirmado; nenhuma chamada de envio; duplicação impedida |
-| P1-09 / P1 / M | Confio no histórico e protejo dados pessoais | P1-03, P1-08 | Evento atômico com mudança; papel sem update/delete em audit; logs redigidos; export/eliminação local e testes de rollback |
-| P1-10 / P1 / M | Demonstro o fluxo completo de forma reproduzível | P1-07, P1-08, P1-09 | E2E fictício; smoke local; executar os 20 casos reais derivados; registrar divergências e revisão humana; checks CI passam |
+| P1-01 / P0 / M | As a developer, I start the API, web app and PostgreSQL locally | ADR-001 review | Docker Compose with health checks; .env.example without secrets; versions/lockfiles; lint, types, tests and build in CI; local ports |
+| P1-02 / P0 / M | As the sole user, I access my data through an authenticated session | P1-01 | Local login, password hash and secret outside Git; session expiry; endpoint ownership; tested 401/403 and cookie CSRF |
+| P1-03 / P0 / M | I record facts and evidence and publish a profile version | P1-02 | CRUD, migrations, validity/uses; a verified fact requires review/evidence; review produces a snapshot; synthetic seed example |
+| P1-04 / P0 / M | I import job text with provenance and review requirements | P1-02 | Hashed raw content; a URL does not trigger fetching; unknown fields are null; manual confirmation precedes PARSED; size limits and XSS protection |
+| P1-05 / P0 / S | I avoid repeating the same job/application | P1-04 | External ID+source, canonical URL and normalised hash; false-merge test; idempotent import and conflict on different payload |
+| P1-06 / P0 / L | I see explainable scores, coverage, gaps and blockers | P1-03, P1-04 | ADR-003 v0.2; null without data; a confirmed blocker overrides the score; unknown sponsorship does not block the search; separate employment_gate; persisted snapshots |
+| P1-07 / P0 / M | I explore the Inbox and details with evidence | P1-05, P1-06 | Filters, empty/error/loading states, evidence links; score and coverage together; edits invalidate analysis; keyboard navigation |
+| P1-08 / P1 / M | I track shortlisted jobs and manual applications | P1-07 | Authorised transitions, timeline; authenticated and confirmed manual record; no submission calls; duplicates prevented |
+| P1-09 / P1 / M | I trust the history and protect personal data | P1-03, P1-08 | Atomic event with each change; role cannot update/delete audit records; redacted logs; local export/erasure and rollback tests |
+| P1-10 / P1 / M | I demonstrate the complete workflow reproducibly | P1-07, P1-08, P1-09 | Synthetic E2E; local smoke test; run the 20 derived real-world cases; record disagreements and human review; CI checks pass |
 
-## Ordem de execução
+## Implementation order
 
-Primeiro P1-01 e P1-02. Em seguida perfil e importação, depois matching, Inbox/detalhe e tracker. Fechar com proteção de dados, fluxo ponta a ponta e documentação. Segurança de cada recurso acompanha sua história; P1-09 não adia autenticação ou redaction.
+Start with P1-01 and P1-02. Then implement the profile and import, followed by matching, Inbox/details and the tracker. Finish with data protection, the end-to-end workflow and documentation. Each resource's security accompanies its story; P1-09 does not defer authentication or redaction.
 
-## Contratos de API a implementar
+## API contracts to implement
 
-| Método / rota | Responsabilidade | Regra principal |
+| Method / route | Responsibility | Main rule |
 |---|---|---|
-| POST /api/v1/session | Login | Limitar tentativas; segredo local |
-| DELETE /api/v1/session | Logout | Invalidar sessão |
-| GET, PATCH /api/v1/candidate/profile | Ler/editar perfil | Versionamento otimista |
-| POST /api/v1/candidate/facts | Registrar fato | Não verificar automaticamente |
-| POST /api/v1/candidate/evidence | Registrar referência | Caminhos nunca vêm como acesso arbitrário ao filesystem |
-| POST /api/v1/jobs/import | Importar texto | Idempotency-Key; payload limitado |
-| PATCH /api/v1/jobs/{id} | Rever campos | Esperar versão atual; conflito 409 |
-| GET /api/v1/jobs e /jobs/{id} | Listar/detalhar | Paginação, filtros e ownership |
-| POST /api/v1/jobs/{id}/analyse | Matching determinístico | Perfil/vaga versionados |
-| GET /api/v1/matches/{id} | Resultado e evidências | Snapshot reproduzível |
-| POST /api/v1/applications | Criar shortlist | Unicidade candidato/vaga |
-| GET /api/v1/applications | Tracker | Filtros e paginação |
-| POST /api/v1/applications/{id}/events | Transição/registro manual | Validar estado, ator e confirmação |
+| POST /api/v1/session | Login | Limit attempts; local secret |
+| DELETE /api/v1/session | Logout | Invalidate the session |
+| GET, PATCH /api/v1/candidate/profile | Read/edit profile | Optimistic versioning |
+| POST /api/v1/candidate/facts | Record a fact | Do not verify automatically |
+| POST /api/v1/candidate/evidence | Record a reference | Paths never grant arbitrary filesystem access |
+| POST /api/v1/jobs/import | Import text | Idempotency-Key; bounded payload |
+| PATCH /api/v1/jobs/{id} | Review fields | Expect the current version; 409 conflict |
+| GET /api/v1/jobs and /jobs/{id} | List/details | Pagination, filters and ownership |
+| POST /api/v1/jobs/{id}/analyse | Deterministic matching | Versioned profile/job |
+| GET /api/v1/matches/{id} | Result and evidence | Reproducible snapshot |
+| POST /api/v1/applications | Create a shortlist entry | Candidate/job uniqueness |
+| GET /api/v1/applications | Tracker | Filters and pagination |
+| POST /api/v1/applications/{id}/events | Transition/manual record | Validate state, actor and confirmation |
 
-Formato uniforme de erro com código, mensagem e correlation ID; sem conteúdo sensível. Sem endpoint funcional de envio na fase 1. Contrato OpenAPI gerado pela implementação futura, não escrito como promessa de endpoint existente.
+Use a consistent error format with a code, message and correlation ID, without sensitive content. No functional submission endpoint in phase 1. The future implementation generates the OpenAPI contract; it is not written as a promise that an endpoint already exists.
 
-## Testes que fecham o primeiro slice
+## Tests completing the first slice
 
-Migrations em PostgreSQL de teste; unitários de domínio/scoring e validade; API autenticada; idempotência e concorrência; proteção XSS; integração de auditoria; E2E importar → rever → analisar → abrir evidências. Incluir salário ausente, requisito eliminatório desconhecido/não atendido, fato revogado e perfil alterado. Não usar chamada paga em CI.
+Migrations against a test PostgreSQL database; domain/scoring and validity unit tests; authenticated API; idempotency and concurrency; XSS protection; audit integration; E2E import → review → analyse → open evidence. Include missing salary, unknown/unmet disqualifying requirements, revoked facts and changed profiles. Do not make paid calls in CI.
 
-## Backlog posterior
+## Later backlog
 
-Fase 2: adapter de inferência, parsing, benchmark do dataset e ledger de custo com reservas/limites €10 IA e €25 combinados. Fase 3: CV/carta e aprovação de pacote. Fase 4: piloto Greenhouse de leitura e Gmail em label dedicada, sem envio. Fase 5: Terraform temporário com preflight €15 AWS, TTL, exportação e teardown verificado. Fase 6: envio controlado em canal permitido. Esses itens não fazem parte da implementação da fase 1.
+Phase 2: inference adapter, parsing, dataset benchmark and cost ledger with reservations/limits of €10 for AI and €25 combined. Phase 3: CV/letter and package approval. Phase 4: read-only Greenhouse pilot and Gmail with a dedicated label, without sending. Phase 5: temporary Terraform infrastructure with a €15 AWS preflight, TTL, export and verified teardown. Phase 6: controlled submission through a permitted channel. These items are outside phase 1 implementation.

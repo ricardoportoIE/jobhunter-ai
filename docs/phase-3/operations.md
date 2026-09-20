@@ -1,72 +1,65 @@
-# P3 — Preparar e aprovar uma candidatura
+# P3 — Prepare and approve an application
 
-Abra uma vaga revisada e escolha **4. Pacote de candidatura**. O perfil precisa
-estar publicado, com nome preenchido; a vaga precisa de cargo e empresa.
+Open a reviewed job and choose the fourth tab, the application package. The profile must
+be published with a name; the job must have a role and company.
 
-1. Selecione fatos revisados, com evidências atuais e permissão para os documentos
-   desejados: `cv`, `cover_letter` e/ou `application_form`. A permissão `matching`
-   isolada não autoriza documentos. Fatos e evidências marcados como sensíveis
-   não entram na seleção automática.
-2. Informe até quatro linhas de contato e, opcionalmente, perguntas do formulário,
-   uma por linha. Os contatos ficam no pacote local.
-3. Prepare a estratégia. Com IA, confirme o envio dos fatos selecionados, conteúdo
-   das evidências, requisitos da vaga e perguntas à OpenAI. O campo de contato,
-   nome do perfil e caminhos das fontes não são enviados; o texto das evidências
-   pode conter dados pessoais, por isso confira a seleção. Também há modo manual.
-4. Revise relevância, lacunas e pontos para entrevista. Ajuste a seleção e a ordem
-   dos fatos do CV e da carta; confirme a revisão e aprove a estratégia.
-5. Gere o pacote. Confira textos e origem de cada alegação. Respostas sem evidência
-   precisam ser preenchidas e declaradas verdadeiras por você. Salário, imigração,
-   disponibilidade e outras perguntas sensíveis exigem revisão específica.
-6. Salve alterações como nova versão e consulte o histórico e as diferenças.
-   Confira o inglês e a apresentação; aprove a versão para habilitar os downloads.
+1. Select reviewed facts with current evidence and permission for the intended documents:
+   `cv`, `cover_letter` and/or `application_form`. The `matching` permission alone does not
+   authorise documents. Facts and evidence marked as sensitive are excluded from automatic selection.
+2. Enter up to four contact lines and, optionally, form questions, one per line.
+   Contact details remain in the local package.
+3. Prepare the strategy. With AI, confirm sending the selected facts, evidence content, job
+   requirements and questions to OpenAI. The contact field, profile name and source paths are
+   not sent; evidence text may contain personal data, so check your selection. Manual mode is also available.
+4. Review relevance, gaps and interview points. Adjust the selection and order of CV and
+   letter facts; confirm review and approve the strategy.
+5. Generate the package. Check the text and each claim's provenance. Answers without evidence
+   must be completed and declared true by you. Salary, immigration, availability and other
+   sensitive questions require specific review.
+6. Save changes as a new version and consult history and differences. Check the English and
+   presentation; approve the version to enable downloads.
 
-Arquivos disponíveis: `cv.docx`, `cv.pdf`, `cover-letter.docx`, `cover-letter.pdf`,
-`answers.json`, `package.json` e um ZIP com todos eles e um manifesto SHA-256.
-Escolha os arquivos adequados antes de partilhar: os JSON e o ZIP incluem respostas
-e referências de origem que podem não ser necessárias ao empregador.
+Available files: `cv.docx`, `cv.pdf`, `cover-letter.docx`, `cover-letter.pdf`,
+`answers.json`, `package.json` and a ZIP containing them all and a SHA-256 manifest.
+Choose appropriate files before sharing: the JSON files and ZIP include answers and provenance
+references that the employer may not need.
 
-## Como o conteúdo permanece verificável
+## How content remains verifiable
 
-A IA propõe a seleção de IDs e explica relevância/lacunas. Um validador determinístico
-confere IDs, permissões, cobertura dos requisitos e perguntas. A geração copia
-literalmente as alegações dos fatos aprovados, incluindo nomes, datas e cargos.
-Uma validação posterior recompõe o conteúdo e compara sua igualdade, verifica
-respostas pendentes e registra alertas. Não há segundo modelo emitindo um parecer
-de veracidade sobre textos livres.
+AI proposes ID selection and explains relevance/gaps. A deterministic validator checks IDs,
+permissions, requirement coverage and questions. Generation copies approved fact claims
+literally, including names, dates and roles. Subsequent validation reconstructs content and
+compares it for equality, checks pending answers and records warnings. No second model issues
+a truthfulness judgement on free text.
 
-Os modelos de documento usam British English. Os fatos não são traduzidos nem
-reescritos automaticamente: para mudar uma alegação, corrija e revise o fato na
-base canónica, publique o perfil quando necessário e gere outra estratégia.
-A carta usa abertura e encerramento fixos, com fatos selecionados; não inventa
-pesquisa sobre a empresa ou motivação pessoal. O CV agrupa os fatos por categoria,
-preservando a ordem escolhida dentro de cada grupo.
+Document templates use British English. Facts are not translated or rewritten automatically:
+to change a claim, correct and review the fact in the canonical base, publish the profile when
+needed and generate another strategy. The letter uses fixed opening and closing text with
+selected facts; it does not invent company research or personal motivation. The CV groups
+facts by category, preserving the selected order within each group.
 
-A aprovação registra utilizador, data, versão e hash do conteúdo. Alterar o pacote
-revoga a aprovação; alterar ou expirar uma fonte bloqueia novas aprovações e
-downloads daquele pacote. Estratégias e versões anteriores continuam disponíveis
-para consulta. Aprovar não envia uma candidatura nem altera automaticamente o tracker.
+Approval records the user, date, version and content hash. Changing the package revokes
+approval; changing or expiring a source blocks new approvals and downloads for that package.
+Previous strategies and versions remain available for consultation. Approval neither submits
+an application nor automatically changes the tracker.
 
-## Privacidade, custos e operação
+## Privacy, costs and operations
 
-Os documentos são renderizados em memória pelo backend local com `python-docx`
-e ReportLab. O runtime não depende de Word, LibreOffice ou conversores cloud.
-Os JSON de download omitem o snapshot completo e os caminhos privados das evidências.
-Snapshots, respostas e histórico entram na exportação e eliminação dos dados locais;
-arquivos já baixados continuam sob seu controle.
+Documents are rendered in memory by the local backend using `python-docx` and ReportLab.
+The runtime does not depend on Word, LibreOffice or cloud converters. Downloaded JSON omits
+the full snapshot and private evidence paths. Snapshots, answers and history are included in
+local data export and erasure; already downloaded files remain under your control.
 
-As chamadas usam o modelo, cache, reservas de orçamento e ledger de P2, visíveis em
-**Atividade de IA**. Mantêm-se os tetos de €10/mês de IA e €25 combinados, conforme
-[operação e privacidade de P2](../phase-2/operations.md). O modo manual e a renderização
-local não consomem API. A configuração padrão usa GPT-4.1 mini.
+Calls use P2's model, cache, budget reservations and ledger, visible in the AI activity screen.
+The €10/month AI and €25 combined ceilings remain, as described in [P2 operations and privacy](../phase-2/operations.md).
+Manual mode and local rendering do not consume API usage. The default configuration uses GPT-4.1 mini.
 
-Os contratos HTTP estão no [OpenAPI local](http://127.0.0.1:5173/api/docs).
-P3 usa `records` e `snapshots` existentes, sem nova migration. As rotas incluem
-estratégia por vaga, aprovação de estratégia, geração, atualização/revisão de pacote,
-histórico/diff e download autenticado com versão esperada.
+HTTP contracts are in [local OpenAPI](http://127.0.0.1:5173/api/docs).
+P3 uses existing `records` and `snapshots`, without a new migration. Routes cover per-job
+strategy, strategy approval, generation, package update/review, history/diff and authenticated
+download with an expected version.
 
-Limites: a classificação de perguntas sensíveis é heurística; todas as respostas
-continuam sujeitas à revisão humana. Respostas manuais são declarações do candidato,
-sem comprovação independente. O layout é de coluna única, orientado a ATS, mas não
-foi certificado em serviços ATS externos. Conteúdo extenso pode gerar várias páginas;
-confira os arquivos baixados antes de enviar.
+Limitations: sensitive-question classification is heuristic; all answers remain subject to
+human review. Manual answers are candidate declarations without independent verification.
+The layout is single-column and ATS-oriented, but has not been certified by external ATS services.
+Long content may produce several pages; check downloaded files before submitting.

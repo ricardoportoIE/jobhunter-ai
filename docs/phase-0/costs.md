@@ -1,38 +1,38 @@
-# Orçamento final da fase 0
+# Final phase 0 budget
 
-Definido em 2026-09-19: **€25 por mês combinado, até €15 AWS e €10 inferência**. Esses limites incluem margem para impostos, câmbio, retries e cobrança residual. Nenhum serviço pago foi ativado.
+Defined on 2026-09-19: **€25 per month combined, up to €15 for AWS and €10 for inference**. These limits include allowances for tax, exchange rates, retries and residual charges. No paid service was activated.
 
-## Baseline que cabe no orçamento
+## Baseline within budget
 
-| Etapa | AWS | Inferência | Condição |
+| Stage | AWS | Inference | Condition |
 |---|---:|---:|---|
-| Fase 1 local | €0 | €0 | Sem recursos cloud ou LLM |
-| Fases 2–3 locais | €0 por padrão | Até €10/mês | Benchmark e ledger de consumo antes de chamadas |
-| Sessões de validação AWS | Reserva de até €5/sessão, duas sessões/mês | Dentro dos mesmos €10 | Cotação aprovada pelo preflight e TTL de no máximo 8h |
-| Resíduos, logs, armazenamento e margem AWS | Reserva €5/mês | — | Soma AWS nunca autoriza mais de €15 |
+| Local phase 1 | €0 | €0 | No cloud resources or LLM |
+| Local phases 2–3 | €0 by default | Up to €10/month | Benchmark and usage ledger before calls |
+| AWS validation sessions | Reservation of up to €5/session, two sessions/month | Within the same €10 | Quote approved by preflight and TTL of at most 8h |
+| Residual resources, logs, storage and AWS allowance | €5/month reservation | — | Total AWS authorisation never exceeds €15 |
 
-Reservas são limites de autorização do projeto, não preços garantidos para a topologia. Não existe AWS 24/7 no baseline. Se a cotação regional exceder a reserva, reduzir o ambiente ou usar somente local. Ver [ADR-004](../adr/0004-local-first-budget.md).
+Reservations are project authorisation limits, not guaranteed topology prices. The baseline has no 24/7 AWS environment. If the regional quote exceeds the reservation, reduce the environment or run locally only. See [ADR-004](../adr/0004-local-first-budget.md).
 
-## Estimativa de inferência
+## Inference estimate
 
-Volume de referência: 300 análises/mês com 4.000 tokens de entrada e 1.000 de saída por análise; 30 pacotes com 10.000 de entrada e 3.000 de saída por pacote. Total 1,5 milhão de entrada e 0,39 milhão de saída, contando todas as chamadas dentro de cada tarefa.
+Reference volume: 300 analyses/month with 4,000 input tokens and 1,000 output tokens per analysis; 30 packages with 10,000 input and 3,000 output tokens per package. Total: 1.5 million input and 0.39 million output tokens, counting all calls within each task.
 
-Com a tarifa de referência consultada para Haiku 4.5 via API direta, US$1/M de entrada e US$5/M de saída, o cálculo é `1,5 × 1 + 0,39 × 5 = US$3,45`. Acrescentar 30% de retries/validação resulta em US$4,49. É um cenário, não escolha de provider; não inclui pesquisa web paga ou contexto adicional. [Tarifa oficial](https://platform.claude.com/docs/en/about-claude/pricing).
+Using the consulted reference rate for Haiku 4.5 through the direct API, US$1/M input and US$5/M output, the calculation is `1.5 × 1 + 0.39 × 5 = US$3.45`. Adding 30% for retries/validation gives US$4.49. This is a scenario, not a provider selection; it excludes paid web research or additional context. [Official rate](https://platform.claude.com/docs/en/about-claude/pricing).
 
-Para reservar orçamento, usar provisoriamente a paridade conservadora US$1=€1 como **parâmetro de planejamento, não cotação cambial**, mais 30% de margem fiscal/cambial: aproximadamente €5,84. Substituir por câmbio e impostos efetivos no preflight. Cobrança real e reservas prevalecem sobre essa aproximação. O limite de €10 não autoriza número ilimitado de chamadas de agentes.
+For budget reservations, provisionally use conservative parity of US$1=€1 as a **planning parameter, not an exchange-rate quote**, plus a 30% tax/currency allowance: approximately €5.84. Replace this with actual exchange rates and taxes during preflight. Actual charges and reservations take precedence over this approximation. The €10 limit does not authorise unlimited agent calls.
 
-## Estimativa AWS temporária
+## Temporary AWS estimate
 
-Cenário: até 8h de um banco pequeno Single-AZ, API e rede temporárias; tarefas episódicas de documentos; volume baixo de logs e armazenamento. Para planejamento, reservar €0,40/h de computação+rede, €0,80 de armazenamento/requests/resíduos da sessão e 25% de contingência: `(8 × 0,40 + 0,80) × 1,25 = €5`. A taxa agregada é uma hipótese conservadora a validar, não preço regional cotado. Duas sessões reservam €10, restando €5 para custos AWS adicionais.
+Scenario: up to 8h of a small Single-AZ database, temporary API and network; occasional document tasks; low log and storage volumes. For planning, reserve €0.40/h for compute+network, €0.80 for session storage/requests/residual resources and 25% contingency: `(8 × 0.40 + 0.80) × 1.25 = €5`. The aggregate rate is a conservative assumption to validate, not a quoted regional price. Two sessions reserve €10, leaving €5 for additional AWS costs.
 
-Antes de qualquer apply, exportar cotação por SKU em eu-west-1: RDS+storage/backups, Fargate/Lambda, rede/NAT ou endpoints, endereços IP, eventual ALB, logs, Secrets Manager, S3, ECR e transferência. A topologia completa poderá exceder €5 e deve então ser reduzida. Não depender de free tier, créditos ou assinatura de chat.
+Before any apply, export a quote by SKU in eu-west-1: RDS+storage/backups, Fargate/Lambda, networking/NAT or endpoints, IP addresses, any ALB, logs, Secrets Manager, S3, ECR and transfer. The complete topology may exceed €5 and must then be reduced. Do not rely on a free tier, credits or a chat subscription.
 
-RDS parado ainda cobra armazenamento; NAT e outros recursos provisionados cobram enquanto existem. Destruir apenas compute não prova encerramento de gastos. Referências: [RDS](https://aws.amazon.com/rds/postgresql/pricing/), [VPC](https://aws.amazon.com/vpc/pricing/), [Fargate](https://aws.amazon.com/fargate/pricing/), [Lambda](https://aws.amazon.com/lambda/pricing/). Preços regionais serão revalidados no momento do deploy.
+A stopped RDS instance still incurs storage charges; NAT and other provisioned resources incur charges while they exist. Destroying compute alone does not prove that spending has ended. References: [RDS](https://aws.amazon.com/rds/postgresql/pricing/), [VPC](https://aws.amazon.com/vpc/pricing/), [Fargate](https://aws.amazon.com/fargate/pricing/), [Lambda](https://aws.amazon.com/lambda/pricing/). Regional prices will be revalidated at deployment time.
 
-## Política de interrupção
+## Spending interruption policy
 
-Alertas em 50/80/100%: combinado €12,50/€20/€25, AWS €7,50/€12/€15 e IA €5/€8/€10. Antes de uma operação, verificar `gasto confirmado + reservas em aberto + custo máximo previsto`. Bloquear se superar qualquer limite aplicável. Falta de dados confiáveis bloqueia novas despesas; revisões manuais não reiniciam o contador automaticamente.
+Alerts at 50/80/100%: combined €12.50/€20/€25, AWS €7.50/€12/€15 and AI €5/€8/€10. Before an operation, check `confirmed spending + open reservations + maximum projected cost`. Block if any applicable limit would be exceeded. Missing reliable data blocks new spending; manual reviews do not automatically reset the counter.
 
-Alarme de billing pode chegar atrasado e não desliga recursos existentes. O design exige reservas atômicas, limites de tokens/chamadas, TTL, teardown e conferência de resíduos. Ao atingir €25, bloquear novas implantações e inferências pagas; continuar permitindo exportação e ações que parem custos. As proteções ainda precisam ser implementadas nas fases correspondentes.
+A billing alarm may arrive late and does not shut down existing resources. The design requires atomic reservations, token/call limits, TTL, teardown and residual resource checks. At €25, block new deployments and paid inference; continue allowing exports and actions that stop costs. These protections still need implementation in their respective phases.
 
-Depois de cada sessão: guardar evidências técnicas anonimizadas, exportar dados necessários, destruir o workspace Terraform correto, verificar RDS/ECS/NAT/ALB/IPs/endpoints/snapshots e atualizar o ledger. Estado canônico pessoal permanece local.
+After each session: save anonymised technical evidence, export necessary data, destroy the correct Terraform workspace, check RDS/ECS/NAT/ALB/IPs/endpoints/snapshots and update the ledger. Canonical personal state remains local.

@@ -1,28 +1,28 @@
-# Fontes selecionadas e regras de acesso
+# Selected sources and access rules
 
-Pesquisa em 2026-09-19. Canal inicial: texto fornecido pelo utilizador, com URL apenas como proveniência. Primeiro piloto automático futuro: Greenhouse Job Board API, começando por um board pequeno e relevante (`fosphamarketing`). Gmail é o primeiro provider de email; OAuth e leitura de label dedicada entram somente na fase 4. Nenhuma caixa de email foi acessada nesta fase.
+Research date: 2026-09-19. Initial channel: user-supplied text, with URLs used only as provenance. First future automatic pilot: Greenhouse Job Board API, starting with a small, relevant board (`fosphamarketing`). Gmail is the first email provider; OAuth and dedicated-label reading enter only in phase 4. No mailbox was accessed in this phase.
 
-## Registro de fontes
+## Source register
 
-| Fonte | Escopo atual | Decisão |
+| Source | Current scope | Decision |
 |---|---|---|
-| Texto manual | Importação local autorizada pelo utilizador | Selecionado para fase 1 |
-| Greenhouse público | GET de anúncios selecionados para pesquisa e avaliação | Pesquisa pontual realizada; scheduler/conector ainda desligado |
-| Greenhouse piloto Fospha | Um board, leitura e deduplicação | Selecionado; nova revisão de termos por finalidade antes de habilitar polling |
-| Gmail | Label dedicada a alertas; sem envio nem alteração | Selecionado para fase 4, não conectado |
-| Lever | Alternativa posterior | Não implementado |
-| LinkedIn automatizado | Login, scraping e candidatura | Bloqueado |
+| Manual text | Local import authorised by the user | Selected for phase 1 |
+| Public Greenhouse | GET selected adverts for research and evaluation | One-off research completed; scheduler/connector still disabled |
+| Greenhouse Fospha pilot | One board, reading and deduplication | Selected; fresh purpose-specific terms review before enabling polling |
+| Gmail | Dedicated alerts label; no sending or modification | Selected for phase 4, not connected |
+| Lever | Later alternative | Not implemented |
+| Automated LinkedIn | Login, scraping and applications | Blocked |
 
-A documentação oficial declara GET público sem autenticação e separa submissão autenticada. A consulta pontual usou apenas endpoints documentados. Acesso técnico público não equivale a licença ampla para redistribuir conteúdo. Usar apenas fatos derivados/reformulados no repositório e preservar originais privados. [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html).
+The official documentation states that GET is public without authentication and separates authenticated submission. The one-off query used only documented endpoints. Public technical access is not a broad licence to redistribute content. Use only derived/paraphrased facts in the repository and preserve private originals. [Greenhouse Job Board API](https://docs.greenhouse.io/job-board.html).
 
-Referências e decisões detalhadas por snapshot estão no registro privado. A URL genérica de termos consultada não respondeu; isso foi registrado e não foi tratado como permissão para polling contínuo. Antes da fase 4, confirmar os termos aplicáveis de plataforma/empregador, finalidade, retenção e frequência. Se não houver base suficiente, manter importação manual e não habilitar o board.
+Detailed references and decisions for each snapshot are in the private register. The generic terms URL consulted did not respond; this was recorded and was not treated as permission for continuous polling. Before phase 4, confirm applicable platform/employer terms, purpose, retention and frequency. Without a sufficient basis, retain manual import and do not enable the board.
 
-## Contrato do conector futuro
+## Future connector contract
 
-ID, domínio/board, endpoints, finalidade, URLs dos termos, data/responsável da revisão, decisão, limites e próxima revisão. Somente `ENABLED` permite execução agendada. GET com concorrência 1, cache, polling diário inicial, timeout 15s, até 2 retries transitórios e respeito a Retry-After. Parar em 401/403 e nunca contornar CAPTCHA. Revalidar DNS/IP e redirects contra SSRF. Email não autoriza seguir automaticamente os links incluídos.
+ID, domain/board, endpoints, purpose, terms URLs, review date/owner, decision, limits and next review. Only `ENABLED` permits scheduled execution. GET with concurrency 1, caching, initial daily polling, a 15s timeout, up to 2 transient retries and respect for Retry-After. Stop on 401/403 and never bypass CAPTCHA. Revalidate DNS/IP and redirects against SSRF. Email does not authorise automatically following embedded links.
 
-## Dataset entregue
+## Delivered dataset
 
-Vinte anúncios reais selecionados de endpoints oficiais, com 12 registros para desenvolvimento e 8 para avaliação. [Dados derivados](../../data/evals/real-cases.json) e [relatório](evaluation-report.md). Os originais, hashes, timestamps e URLs estão em `.private/evaluation/`. A análise inclui um caso fora do mercado-alvo, uma duplicata confirmada e um conflito real entre título e descrição.
+Twenty real adverts selected from official endpoints, with 12 records for development and 8 for evaluation. [Derived data](../../data/evals/real-cases.json) and [report](evaluation-report.md). Originals, hashes, timestamps and URLs are in `.private/evaluation/`. The analysis includes one case outside the target market, one confirmed duplicate and one real title/description conflict.
 
-Rótulos feitos pelo assistente são expectativas de design, não gold labels humanos. A avaliação de concordância humana, precisão e calibração será registrada quando o fluxo de matching for implementado. O dataset sintético continua separado e não foi contado como vaga real.
+Assistant-written labels are design expectations, not human gold-standard labels. Human agreement, accuracy and calibration evaluation will be recorded when the matching workflow is implemented. The synthetic dataset remains separate and was not counted as real vacancies.

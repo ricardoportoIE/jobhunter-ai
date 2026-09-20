@@ -1,25 +1,25 @@
-# Segurança e dados da fase 1
+# Phase 1 security and data
 
-O runtime utiliza `jobhunter_app`, sem superuser, CREATE DATABASE, CREATE ROLE ou CREATE no schema. O serviço efêmero `migrate` utiliza a credencial administrativa apenas para migrations e grants e termina antes da API iniciar. A API recebe somente a credencial runtime no Compose. Fora do Docker, `Settings.runtime()` seleciona `JOBHUNTER_APP_DB_PASSWORD` de `.env`.
+The runtime uses `jobhunter_app`, without superuser, CREATE DATABASE, CREATE ROLE or CREATE on the schema. The ephemeral `migrate` service uses the administrative credential only for migrations and grants, and exits before the API starts. The API receives only the runtime credential in Compose. Outside Docker, `Settings.runtime()` selects `JOBHUNTER_APP_DB_PASSWORD` from `.env`.
 
-Auditoria e snapshots permitem SELECT/INSERT ao runtime; UPDATE, DELETE, TRUNCATE e DDL são negados. Isso protege contra a aplicação, não contra o administrador do PostgreSQL. Cada mutação e seu evento são gravados na mesma transação. Escritas são serializadas por proprietário com advisory lock e versões otimistas; o índice de candidatura impede duplicatas também no banco.
+Audit records and snapshots allow SELECT/INSERT for the runtime; UPDATE, DELETE, TRUNCATE and DDL are denied. This protects against the application, not the PostgreSQL administrator. Each mutation and its event are written in the same transaction. Writes are serialised per owner using an advisory lock and optimistic versions; the application index also prevents duplicates in the database.
 
-Sessões usam tokens opacos aleatórios com hash no banco, cookie HttpOnly/SameSite Strict, expiração absoluta de oito horas, logout com revogação e CSRF + origem permitida nas escritas. HTTP local usa cookie sem Secure; um futuro deploy HTTPS deve habilitar `JOBHUNTER_COOKIE_SECURE=true` e definir origens explícitas. Não há acesso público configurado.
+Sessions use random opaque tokens hashed in the database, an HttpOnly/SameSite Strict cookie, an absolute eight-hour expiry, logout with revocation and CSRF + allowed-origin checks on writes. Local HTTP uses a cookie without Secure; a future HTTPS deployment must enable `JOBHUNTER_COOKIE_SECURE=true` and define explicit origins. No public access is configured.
 
-Texto importado, fontes e justificativas são dados. Nenhuma URL dispara fetch no servidor; a interface usa escape do React e nunca injeta HTML bruto. Limite total de corpo: 128 KiB; anúncio: 50.000 caracteres. Respostas privadas têm `Cache-Control: no-store`. Logs de acesso com query strings foram desativados em Nginx/uvicorn; erros inesperados registram apenas correlação e tipo, sem exceção original, SQL ou corpo.
+Imported text, sources and explanations are data. No URL triggers server-side fetching; the interface uses React escaping and never injects raw HTML. Total body limit: 128 KiB; advert: 50,000 characters. Private responses have `Cache-Control: no-store`. Access logs containing query strings were disabled in Nginx/uvicorn; unexpected errors record only correlation and type, without the original exception, SQL or body.
 
-## Exportação
+## Export
 
-Na tela **Privacidade**, `Baixar exportação` baixa JSON autenticado com registros, snapshots e auditoria. Não inclui hashes de senha, cookies, tokens de sessão ou CSRF. O arquivo contém dados pessoais se estes tiverem sido cadastrados; guarde-o fora do Git. O endpoint é `GET /api/v1/candidate/export`.
+On the privacy screen, the export download action retrieves authenticated JSON containing records, snapshots and audit history. It excludes password hashes, cookies, session tokens and CSRF tokens. The file contains personal data if any has been entered; keep it outside Git. The endpoint is `GET /api/v1/candidate/export`.
 
-## Eliminação administrativa
+## Administrative erasure
 
-Remover um fato/evidência pela interface é exclusão lógica: o histórico continua disponível e análises ficam desatualizadas. Para apagar os dados da aplicação, incluindo snapshots, histórico, chaves de idempotência e sessões, use na raiz, **somente quando desejar essa eliminação**:
+Deleting a fact/evidence record through the interface is a soft deletion: history remains available and analyses become stale. To erase application data, including snapshots, history, idempotency keys and sessions, run this from the root **only when you intend that erasure**:
 
 ```powershell
 uv run --project apps/api --env-file .env python -m jobhunter_api.manage erase --confirm DELETE_LOCAL_APPLICATION_DATA
 ```
 
-A conta local e seu hash de senha são preservados para poder entrar novamente. Arquivos de origem em `.private/`, exportações e backups externos não são apagados por esse comando; não pertencem ao banco da aplicação. Exclua essas cópias separadamente se essa for a intenção. Nenhuma eliminação foi executada sobre dados reais durante o desenvolvimento: o teste usa banco isolado com dados fictícios.
+The local account and its password hash are preserved so that you can log in again. This command does not delete source files in `.private/`, exports or external backups; they are outside the application database. Delete those copies separately if intended. No real data was erased during development: the test uses an isolated database with synthetic data.
 
-As cópias antigas continuam existindo em backups até que sejam eliminadas; uma restauração deve respeitar eliminações posteriores. Recuperação e backups automatizados pertencem à fase 5.
+Old copies remain in backups until deleted; restoration must respect subsequent erasure requests. Automated recovery and backups belong to phase 5.

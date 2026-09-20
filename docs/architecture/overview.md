@@ -1,57 +1,57 @@
-# Arquitetura definida na fase 0
+# Architecture defined in phase 0
 
-Baseline adotado: aplicação local, monólito modular e AWS apenas para validações temporárias. O teto €25/mês torna a topologia cloud abaixo um ambiente efêmero de demonstração; ela não será mantida como produção pessoal contínua. Ver [ADR-004](../adr/0004-local-first-budget.md).
+Adopted baseline: a local application, modular monolith and AWS only for temporary validation. The €25/month ceiling makes the cloud topology below an ephemeral demonstration environment; it will not run as continuous personal production infrastructure. See [ADR-004](../adr/0004-local-first-budget.md).
 
-## Núcleo local — fase 1
+## Local core — phase 1
 
 ```mermaid
 flowchart LR
-  U[Utilizador] --> W[React e TypeScript]
-  W --> A[FastAPI: autenticação e contratos]
-  A --> C[Perfil e evidências]
-  A --> J[Importação e revisão de vagas]
-  A --> M[Matching determinístico]
-  A --> T[Tracker e auditoria]
+  U[User] --> W[React and TypeScript]
+  W --> A[FastAPI: authentication and contracts]
+  A --> C[Profile and evidence]
+  A --> J[Job import and review]
+  A --> M[Deterministic matching]
+  A --> T[Tracker and audit]
   C --> P[(PostgreSQL)]
   J --> P
   M --> P
   T --> P
-  C --> F[Arquivos privados locais]
+  C --> F[Local private files]
 ```
 
-Um backend, um banco e módulos com limites explícitos. Domínio não importa FastAPI, SDK de LLM ou detalhes AWS. Adaptadores convertem contratos externos para o domínio. React consome API; não acessa banco, providers ou segredos diretamente. Aplicação e banco locais ficam limitados ao loopback, com credenciais locais fora do Git.
+One backend, one database and modules with explicit boundaries. The domain does not import FastAPI, an LLM SDK or AWS details. Adapters convert external contracts into domain objects. React consumes the API; it does not access the database, providers or secrets directly. The local application and database are restricted to loopback, with local credentials kept outside Git.
 
-Estrutura implementada: `apps/api` e `apps/web`, com testes junto de cada aplicação e scripts de validação na raiz. O motor puro está em `jobhunter_api/scoring.py`, sem FastAPI ou PostgreSQL. Workers, renderer, MCP e infraestrutura cloud surgem quando suas fases precisarem deles. [Contratos concretizados na fase 1](../phase-1/runtime-contracts.md).
+Implemented structure: `apps/api` and `apps/web`, with tests alongside each application and validation scripts at the root. The pure scoring engine is in `jobhunter_api/scoring.py`, without FastAPI or PostgreSQL. Workers, the renderer, MCP and cloud infrastructure are introduced when their phases need them. [Contracts implemented in phase 1](../phase-1/runtime-contracts.md).
 
-## Evolução AWS — referência para fase 5
+## AWS evolution — reference for phase 5
 
 ```mermaid
 flowchart TD
-  U[Utilizador autenticado] --> UI[Frontend privado ou autenticado]
-  UI --> API[API Gateway e Lambda/FastAPI]
+  U[Authenticated user] --> UI[Private or authenticated frontend]
+  UI --> API[API Gateway and Lambda/FastAPI]
   ID[Cognito] --> API
   S[EventBridge Scheduler] --> SF[Step Functions]
-  SF --> L[Lambda: tarefas curtas]
-  SF --> F[ECS Fargate: documentos e tarefas longas]
-  API --> DB[(RDS PostgreSQL privado)]
+  SF --> L[Lambda: short tasks]
+  SF --> F[ECS Fargate: documents and long tasks]
+  API --> DB[(Private RDS PostgreSQL)]
   L --> DB
   F --> DB
-  L --> AI[Adapter de inferência / Bedrock]
-  F --> O[S3 privado]
+  L --> AI[Inference adapter / Bedrock]
+  F --> O[Private S3]
   API --> O
   SEC[Secrets Manager / IAM] --> API
   SEC --> L
   SEC --> F
-  API --> OBS[Logs redigidos e métricas]
+  API --> OBS[Redacted logs and metrics]
   L --> OBS
   F --> OBS
 ```
 
-O diagrama é lógico: rede, endpoints privados, quotas e disponibilidade regional precisam de design detalhado e cotação antes do Terraform. RDS continua tendo custo fixo mesmo com processamento por eventos. A demonstração temporária pode usar Single-AZ e é destruída depois da validação. Dados canônicos permanecem locais; não há promessa de disponibilidade cloud contínua.
+This is a logical diagram: networking, private endpoints, quotas and regional availability need detailed design and pricing before Terraform implementation. RDS still has a fixed cost with event-driven processing. The temporary demonstration may use Single-AZ and is destroyed after validation. Canonical data remains local; continuous cloud availability is not promised.
 
-Step Functions controla tarefas cloud, retries e agendamento. LangGraph, quando necessário, controla estados internos de uma análise por IA. Estado de candidatura e aprovação pertence ao banco/domínio. Não duplicar a mesma máquina de estados nos três lugares.
+Step Functions controls cloud tasks, retries and scheduling. LangGraph, when needed, controls the internal states of an AI analysis. Application and approval state belongs to the database/domain. Do not duplicate the same state machine across all three.
 
-## Dados e relações
+## Data and relationships
 
 ```mermaid
 erDiagram
@@ -64,31 +64,31 @@ erDiagram
   Application ||--o{ ApplicationEvent : audited_by
 ```
 
-Perfil, vaga e matching são versionados. Unicidade de candidato + vaga impede duplicação acidental de candidatura; novas tentativas explícitas terão modelo próprio se necessárias. Escrita do estado e evento de auditoria ocorre na mesma transação. Uma chave de idempotência é vinculada ao ator, operação e hash do payload; reutilização com payload diferente retorna conflito.
+Profiles, jobs and matches are versioned. Candidate + job uniqueness prevents accidental duplicate applications; explicit new attempts will have their own model if needed. State and audit events are written in the same transaction. An idempotency key is bound to the actor, operation and payload hash; reuse with a different payload returns a conflict.
 
-## Máquina de estados
+## State machine
 
-Pipeline de inteligência da vaga: `DISCOVERED → PARSED → SCORED`. `PARSED` requer revisão manual dos campos na fase 1. A shortlist cria uma `Application` em `SHORTLISTED`; a vaga mantém seu estágio de análise. Isso separa reanálises de resultados de candidaturas.
+Job intelligence pipeline: `DISCOVERED → PARSED → SCORED`. `PARSED` requires manual field review in phase 1. Shortlisting creates an `Application` in `SHORTLISTED`; the job retains its analysis stage. This separates reanalysis from application outcomes.
 
-| Estado atual da candidatura | Próximos estados normais | Condição |
+| Current application state | Normal next states | Condition |
 |---|---|---|
-| SHORTLISTED | RESEARCHED, PACKAGE_GENERATED | Pesquisa é opcional no MVP local; geração exige matching válido |
-| RESEARCHED | PACKAGE_GENERATED | Snapshot factual e estratégia definidos |
-| PACKAGE_GENERATED | NEEDS_REVIEW | Validação do pacote passou |
-| NEEDS_REVIEW | APPROVED, PACKAGE_GENERATED | Aprovar versão ou pedir alterações; recusa de pacote permanece em revisão |
-| APPROVED | SUBMITTED, NEEDS_REVIEW | Envio/registro manual comprovado ou invalidação da aprovação |
-| SUBMITTED | INTERVIEWING, OFFERED, REJECTED | Evidência do resultado; não inferir sucesso por timeout |
-| INTERVIEWING | OFFERED, REJECTED | Resultado registrado pelo utilizador |
-| OFFERED, REJECTED, WITHDRAWN, EXPIRED | Nenhum | Terminais; correções exigem evento administrativo explícito |
+| SHORTLISTED | RESEARCHED, PACKAGE_GENERATED | Research is optional in the local MVP; generation requires a valid match |
+| RESEARCHED | PACKAGE_GENERATED | Factual snapshot and strategy defined |
+| PACKAGE_GENERATED | NEEDS_REVIEW | Package validation passed |
+| NEEDS_REVIEW | APPROVED, PACKAGE_GENERATED | Approve the version or request changes; package rejection remains under review |
+| APPROVED | SUBMITTED, NEEDS_REVIEW | Confirmed submission/manual record or invalidated approval |
+| SUBMITTED | INTERVIEWING, OFFERED, REJECTED | Evidence of the outcome; do not infer success from a timeout |
+| INTERVIEWING | OFFERED, REJECTED | Outcome recorded by the user |
+| OFFERED, REJECTED, WITHDRAWN, EXPIRED | None | Terminal; corrections require an explicit administrative event |
 
-Dos estados não terminais é permitido `WITHDRAWN`; `EXPIRED` é permitido antes de submissão. `ARCHIVED` é um marcador da vaga, independente do resultado da candidatura. Na fase 1, pacote e envio automatizado não existem: tracker pode registrar uma submissão manual com confirmação explícita, origem `manual_record` e data/comprovante. A exceção não pode ser usada pelo adaptador automatizado futuro.
+`WITHDRAWN` is permitted from non-terminal states; `EXPIRED` is permitted before submission. `ARCHIVED` is a job marker, independent of the application outcome. Phase 1 has no automated package generation or submission: the tracker can record a manual submission with explicit confirmation, origin `manual_record` and a date/supporting record. The future automated adapter must not use this exception.
 
-Alteração do perfil, vaga, evidência ou pacote invalida a aprovação afetada. Envio futuro precisa de aprovação separada de escopo `submission`, destinatário/canal, hash do pacote e prazo. Se o resultado externo ficar ambíguo, registrar tentativa `UNKNOWN` fora do estado principal e reconciliar antes de tentar novamente.
+A change to the profile, job, evidence or package invalidates the affected approval. Future submission requires a separate approval with `submission` scope, recipient/channel, package hash and expiry. If the external outcome is ambiguous, record an `UNKNOWN` attempt outside the main state and reconcile it before retrying.
 
-## Fronteiras de confiança
+## Trust boundaries
 
-1. Browser → API: autenticação, autorização por proprietário e validação de entrada.
-2. Fontes externas → parser: dados não confiáveis, limites e isolamento.
-3. Domínio → IA: somente contexto necessário, sem credenciais ou dados sensíveis dispensáveis.
-4. Domínio → canal de candidatura: aprovação válida, idempotência e confirmação de resultado.
-5. Banco/arquivos → logs: apenas metadados redigidos.
+1. Browser → API: authentication, owner-based authorisation and input validation.
+2. External sources → parser: untrusted data, limits and isolation.
+3. Domain → AI: only necessary context, without credentials or unnecessary sensitive data.
+4. Domain → application channel: valid approval, idempotency and outcome confirmation.
+5. Database/files → logs: redacted metadata only.

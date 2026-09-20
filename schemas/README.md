@@ -1,41 +1,41 @@
-# Contratos de dados v0.2.0
+# Data contracts v0.2.0
 
-[domain.schema.json](domain.schema.json) usa JSON Schema Draft 2020-12 e contém seis entidades principais em `$defs`. É um contrato de design, não uma migration de banco nem implementação Pydantic.
+[domain.schema.json](domain.schema.json) uses JSON Schema Draft 2020-12 and contains six main entities in `$defs`. It is a design contract, not a database migration or Pydantic implementation.
 
-| Entidade | Responsabilidade | Invariantes principais |
+| Entity | Responsibility | Main invariants |
 |---|---|---|
-| Job | Snapshot de vaga, origem e requisitos | Campos desconhecidos null; URL não autoriza fetch; origem programática exige referência de revisão |
-| CandidateFact | Afirmação atômica versionada | verified exige evidência, revisor, data e usos permitidos |
-| Evidence | Referência e localização da fonte | Conteúdo privado por referência; revisão com ator e data |
-| MatchResult | Score e cobertura reproduzíveis | Oito categorias; referências a versões de perfil/vaga e algoritmo |
-| Application | Ciclo de candidatura | Pacote aprovado identificado por hash; envio manual separado de adapter |
-| CandidateProfile | Snapshot e preferências | Fatos por ID de revisão; restrições e master CV ficam privados |
+| Job | Job snapshot, provenance and requirements | Unknown fields are null; a URL does not authorise fetching; programmatic sources require a review reference |
+| CandidateFact | Versioned atomic claim | verified requires evidence, a reviewer, a date and permitted uses |
+| Evidence | Source reference and location | Private content by reference; review records actor and date |
+| MatchResult | Reproducible score and coverage | Eight categories; references to profile/job versions and algorithm |
+| Application | Application lifecycle | Approved package identified by hash; manual submission separate from the adapter |
+| CandidateProfile | Snapshot and preferences | Facts referenced by revision ID; constraints and master CV remain private |
 
-Todas as propriedades listadas são obrigatórias; quando desconhecidas, preencher null onde admitido. Arrays vazios representam ausência de registros. UUIDs são identificadores, instantes usam UTC com `Z`, scores ficam entre 0 e 100 e coverage/confidence entre 0 e 1. `additionalProperties: false` evita aceitar campos inesperados silenciosamente.
+All listed properties are required; use null for unknown values where permitted. Empty arrays represent the absence of records. UUIDs are identifiers, timestamps use UTC with `Z`, scores range from 0 to 100 and coverage/confidence from 0 to 1. `additionalProperties: false` prevents unexpected fields from being silently accepted.
 
-Na v0.2.0, MatchResult exige `employment_gate` e `review_flags`. A recomendação de procurar uma oferta é distinta da condição para começar a trabalhar. `REVIEW_BEFORE_START` exige pelo menos uma flag. Sponsorship desconhecido não impede recomendação positiva por si só. Dados locais foram migrados da v0.1.0 para a v0.2.0; ver [política](../docs/phase-0/matching-policy.md).
+In v0.2.0, MatchResult requires `employment_gate` and `review_flags`. The recommendation to pursue an offer is separate from the conditions for starting work. `REVIEW_BEFORE_START` requires at least one flag. Unknown sponsorship does not by itself prevent a positive recommendation. Local data was migrated from v0.1.0 to v0.2.0; see the [policy](../docs/phase-0/matching-policy.md).
 
-`confidence` de extração pode ser null e não equivale a evidência ou aprovação. `coverage` mede dados avaliados e não é probabilidade estatística. Referências `fixture://` e hashes repetidos do exemplo são placeholders declarados; em dados reais, calcular SHA-256 sobre os bytes canônicos especificados e guardar a referência resolvível em armazenamento autorizado.
+Extraction `confidence` may be null and is not evidence or approval. `coverage` measures assessed data and is not a statistical probability. The example's `fixture://` references and repeated hashes are declared placeholders; for real data, calculate SHA-256 over the specified canonical bytes and store a resolvable reference in authorised storage.
 
-## Regras que ainda precisam de validação no domínio
+## Rules still requiring domain validation
 
-JSON Schema valida forma, tipos e algumas condições locais. Não valida por si só:
+JSON Schema validates structure, types and some local conditions. It does not itself validate:
 
-- Existência, ownership e revisão das evidências referenciadas; validade temporal e usos no momento da operação.
-- `valid_until >= valid_from`, salário mínimo <= máximo e expiração posterior à decisão.
-- Oito categorias distintas e pesos somando 100; correspondência entre assessments e requisitos; cálculo de score/coverage e blockers segundo [ADR-003](../docs/adr/0003-evidence-and-approval.md).
-- Perfil reviewed com fatos/evidências válidos e restrições suficientes para o uso pretendido.
-- Transições permitidas, coerência de eventos, idempotência e concorrência.
-- Aprovação por ator autorizado, hash e versões atuais, escopo, destinatário, validade e campos sensíveis revisados.
-- Invalidação de pacotes após revogação; reconciliação de tentativa de envio com resultado desconhecido.
-- Segurança de URL, caminho e bytes de arquivos.
+- Existence, ownership and review of referenced evidence; temporal validity and permitted uses at the time of the operation.
+- `valid_until >= valid_from`, minimum salary <= maximum salary and expiry after the decision.
+- Eight distinct categories and weights totalling 100; correspondence between assessments and requirements; score/coverage and blocker calculations under [ADR-003](../docs/adr/0003-evidence-and-approval.md).
+- A reviewed profile with valid facts/evidence and sufficient constraints for the intended use.
+- Permitted transitions, event consistency, idempotency and concurrency.
+- Approval by an authorised actor, current hash and versions, scope, recipient, validity and reviewed sensitive fields.
+- Package invalidation after revocation; reconciliation of a submission attempt with an unknown outcome.
+- URL, path and file-byte security.
 
-Essas regras entram nas histórias da fase 1 ou na fase que introduz a operação. O exemplo é verificado também quanto às referências e coerência básica, sem alegar que há um motor de domínio pronto.
+These rules belong to phase 1 stories or the phase introducing the operation. The example also undergoes reference and basic consistency checks, without claiming that a domain engine is already implemented.
 
-## Versionamento
+## Versioning
 
-Mudança incompatível exige nova `schema_version` e migração explícita dos dados. IDs de revisões de fatos permanecem imutáveis. API poderá expor views menores e excluir conteúdo sensível; estes schemas não autorizam publicar todo o objeto no frontend.
+An incompatible change requires a new `schema_version` and explicit data migration. Fact revision IDs remain immutable. The API may expose smaller views and exclude sensitive content; these schemas do not authorise publishing the entire object in the frontend.
 
-## Validar
+## Validation
 
-Executar `python scripts/validate_phase0.py` no ambiente com [requirements-phase0.txt](../requirements-phase0.txt). O script verifica metaschema, exemplos, referências do fixture, casos de rejeição e links locais da documentação. Não usa rede nem credenciais. A dependência `jsonschema` serve apenas para validação dos contratos nesta fase.
+Run `python scripts/validate_phase0.py` in an environment with [requirements-phase0.txt](../requirements-phase0.txt). The script checks the metaschema, examples, fixture references, rejection cases and local documentation links. It uses neither network access nor credentials. The `jsonschema` dependency is used only to validate contracts in this phase.

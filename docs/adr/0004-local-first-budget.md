@@ -1,19 +1,19 @@
-# ADR-004 — Desenvolvimento local e AWS temporária
+# ADR-004 — Local development and temporary AWS environments
 
-Estado: adotado para a fase 1 com base nas preferências fornecidas. Data: 2026-09-19.
+Status: adopted for phase 1 based on the supplied preferences. Date: 2026-09-19.
 
-O orçamento combinado é €25/mês: até €15 AWS e €10 inferência. A topologia de produção permanente descrita inicialmente não cabe com segurança nesse limite. O produto será utilizado localmente; AWS servirá inicialmente para demonstrações e validações temporárias reproduzíveis.
+The combined budget is €25/month: up to €15 for AWS and €10 for inference. The permanent production topology originally described cannot safely fit within this limit. The product will run locally; AWS will initially support reproducible temporary demonstrations and validation.
 
-## Decisão
+## Decision
 
-Fase 1 sem serviços cloud ou LLM. Fases 2–3 usam inferência somente dentro do orçamento. Fase 5 cria ambientes temporários, captura evidência técnica anonimizada, exporta dados necessários e destrói recursos do projeto com Terraform após a sessão. RDS, ECS, NAT Gateway e ALB não permanecem ativos por padrão. Nunca destruir recursos alheios ao workspace/estado Terraform selecionado.
+Phase 1 uses no cloud services or LLM. Phases 2–3 use inference only within budget. Phase 5 creates temporary environments, captures anonymised technical evidence, exports necessary data and destroys project resources with Terraform after each session. RDS, ECS, NAT Gateway and ALB do not remain active by default. Never destroy resources outside the selected Terraform workspace/state.
 
-Planejar até duas sessões mensais de oito horas, com reserva máxima inicial de €5 por sessão AWS e €5 para armazenamento, logs, resíduos e contingências do mês. O preflight deve usar a cotação vigente de todos os recursos; se uma sessão não couber na reserva, reduzir a topologia ou não implantar. O limite de tempo é um mecanismo de controle, não uma garantia do preço.
+Plan up to two eight-hour sessions per month, with an initial maximum AWS reservation of €5 per session and €5 for storage, logs, residual resources and monthly contingency. The preflight must use current quotes for all resources; if a session exceeds its reservation, reduce the topology or do not deploy. The time limit is a control mechanism, not a price guarantee.
 
-Alertas em 50%, 80% e 100% para cada suborçamento e para o combinado. Bloquear novas chamadas pagas e novos applies quando custo confirmado + reservas + custo máximo estimado ultrapassar um limite. Gastos desconhecidos ou informação de billing desatualizada impedem nova alocação. Destruição, exportação e ações necessárias para encerrar recursos continuam permitidas mesmo após o limite.
+Set alerts at 50%, 80% and 100% for each sub-budget and the combined budget. Block new paid calls and new applies when confirmed cost + reservations + maximum estimated cost would exceed a limit. Unknown spending or stale billing information prevents new allocation. Destruction, export and actions needed to shut down resources remain permitted after the limit is reached.
 
-AWS Budgets pode avisar com atraso e recursos existentes continuam cobrando. A proteção exige preflight, reserva atômica, TTL e cleanup verificável; não prometer um hard cap de fatura oferecido pela AWS. Não há infraestrutura nem bloqueio operacional implementados nesta fase.
+AWS Budgets may notify late, and existing resources continue to incur charges. Protection requires preflight checks, atomic reservations, TTL and verifiable clean-up; do not promise an AWS-enforced hard billing cap. No infrastructure or operational blocking controls are implemented in this phase.
 
-## Consequências
+## Consequences
 
-Não existe serviço disponível 24/7 na AWS no baseline. Dados pessoais e estado canônico permanecem locais; demos cloud usam seed fictício sempre que possível. A demonstração de portfólio registra infraestrutura realmente validada e depois removida, sem anunciar URL permanente. Um deploy contínuo exigirá novo orçamento e ADR.
+The baseline has no AWS service available 24/7. Personal data and canonical state remain local; cloud demonstrations use synthetic seed data wherever possible. Portfolio evidence records infrastructure that was actually validated and then removed, without advertising a permanent URL. Continuous deployment would require a new budget and ADR.

@@ -1,46 +1,46 @@
-# Master CV e Candidate Knowledge Base
+# Master CV and Candidate Knowledge Base
 
-## Separação entre template e dados reais
+## Separating the template from real data
 
-`data/templates/candidate-profile.json` é um formulário vazio validável. Copiar para `.private/candidate-profile.json` e preencher apenas com informações revistas. `.gitignore` reduz publicação acidental; não criptografa arquivos nem substitui controle de acesso. Usar armazenamento local protegido e verificar o diff antes de qualquer commit.
+`data/templates/candidate-profile.json` is a validatable blank form. Copy it to `.private/candidate-profile.json` and fill it in only with reviewed information. `.gitignore` reduces accidental publication; it neither encrypts files nor replaces access control. Use protected local storage and inspect the diff before every commit.
 
-O master CV permanece privado em `.private/master-cv/`. Evidências privadas ficam em `.private/evidence/`. O DOCX e o PDF fornecidos foram lidos e comparados: 60 parágrafos correspondem após normalização textual; o PDF de duas páginas foi inspecionado visualmente. Originais preservados com SHA-256. O caminho antigo `data/cv/` indicado no material não existe e não foi criado para dados pessoais.
+The master CV remains private in `.private/master-cv/`. Private evidence is stored in `.private/evidence/`. The supplied DOCX and PDF were read and compared: 60 paragraphs match after text normalisation; the two-page PDF was visually inspected. Originals were preserved with SHA-256 hashes. The old `data/cv/` path mentioned in the material does not exist and was not created for personal data.
 
-Base consolidada: 114 fatos, 43 evidências e quatro referências de repositórios fixadas por commit. O utilizador confirmou nesta conversa que fatos e datas do CV estão atuais. `verified` representa essa declaração aprovada, com documentação pública complementar quando disponível; nenhum teste dos projetos foi reexecutado. Qualificações e premiações mantêm origem declarativa até eventual comprovação documental, sem transformar diploma de pós-graduação em mestrado.
+Consolidated base: 114 facts, 43 evidence records and four repository references pinned to commits. The user confirmed in this conversation that the CV's facts and dates are current. `verified` represents that approved declaration, supplemented by public documentation where available; no project tests were rerun. Qualifications and awards retain declarative provenance pending any documentary verification, without presenting a postgraduate diploma as a master's degree.
 
-Arquivos privados: `candidate-profile.json`, `candidate-facts.json`, `candidate-evidence.json`, `candidate-fact-annotations.json`, `candidate-constraints.json` e `candidate-contact.json`. Contatos e restrições sensíveis ficam separados. Dados pessoais desnecessários continuam null. Projeto em desenvolvimento não é fato de entrega concluída.
+Private files: `candidate-profile.json`, `candidate-facts.json`, `candidate-evidence.json`, `candidate-fact-annotations.json`, `candidate-constraints.json` and `candidate-contact.json`. Contact details and sensitive constraints remain separate. Unnecessary personal data remains null. A project under development is not a completed delivery fact.
 
-## Processo de consolidação
+## Consolidation process
 
-1. Registrar versão, data e hash do CV original, mantendo uma cópia sem alterações.
-2. Extrair fatos atômicos: uma experiência, competência, certificação ou realização por registro.
-3. Associar evidência e localização exata: página, seção, arquivo/commit ou declaração aprovada do candidato.
-4. Manter os fatos extraídos como `unverified` até revisão. CV é fonte declarativa, não confirmação independente.
-5. Definir validade, usos permitidos e classificação de sensibilidade.
-6. Revisar contradições, datas e métricas com o candidato; nunca escolher uma versão silenciosamente.
-7. Publicar um snapshot imutável do perfil, com IDs das revisões dos fatos, para matching e geração.
+1. Record the original CV's version, date and hash, retaining an unchanged copy.
+2. Extract atomic facts: one experience, skill, certification or achievement per record.
+3. Associate evidence and its exact location: page, section, file/commit or approved candidate declaration.
+4. Keep extracted facts `unverified` until review. A CV is a declarative source, not independent confirmation.
+5. Define validity, permitted uses and sensitivity classification.
+6. Review contradictions, dates and metrics with the candidate; never silently choose one version.
+7. Publish an immutable profile snapshot with fact revision IDs for matching and generation.
 
-## Regras de validade
+## Validity rules
 
-`verified` significa que o candidato aprovou a afirmação e suas fontes para uso. Isso não significa verificação externa independente. Fatos `unverified`, `expired` ou `revoked` não alimentam geração factual. O período de validade é verificado em cada execução. Revogação invalida pacotes ainda não enviados e exige nova revisão.
+`verified` means that the candidate has approved the claim and its sources for use. It does not mean independent external verification. `unverified`, `expired` or `revoked` facts cannot feed factual generation. Validity is checked on every execution. Revocation invalidates packages that have not yet been submitted and requires a new review.
 
-Uma revisão cria novo ID de fato e incrementa a versão do perfil. Registros antigos usados por avaliações continuam referenciáveis, sujeitos à política de eliminação de dados pessoais. Audit logs preservam identificadores e hashes mínimos, não o texto sensível.
+A revision creates a new fact ID and increments the profile version. Old records used in evaluations remain referenceable, subject to the personal data erasure policy. Audit logs retain minimal identifiers and hashes, not sensitive text.
 
-Restrições de imigração, autorização de trabalho, salário e disponibilidade devem estar em registros privados separados, com jurisdição, validade e revisão humana. A aplicação não infere direitos legais a partir de nacionalidade ou localização.
+Immigration, work authorisation, salary and availability constraints must be held in separate private records with jurisdiction, validity and human review. The application does not infer legal rights from nationality or location.
 
-## Campos de entrada
+## Input fields
 
-| Grupo | Conteúdo | Se ausente |
+| Group | Content | If missing |
 |---|---|---|
-| Preferências | Cargos, mercados, localidades, modalidade | Solicitar configuração; não inventar filtros |
-| Experiência | Empregador, cargo, datas, responsabilidades comprovadas | Não gerar afirmações |
-| Projetos | Repositório, papel pessoal, tecnologias, entregas | Não assumir autoria ou proficiência |
-| Educação | Curso, instituição, datas e estado | Desconhecido |
-| Restrições | Horas, autorização, sponsorship, disponibilidade, salário | Marcar revisão necessária |
-| Evidências | Origem, hash, localização e data de revisão | Fato permanece não verificado |
+| Preferences | Roles, markets, locations, working arrangements | Request configuration; do not invent filters |
+| Experience | Employer, role, dates, supported responsibilities | Do not generate claims |
+| Projects | Repository, personal role, technologies, deliverables | Do not assume authorship or proficiency |
+| Education | Course, institution, dates and status | Unknown |
+| Constraints | Hours, authorisation, sponsorship, availability, salary | Mark as requiring review |
+| Evidence | Provenance, hash, location and review date | Fact remains unverified |
 
-## Retenção proposta
+## Proposed retention
 
-Documentos privados ativos: enquanto necessários à procura de trabalho. Conteúdo bruto de vagas e anexos: 90 dias por padrão. Pacotes rejeitados: 90 dias. Histórico de candidaturas encerradas: revisão de necessidade após 12 meses. Logs operacionais redigidos: 30 dias. Backups: janela de 30 dias, com reaplicação de eliminações após restauração. São escolhas iniciais de produto a confirmar, não prazos legais determinados.
+Active private documents: while needed for the job search. Raw job content and attachments: 90 days by default. Rejected packages: 90 days. Closed application history: review necessity after 12 months. Redacted operational logs: 30 days. Backups: a 30-day window, with deletions reapplied after restoration. These are initial product choices to confirm, not prescribed legal periods.
 
-Solicitar eliminação deve remover arquivos, embeddings, conteúdo dos fatos, caches e cópias em providers quando aplicável. Manter apenas auditoria mínima pseudonimizada quando justificada; não usar soft delete como substituto de eliminação.
+An erasure request must remove files, embeddings, fact content, caches and provider copies where applicable. Retain only justified minimal pseudonymised audit records; do not use soft deletion as a substitute for erasure.

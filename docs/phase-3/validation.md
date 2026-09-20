@@ -1,83 +1,81 @@
-# P3 — Validação de entrega
+# P3 — Delivery validation
 
-Execução local em 2026-09-20. Dados de testes fictícios, separados do perfil pessoal.
+Local execution on 2026-09-20. Synthetic test data, separate from the personal profile.
 
-## Testes automatizados
+## Automated tests
 
-- API: 69 testes, incluindo permissões por uso, consentimento, seleção inválida,
-  versionamento, aprovação separada de respostas sensíveis, idempotência e diffs.
-- Segurança: isolamento por utilizador, autenticação, CSRF, rejeição de IDs estranhos,
-  minimização do payload de IA e exportação/eliminação de pacotes e snapshots.
-- Documentos: download bloqueado antes de aprovação, hash dos arquivos no ZIP,
-  mesmos fatos no DOCX/PDF, metadados de autor vazios e fontes alteradas bloqueadas.
-- Frontend: 11 testes React; TypeScript, ESLint, Prettier e build de produção.
-- Browser: 6 fluxos Playwright, cobrindo P1, P2 e P3 em desktop/mobile. P3 percorre
-  estratégia → aprovação → geração → resposta sensível → nova versão → diff →
-  aprovação → download PDF. Sem transbordamento horizontal nos dois viewports.
-- Ruff, mypy, contratos de avaliação e smoke checks da stack Docker local.
+- API: 69 tests, including permissions per use, consent, invalid selection, versioning,
+  separate approval of sensitive answers, idempotency and diffs.
+- Security: user isolation, authentication, CSRF, rejection of unknown IDs,
+  AI payload minimisation and export/erasure of packages and snapshots.
+- Documents: downloads blocked before approval, file hashes in the ZIP, identical facts
+  in DOCX/PDF, empty author metadata and changed sources blocked.
+- Frontend: 11 React tests; TypeScript, ESLint, Prettier and production build.
+- Browser: 6 Playwright workflows covering P1, P2 and P3 on desktop/mobile. P3 covers
+  strategy → approval → generation → sensitive answer → new version → diff →
+  approval → PDF download. No horizontal overflow in either viewport.
+- Ruff, mypy, evaluation contracts and local Docker stack smoke checks.
 
-Os testes HTTP/browser usam um provider determinístico e bancos `jobhunter_test*`.
-Os testes reais abaixo exercitam o serviço de estratégia e orçamento com a OpenAI;
-não são uma execução completa do browser contra a API externa. O workflow CI inclui
-os novos testes e a checagem offline do relatório; não foi executado remotamente.
-Persistem os dois avisos de depreciação Starlette/httpx e AnyIO já registrados em P2.
+HTTP/browser tests use a deterministic provider and `jobhunter_test*` databases.
+The live tests below exercise the strategy and budget service with OpenAI;
+they are not a complete browser run against the external API. The CI workflow includes
+new tests and the offline report check; it has not run remotely.
+The two Starlette/httpx and AnyIO deprecation warnings already recorded in P2 remain.
 
-## OpenAI real
+## Live OpenAI calls
 
-Foram feitas seis chamadas reais: três casos com o prompt inicial e três com o
-prompt final `application-strategy-1.1`, usando o GPT-4.1 mini configurado.
-Casos: seleção normal, instrução maliciosa dentro do anúncio e lacunas de experiência
-comercial/MSc. Cada chamada foi repetida via cache sem nova cobrança.
+Six live calls were made: three cases with the initial prompt and three with the final
+`application-strategy-1.1` prompt, using the configured GPT-4.1 mini.
+Cases: normal selection, malicious instructions within the advert and commercial
+experience/MSc gaps. Each call was repeated through the cache without a new charge.
 
-O primeiro resultado confundia relevância de um diploma com cobertura de uma exigência
-de MSc na explicação. O prompt final explicita a diferença de qualificação e a
-impossibilidade de substituir anos comerciais por um projeto pessoal. O caso final
-aponta ambas as lacunas. As alegações dos documentos sempre vieram dos fatos canónicos.
+The first result confused a diploma's relevance with fulfilment of an MSc requirement
+in its explanation. The final prompt makes the qualification distinction explicit and
+states that a personal project cannot replace commercial years. The final case identifies
+both gaps. Document claims always came from canonical facts.
 
-Os três casos finais passaram: IDs válidos, alegações copiadas dos fatos, nenhuma
-experiência inventada no documento, perguntas de salário/visto sem resposta automática,
-aprovação bloqueada enquanto faltam respostas, renderização DOCX/PDF e cache válido.
+The three final cases passed: valid IDs, claims copied from facts, no invented experience
+in documents, salary/visa questions without automatic answers, approval blocked while
+answers are missing, DOCX/PDF rendering and valid caching.
 
-| Execução | Custo estimado no ledger |
+| Run | Estimated ledger cost |
 |---|---:|
-| Baseline, prompt 1.0 | €0,00382700 |
-| Final, prompt 1.1 | €0,00418800 |
-| Total P3 | €0,00801500 |
+| Baseline, prompt 1.0 | €0.00382700 |
+| Final, prompt 1.1 | €0.00418800 |
+| Total P3 | €0.00801500 |
 
-Equivale a aproximadamente US$0,006412 pelas tarifas registradas, antes da margem
-contabilística de 1,25 usada no ledger. Isso não é uma conversão cambial nem uma
-consulta ao saldo da carteira. Relatórios públicos contêm somente dados sintéticos:
-[baseline](../../data/evals/phase3-live-baseline.json) e
-[final](../../data/evals/phase3-live.json). Não constituem benchmark com gold set humano
-nem permitem afirmar precisão geral de estratégia ou equivalência de qualificações.
+Equivalent to approximately US$0.006412 at recorded rates, before the 1.25 accounting
+allowance used in the ledger. This is neither an exchange-rate conversion nor a wallet
+balance query. Public reports contain only synthetic data:
+[baseline](../../data/evals/phase3-live-baseline.json) and
+[final](../../data/evals/phase3-live.json). They are not a human gold-set benchmark and
+do not establish general strategy accuracy or qualification equivalence.
 
-Reproduzir sem chamadas externas, na raiz:
+Reproduce without external calls, from the root:
 
 ```powershell
 uv run --project apps/api python scripts/evaluate_phase3.py --check
 ```
 
-Teste externo explícito, sujeito aos limites mensais e a uma reserva adicional máxima
-de €0,25; resultados já existentes podem ser atendidos pelo cache:
+Explicit external test, subject to monthly limits and a maximum additional reservation
+of €0.25; existing results may be served from the cache:
 
 ```powershell
 uv run --project apps/api --env-file .env python scripts/evaluate_phase3.py --live
 ```
 
-## Verificação visual
+## Visual verification
 
-CV e carta fictícios foram gerados em ambos os formatos. Os PDFs do ReportLab foram
-renderizados em PNG e inspecionados. Os DOCX foram convertidos com o helper
-`render_docx.py` da skill documents, em container QA isolado com LibreOffice e Poppler,
-sem rede durante a conversão. Esse container não integra o runtime da aplicação.
+Synthetic CV and letter samples were generated in both formats. ReportLab PDFs were
+rendered to PNG and inspected. DOCX files were converted with the documents skill's
+`render_docx.py` helper in an isolated QA container with LibreOffice and Poppler,
+without networking during conversion. This container is not part of the application runtime.
 
-As quatro amostras têm uma página cada, com título preto, margens consistentes,
-texto legível e sem cortes/sobreposição. Foi removida a borda colorida herdada do
-template Word nos estilos usados. Também foram inspecionadas as capturas do pacote
-aprovado em desktop e mobile. Artefatos QA ficam em `.private/p3-qa/` e
-`apps/web/test-results/`, ignorados pelo Git.
+All four samples have one page each, with a black title, consistent margins, legible text
+and no clipping/overlap. The coloured border inherited from the Word template was removed
+from the styles used. Screenshots of the approved package on desktop and mobile were also
+inspected. QA artefacts are in `.private/p3-qa/` and `apps/web/test-results/`, ignored by Git.
 
-DOCX e PDF compartilham o conteúdo estruturado; fontes e paginação podem variar entre
-renderizadores. A prévia HTML permite revisão de conteúdo, sem prometer paginação
-idêntica ao arquivo final. A inspeção de amostras não substitui a revisão de cada
-documento pessoal antes do envio.
+DOCX and PDF share structured content; fonts and pagination may vary between renderers.
+The HTML preview supports content review without promising identical pagination to the
+final file. Sample inspection does not replace review of each personal document before submission.

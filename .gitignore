@@ -1,4 +1,4 @@
-# Dados locais: nunca publicar CV, credenciais ou evidências reais.
+# Local data: never publish CVs, credentials or real evidence.
 .private/
 .env
 .env.*

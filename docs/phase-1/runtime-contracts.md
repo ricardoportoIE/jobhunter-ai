@@ -1,22 +1,22 @@
-# Contratos de runtime — fase 1
+# Runtime contracts — phase 1
 
-O OpenAPI em `/api/openapi.json` é a referência executável. Os schemas v0.2 da fase 0 permanecem como contratos de design e fixtures históricas; não são serializadores idênticos ao runtime. A implementação usa `version` para concorrência em todos os registros, UUID gerado pelo servidor e proprietário derivado exclusivamente da sessão.
+OpenAPI at `/api/openapi.json` is the executable reference. Phase 0 v0.2 schemas remain design contracts and historical fixtures; they are not identical runtime serialisers. The implementation uses `version` for concurrency on all records, server-generated UUIDs and ownership derived exclusively from the session.
 
-## Decisões concretizadas
+## Implemented decisions
 
-- Armazenamento: registros JSONB tipados/validados por Pydantic, metadados relacionais de owner/kind/version, índices para identidade e unicidade, snapshots separados e audit append-only. Não houve adoção de microserviços nem criação de pacotes vazios.
-- Perfil: qualquer alteração de fato/evidência incrementa a versão e volta o perfil a draft. Publicação cria snapshot imutável. Fatos guardam versões das evidências; mudar uma evidência exige rever o fato antes de voltar a sustentar uma avaliação positiva.
-- Evidência: `content_sha256` é hash do trecho/declaracão fornecido pelo usuário, não prova que um arquivo remoto foi baixado ou validado. Referências não abrem arquivos arbitrários.
-- Vaga: importação conserva o texto integral e seu hash; edição substitui os campos estruturados e exige `expected_version`. `review_confirmed` libera PARSED. Estado SCORED é metadado derivado e não altera a versão dos campos revisados. Uma nova edição invalida a análise por comparação de versões.
-- Matching: o usuário avalia critérios e liga fatos. Não há similaridade textual como prova de atendimento. Positivos sem fato válido tornam-se unknown. Estratégia de carreira usa avaliação explícita. Senioridade avançada confirmada em campo estruturado cria blocker; menções incidentais e nível misto não.
-- Autorização: a exceção para eliminatório desconhecido só se aplica quando a categoria é autorização/horário e `future_authorisation=true`. Não é confirmação jurídica ou permissão para começar a trabalhar.
-- Idempotência: o header `Idempotency-Key` é vinculado ao ator/operação/hash. Sem header, repetição exata do payload tem chave derivada. Payload diferente com a mesma chave retorna 409. Reimportação de uma identidade existente não sobrescreve conteúdo revisado.
-- Deduplicação: ID+fonte, URL preservando parâmetros de identidade e hash normalizado+localidade. Não há merge semântico/fuzzy. Mesma referência com localidades conflitantes exige revisão; conteúdos iguais em cidades diferentes permanecem separados.
-- Tracker: apenas estados efetivamente implementados são aceitos; etapas de geração/aprovação de pacote ficam para a fase 3. SHORTLISTED/RESEARCHED podem registrar SUBMITTED exclusivamente com confirmação, data, canal e comprovante de envio manual. Isso não chama email nem um portal.
-- Falhas de ownership retornam 404 para não confirmar a existência do registro de outro proprietário. Falta de sessão retorna 401; origem/CSRF inválidos retornam 403. Erros têm código, mensagem segura e correlation ID.
+- Storage: JSONB records typed/validated by Pydantic, relational owner/kind/version metadata, identity and uniqueness indexes, separate snapshots and append-only auditing. No microservices were adopted and no empty packages created.
+- Profile: any fact/evidence change increments the version and returns the profile to draft. Publication creates an immutable snapshot. Facts retain evidence versions; changing evidence requires fact review before it can support a positive assessment again.
+- Evidence: `content_sha256` hashes the excerpt/declaration supplied by the user; it does not prove that a remote file was downloaded or validated. References do not open arbitrary files.
+- Job: import preserves the full text and its hash; editing replaces structured fields and requires `expected_version`. `review_confirmed` permits PARSED. SCORED is derived metadata and does not alter the version of reviewed fields. A new edit invalidates analysis through version comparison.
+- Matching: the user assesses criteria and links facts. Text similarity is not proof of fulfilment. Positive assessments without a valid fact become unknown. Career strategy uses explicit assessment. Advanced seniority confirmed in a structured field creates a blocker; incidental mentions and mixed levels do not.
+- Authorisation: the unknown disqualifying requirement exception applies only when the category is authorisation/hours and `future_authorisation=true`. It is not legal confirmation or permission to start work.
+- Idempotency: the `Idempotency-Key` header is bound to the actor/operation/hash. Without a header, an exact repeated payload has a derived key. A different payload with the same key returns 409. Reimporting an existing identity does not overwrite reviewed content.
+- Deduplication: ID+source, URL preserving identity parameters and normalised hash+location. No semantic/fuzzy merge. The same reference with conflicting locations requires review; identical content in different cities remains separate.
+- Tracker: only implemented states are accepted; package generation/approval stages are deferred to phase 3. SHORTLISTED/RESEARCHED can record SUBMITTED only with confirmation, date, channel and evidence of manual submission. This does not invoke email or a portal.
+- Ownership failures return 404 to avoid confirming another owner's record exists. Missing sessions return 401; invalid origin/CSRF returns 403. Errors contain a code, safe message and correlation ID.
 
-## Rotas adicionais ao backlog
+## Routes additional to the backlog
 
-`GET /api/v1/session`, `POST /api/v1/candidate/profile/review`, `GET/PATCH/DELETE` de fatos/evidências, `GET /api/v1/jobs/{id}/matches`, `GET /api/v1/applications/{id}` e `GET /api/v1/candidate/export` completam o fluxo da interface. Login e healthchecks são os únicos endpoints de dados sem sessão; Swagger/OpenAPI também ficam disponíveis apenas no ambiente local.
+`GET /api/v1/session`, `POST /api/v1/candidate/profile/review`, fact/evidence `GET/PATCH/DELETE`, `GET /api/v1/jobs/{id}/matches`, `GET /api/v1/applications/{id}` and `GET /api/v1/candidate/export` complete the interface workflow. Login and health checks are the only data endpoints without a session; Swagger/OpenAPI are also available only in the local environment.
 
-Os dados reais da fase 0 não foram importados automaticamente. O seed fictício é opcional e recusa um perfil que já tenha fatos. Dados de teste usam bancos cujo nome começa por `jobhunter_test`.
+Real phase 0 data was not imported automatically. The synthetic seed is optional and refuses a profile that already has facts. Test data uses databases whose names begin with `jobhunter_test`.

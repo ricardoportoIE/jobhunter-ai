@@ -1,29 +1,29 @@
-# Implementação da fase 1
+# Phase 1 implementation
 
-Cada etapa tem commit local próprio. Sem publicação remota.
+Each stage has its own local commit. No remote publication.
 
-| Etapa | Resultado | Validação |
+| Stage | Result | Validation |
 |---|---|---|
-| P1-01 | Compose, API, web e lockfiles | 10 testes, builds e smoke com recuperação do banco |
-| P1-02 | Conta local, Argon2, sessão opaca de 8h, logout, CSRF, origem e limite persistente de login | 11 testes API com PostgreSQL isolado; hash, expiração, replay, 401/403/429 |
-| P1-03 | CRUD de perfil/fatos/evidências, revisão e snapshots, validade/usos, versão otimista e seed fictício opcional | Integração: review obrigatório, snapshot preservado, revogação invalida perfil, 409 e isolamento por proprietário |
-| P1-04 | Importação de texto com SHA-256, referência sem fetch, requisitos manuais e confirmação antes de PARSED | Integração: texto preservado, desconhecidos null, filtros, limites 50.000 caracteres/128 KiB, payload XSS armazenado como texto |
-| P1-05 | Identidade por fonte+ID, URL canônica e hash+localidade; idempotência vinculada ao ator e payload | Repetição, conflito 409, importações concorrentes e texto igual em cidades diferentes; duplicata nunca sobrescreve vaga revisada |
-| P1-06 | Matching determinístico v0.2, score/cobertura separados, fatos válidos e snapshots reproduzíveis | Exemplo ADR 68/0,50; half-up; pesos; blockers; autorização futura desconhecida; fatos revogados/vencidos e análise obsoleta |
-| P1-07 | Login, perfil, fatos/evidências, Inbox com filtros/paginação, importação, revisão, avaliação e detalhe com fontes | TypeScript/ESLint/build; componentes com falha/retry/vazio, XSS como texto, versão otimista, score/cobertura juntos e alerta de análise obsoleta |
-| P1-08 | Shortlist única por vaga, tracker com linha do tempo e transições autorizadas; envio somente como registro manual confirmado | Integração: duplicata, replay de evento, conflito de payload, estados terminais, data futura e confirmação/comprovante obrigatórios |
-| P1-09 | Papel runtime separado, auditoria e snapshots append-only, exportação privada e eliminação administrativa explícita | SQL UPDATE/DELETE/TRUNCATE negado; falha de auditoria reverte escrita; respostas/logs sem payload; export sem credenciais e erasure revoga sessões |
-| P1-10 | E2E fictício desktop/mobile, avaliação pública reproduzível, cinco jobs de CI e documentação operacional | 36 testes API + 9 componentes + 2 E2E; lint/tipos/builds; Compose do zero e smoke; revisão humana das divergências pendente |
+| P1-01 | Compose, API, web app and lockfiles | 10 tests, builds and smoke test with database recovery |
+| P1-02 | Local account, Argon2, opaque 8h session, logout, CSRF, origin and persistent login limit | 11 API tests with isolated PostgreSQL; hash, expiry, replay, 401/403/429 |
+| P1-03 | Profile/fact/evidence CRUD, review and snapshots, validity/uses, optimistic versioning and optional synthetic seed | Integration: mandatory review, preserved snapshot, revocation invalidates profile, 409 and owner isolation |
+| P1-04 | Text import with SHA-256, reference without fetching, manual requirements and confirmation before PARSED | Integration: preserved text, unknowns null, filters, 50,000-character/128 KiB limits, XSS payload stored as text |
+| P1-05 | Identity by source+ID, canonical URL and hash+location; idempotency bound to actor and payload | Repetition, 409 conflict, concurrent imports and identical text in different cities; duplicates never overwrite a reviewed job |
+| P1-06 | Deterministic matching v0.2, separate score/coverage, valid facts and reproducible snapshots | ADR example 68/0.50; half-up; weights; blockers; unknown future authorisation; revoked/expired facts and stale analysis |
+| P1-07 | Login, profile, facts/evidence, Inbox with filters/pagination, import, review, assessment and details with sources | TypeScript/ESLint/build; components with failure/retry/empty states, XSS as text, optimistic versioning, score/coverage together and stale analysis warning |
+| P1-08 | Unique shortlist entry per job, tracker with timeline and authorised transitions; submission only as a confirmed manual record | Integration: duplicate, event replay, payload conflict, terminal states, future date and mandatory confirmation/supporting record |
+| P1-09 | Separate runtime role, append-only audit and snapshots, private export and explicit administrative erasure | SQL UPDATE/DELETE/TRUNCATE denied; audit failure rolls back writes; responses/logs without payloads; export without credentials and erasure revokes sessions |
+| P1-10 | Synthetic desktop/mobile E2E, reproducible public evaluation, five CI jobs and operational documentation | 36 API tests + 9 component tests + 2 E2E; lint/types/builds; Compose from scratch and smoke; human review of disagreements pending |
 
-## Fechamento técnico — 2026-09-20
+## Technical completion — 2026-09-20
 
-Os 47 testes passaram localmente. O E2E usa Edge 153 em sessão headless isolada, pois o download do Chromium do Playwright expirou nesta rede. Testou navegação por teclado, fluxo completo, exportação, logout, XSS como texto e ausência de rolagem horizontal no mobile. As capturas desktop/mobile foram inspecionadas. [Relatório final](validation.md).
+All 47 tests passed locally. E2E uses Edge 153 in an isolated headless session because the Playwright Chromium download timed out on this network. It tested keyboard navigation, the complete workflow, export, logout, XSS as text and absence of horizontal scrolling on mobile. Desktop/mobile screenshots were inspected. [Final report](validation.md).
 
-Os cinco jobs de CI estão definidos e o YAML passou na validação de schema; não houve execução no GitHub nem push. O dataset público teve 20/20 invariantes conservadores preservados, 12/20 recomendações mapeadas coincidentes e diferenças em 18 casos. A confirmação humana não foi presumida: [resultados e limites](evaluation-results.md).
+The five CI jobs are defined and the YAML passed schema validation; there was no GitHub run or push. The public dataset preserved 20/20 conservative invariants, with 12/20 matching mapped recommendations and differences in 18 cases. Human confirmation was not assumed: [results and limitations](evaluation-results.md).
 
-## Commits locais
+## Local commits
 
-| Etapa | Commit |
+| Stage | Commit |
 |---|---|
 | P1-01 | `bbfa9df` |
 | P1-02 | `6e541cc` |
@@ -34,8 +34,8 @@ Os cinco jobs de CI estão definidos e o YAML passou na validação de schema; n
 | P1-07 | `d1a8ab4` |
 | P1-08 | `59751fa` |
 | P1-09 | `e1d9ca6` |
-| P1-10 | commit que adiciona este fechamento; localizar por `git log --grep=P1-10` |
+| P1-10 | The commit adding this completion record; find it with `git log --grep=P1-10` |
 
-Credenciais iniciais são geradas por `uv run --project apps/api --env-file .env python -m jobhunter_api.manage bootstrap` e guardadas em `.private/local-login.txt`, nunca no Git. O comando não redefine uma conta existente. Migrations têm checksum e lock transacional. Testes de integração exigem `JOBHUNTER_TEST_DB_NAME` começando por `jobhunter_test`, separado do banco da aplicação.
+Initial credentials are generated by `uv run --project apps/api --env-file .env python -m jobhunter_api.manage bootstrap` and saved in `.private/local-login.txt`, never in Git. The command does not reset an existing account. Migrations have checksums and a transactional lock. Integration tests require `JOBHUNTER_TEST_DB_NAME` to begin with `jobhunter_test`, separate from the application database.
 
-Referências de implementação: [transações psycopg](https://www.psycopg.org/psycopg3/docs/basic/transactions.html), [Argon2](https://argon2-cffi.readthedocs.io/en/stable/howto.html), [privilégios PostgreSQL](https://www.postgresql.org/docs/17/ddl-priv.html).
+Implementation references: [psycopg transactions](https://www.psycopg.org/psycopg3/docs/basic/transactions.html), [Argon2](https://argon2-cffi.readthedocs.io/en/stable/howto.html), [PostgreSQL privileges](https://www.postgresql.org/docs/17/ddl-priv.html).

@@ -129,3 +129,4 @@ jobs:
           python-version: '3.13'
       - run: python -m pip install -r requirements-phase0.txt
       - run: python scripts/validate_phase0.py
+      - run: python scripts/check_documentation.py

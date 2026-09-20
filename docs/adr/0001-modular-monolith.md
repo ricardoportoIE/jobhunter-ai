@@ -1,28 +1,28 @@
-# ADR-001 — Monorepo e monólito modular
+# ADR-001 — Monorepo and modular monolith
 
-Estado: adotado como baseline da fase 1. Data: 2026-09-19.
+Status: adopted as the phase 1 baseline. Date: 2026-09-19.
 
-## Contexto
+## Context
 
-Um desenvolvedor, um utilizador e um fluxo inicial pequeno precisam evoluir contratos e interface juntos. O briefing descreve muitos serviços lógicos, mas isso não exige processos separados.
+One developer, one user and a small initial workflow need contracts and the interface to evolve together. The brief describes many logical services, but these do not require separate processes.
 
-## Decisão
+## Decision
 
-Usar monorepo com backend FastAPI modular, frontend React/TypeScript e PostgreSQL. Manter domínio separado dos adaptadores. Criar apenas os pacotes que já tenham responsabilidade implementada; não copiar toda a árvore futura do briefing.
+Use a monorepo with a modular FastAPI backend, React/TypeScript frontend and PostgreSQL. Keep the domain separate from adapters. Create packages only when they have an implemented responsibility; do not copy the entire future directory tree from the brief.
 
-## Alternativas
+## Alternatives
 
-| Alternativa | Vantagem | Custo neste estágio |
+| Alternative | Benefit | Cost at this stage |
 |---|---|---|
-| Monólito sem módulos | Menos estrutura inicial | Regras, infraestrutura e provider se misturam |
-| Monólito modular escolhido | Transações simples, contratos coordenados, deploy pequeno | Exige disciplina de dependências |
-| Microserviços | Deploy e escala independentes | Rede, observabilidade distribuída e consistência antes de haver necessidade |
-| Repositórios separados | Autonomia de equipes | Não há equipes independentes; mudanças de contrato ficam mais difíceis |
+| Monolith without modules | Less initial structure | Rules, infrastructure and the provider become intertwined |
+| Selected modular monolith | Simple transactions, coordinated contracts, small deployment | Requires dependency discipline |
+| Microservices | Independent deployment and scaling | Networking, distributed observability and consistency before they are needed |
+| Separate repositories | Team autonomy | There are no independent teams; contract changes become harder |
 
-## Consequências e revisão
+## Consequences and review
 
-Módulos compartilham banco com acesso por serviços/repositórios próprios. Renderização pesada e ingestão poderão virar workers usando o mesmo domínio. Extrair serviço somente se isolamento de segurança, carga ou ciclo de deploy medido exigir. A primeira fase não instala LangGraph, Redis, Celery, MCP ou pgvector.
+Modules share a database, accessed through their own services/repositories. Heavy rendering and ingestion may become workers using the same domain. Extract a service only when measured security isolation, load or deployment requirements justify it. The first phase does not install LangGraph, Redis, Celery, MCP or pgvector.
 
-P1-01 implementa `apps/api` (Python 3.13, FastAPI, psycopg) e `apps/web` (Node 24, React 19, TypeScript 6, Vite 8), com PostgreSQL 17. TypeScript 6 respeita o intervalo suportado pelo typescript-eslint selecionado. `uv.lock` e `package-lock.json` fixam as dependências resolvidas; imagens Docker e ações de CI usam digests/SHAs. O ambiente Python da API fica separado do validador documental da fase 0.
+P1-01 implements `apps/api` (Python 3.13, FastAPI, psycopg) and `apps/web` (Node 24, React 19, TypeScript 6, Vite 8), with PostgreSQL 17. TypeScript 6 is within the range supported by the selected typescript-eslint version. `uv.lock` and `package-lock.json` pin resolved dependencies; Docker images and CI actions use digests/SHAs. The API's Python environment is separate from the phase 0 documentation validator.
 
-Neste incremento, a API contém apenas configuração, conexão de banco e healthchecks. Não há tabelas de domínio, migrations ou importação de dados privados. O frontend acessa `/api` na mesma origem: Nginx no Compose e proxy do Vite no modo de desenvolvimento. Portas publicadas ficam em `127.0.0.1`; credencial aleatória fica em `.env` ignorado. Detalhes operacionais em [desenvolvimento local](../local-development.md).
+In this increment, the API contains only configuration, database connectivity and health checks. There are no domain tables, migrations or private data imports. The frontend accesses `/api` on the same origin: Nginx in Compose and the Vite proxy in development mode. Published ports bind to `127.0.0.1`; a random credential is stored in the ignored `.env` file. See [local development](../local-development.md) for operational details.

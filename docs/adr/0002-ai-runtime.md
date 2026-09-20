@@ -1,39 +1,39 @@
-# ADR-002 — Inferência e execução de agentes
+# ADR-002 — Inference and agent execution
 
-Estado: adotado para uso local assistido. Modelo selecionado no benchmark P2 em 2026-09-20.
+Status: adopted for assisted local use. Model selected in the P2 benchmark on 2026-09-20.
 
-Atualização P2, 2026-09-20: o utilizador escolheu OpenAI e forneceu chave privada. Adapter
-Responses/embeddings implementado com orçamento local e revisão humana. Após o crédito de
-US$10, o benchmark real foi executado. GPT-4.1 mini escolhido: 20/20 saídas válidas e 79/80
-campos básicos corretos. Nano: 18/20 válidas e perda de condição de sponsorship na revisão.
-O custo de mini nos 20 casos foi €0,02443300; seleção para rascunhos revisados, sem alegar
-precisão de matching pessoal ou gold humano. [Evidências e limites](../phase-2/validation.md).
-Ver [operação P2](../phase-2/operations.md).
+P2 update, 2026-09-20: the user selected OpenAI and supplied a private key. The
+Responses/embeddings adapter was implemented with local budgeting and human review. After
+US$10 was credited, the live benchmark ran. GPT-4.1 mini was selected: 20/20 valid outputs
+and 79/80 correct basic fields. Nano: 18/20 valid outputs and a sponsorship condition lost
+in review. Mini cost €0.02443300 for the 20 cases; it was selected for reviewed drafts,
+without claiming personal matching accuracy or human gold-standard labels.
+[Evidence and limitations](../phase-2/validation.md). See [P2 operations](../phase-2/operations.md).
 
-## Distinção necessária
+## Necessary distinctions
 
-Bedrock oferece acesso a modelos; AgentCore oferece capacidades de execução e ferramentas para agentes. Um não é requisito automático do outro. LangGraph é uma biblioteca de orquestração com persistência e interrupções para revisão humana. [AgentCore](https://aws.amazon.com/bedrock/agentcore/pricing/), [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview).
+Bedrock provides access to models; AgentCore provides execution capabilities and tools for agents. Neither automatically requires the other. LangGraph is an orchestration library with persistence and interrupts for human review. [AgentCore](https://aws.amazon.com/bedrock/agentcore/pricing/), [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview).
 
-## Comparação
+## Comparison
 
-| Caminho | Valor para o projeto | Trade-off | Posição |
+| Approach | Value to the project | Trade-off | Position |
 |---|---|---|---|
-| Regras Python sem LLM | Resultado testável, sem inferência paga | Requisitos precisam ser estruturados manualmente | Fase 1 |
-| Bedrock + código próprio em Lambda/Fargate | Integração com a arquitetura AWS e controle de adapters | Seleção regional/modelo, quotas e rede a validar | Preferência para piloto cloud |
-| API direta de modelo, como Anthropic | Menos infraestrutura para experimentar localmente | Segredo e política de dados de outro provider; inferência continua paga | Alternativa para benchmark |
-| Bedrock + AgentCore Runtime | Execução gerida e componentes de agentes reutilizáveis | Superfície operacional e cobrança adicionais ao modelo | Adiar até existir requisito demonstrável |
-| Modelo local | Controle do ambiente e ausência de cobrança por chamada externa | Hardware, manutenção, latência e qualidade precisam de benchmark | Opcional, fora do baseline |
+| Python rules without an LLM | Testable results without paid inference | Requirements must be structured manually | Phase 1 |
+| Bedrock + custom code in Lambda/Fargate | Integration with the AWS architecture and control over adapters | Regional/model selection, quotas and networking require validation | Preferred for the cloud pilot |
+| Direct model API, such as Anthropic | Less infrastructure for local experiments | Another provider's secret and data policy; inference remains chargeable | Benchmark alternative |
+| Bedrock + AgentCore Runtime | Managed execution and reusable agent components | Additional operational surface and charges beyond model inference | Defer until there is a demonstrable requirement |
+| Local model | Control over the environment and no external per-call charges | Hardware, maintenance, latency and quality require benchmarking | Optional, outside the baseline |
 
-AgentCore possui cobrança própria por consumo, separada da inferência. A API direta também cobra por tokens; não presumir uso coberto por uma assinatura de chat. [AgentCore pricing](https://aws.amazon.com/bedrock/agentcore/pricing/), [Claude API pricing](https://platform.claude.com/docs/en/about-claude/pricing).
+AgentCore has its own usage charges, separate from inference. Direct APIs also charge for tokens; do not assume a chat subscription covers usage. [AgentCore pricing](https://aws.amazon.com/bedrock/agentcore/pricing/), [Claude API pricing](https://platform.claude.com/docs/en/about-claude/pricing).
 
-## Decisão proposta
+## Proposed decision
 
-Na fase 2, criar porta `StructuredInference` com schema de entrada/saída, versão de modelo/prompt, timeout e contabilização de tokens. Um adapter inicial basta. Sem fallback silencioso que envie dados para outro provider. O dataset real inicial já está preparado; a seleção definitiva requer benchmark e revisão de residência/retenção de dados e disponibilidade na região alvo. O teto de inferência é €10/mês, dentro de €25 combinados; ver ADR-004.
+In phase 2, create a `StructuredInference` port with input/output schemas, model/prompt versions, a timeout and token accounting. One initial adapter is sufficient. No silent fallback that sends data to another provider. The initial real-world dataset is ready; final selection requires a benchmark and a review of data residency/retention and availability in the target region. The inference ceiling is €10/month within the combined €25 budget; see ADR-004.
 
-Bedrock é candidato preferido para a AWS; API direta é alternativa de desenvolvimento. AgentCore não entra no MVP por padrão. LangGraph só entra quando houver workflow que precise de checkpoint, retomada e revisão; extração simples pode ser uma chamada estruturada. A documentação descreve esses recursos, mas nossa persistência e recuperação precisarão de testes próprios. [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview).
+Bedrock is the preferred AWS candidate; a direct API is a development alternative. AgentCore is not included in the MVP by default. Introduce LangGraph only when a workflow needs checkpoints, resumption and review; simple extraction may require just one structured call. Its documentation describes these capabilities, but our persistence and recovery require their own tests. [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview).
 
-## Como decidir por evidência
+## Evidence-based selection
 
-Executar os mesmos 20 casos com dois candidatos, registrar precisão de campos, recusas, saída inválida, latência p50/p95 e custo completo incluindo retries. Escolher o modelo mais barato que cumpra os gates de qualidade e privacidade. Comparação executada em P2: mini passa os gates; nano não. Novos casos com revisão humana são necessários para estimar generalização e calibração.
+Run the same 20 cases with two candidates and record field accuracy, refusals, invalid outputs, p50/p95 latency and full cost including retries. Select the cheapest model that passes the quality and privacy gates. The P2 comparison was completed: mini passes the gates; nano does not. New cases with human review are needed to estimate generalisation and calibration.
 
-Reavaliar AgentCore quando isolamento de browser, identidade de ferramentas ou gestão de sessões resolverem uma necessidade medida que Lambda/Fargate não atendam com simplicidade. MCP entra apenas quando ferramentas forem reutilizadas por clientes distintos.
+Reassess AgentCore when browser isolation, tool identity or session management addresses a measured need that Lambda/Fargate cannot meet simply. Introduce MCP only when distinct clients reuse tools.

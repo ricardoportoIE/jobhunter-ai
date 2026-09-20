@@ -67,7 +67,7 @@ def strict_schema(schema: dict[str, Any]) -> dict[str, Any]:
 
 
 def constrained_schema(schema: type[BaseModel], payload: dict[str, Any]) -> dict[str, Any]:
-    """Constrain supplied IDs at generation time; semantic/ownership checks still run afterward."""
+    """Constrain supplied IDs at generation time; semantic/ownership checks still run afterwards."""
     contract = strict_schema(schema.model_json_schema())
     facts = sorted({str(f["id"]) for f in payload.get("facts", [])})
     evidence = sorted({str(e["id"]) for e in payload.get("evidence", [])})

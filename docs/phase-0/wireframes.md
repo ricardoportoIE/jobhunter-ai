@@ -1,85 +1,85 @@
-# Quatro telas para o primeiro fluxo
+# Four screens for the first workflow
 
-Wireframes de baixa fidelidade, sem aplicação implementada. Textos e números ilustrativos; nenhum dado real. Fluxo: Perfil → Inbox/importação → Detalhe/análise → Tracker. Overview será resumo na Inbox; revisão de documentos ganha tela própria na fase 3.
+Low-fidelity wireframes, without an implemented application. Illustrative text and numbers; no real data. Workflow: Profile → Inbox/import → Details/analysis → Tracker. The overview will be an Inbox summary; document review gains its own screen in phase 3.
 
-## 1. Perfil e evidências
-
-```text
-+------------------------------------------------------------------+
-| JobHunter AI     Vagas | Perfil | Candidaturas                     |
-| Perfil — versão 1                  [Nova revisão]                 |
-| Cargos: [por preencher]  Mercados: [por confirmar]                 |
-| Restrições privadas: incompletas    [Rever em privado]              |
-|                                                                  |
-| Fato                  Estado          Evidência       Ações       |
-| Exemplo fictício      Não verificado  [Adicionar]     [Rever]      |
-|                                                                  |
-| [Adicionar fato]  [Adicionar fonte]  [Publicar versão revista]      |
-| Só fatos verificados e vigentes sustentam candidaturas.           |
-+------------------------------------------------------------------+
-```
-
-Estado vazio pede fatos e evidências, sem autoaprovação. O detalhe de evidência mostra origem, localização, validade e usos. Campos sensíveis não aparecem na listagem nem no resumo do perfil.
-
-## 2. Inbox e importação
+## 1. Profile and evidence
 
 ```text
-+------------------------------------------------------------------+
-| Vagas                              [Importar texto de vaga]       |
-| [País] [Modalidade] [Score] [Estado] [Revisão necessária]           |
-|                                                                  |
-| Cargo / empresa fictícia     Score    Cobertura    Estado         |
-| Junior Backend / Empresa A   68/100   50%          Rever dados     |
-| Graduate / Empresa B         —        —           Rever campos    |
-|                                                                  |
-| Importar: [texto da descrição.................................]   |
-| Origem/URL opcional: [........................................]   |
-| [Guardar e rever campos]                                         |
-+------------------------------------------------------------------+
++------------------------------------------------------------------------+
+| JobHunter AI     Jobs | Profile | Applications                         |
+| Profile — version 1                         [New revision]             |
+| Roles: [to be completed]  Markets: [to be confirmed]                   |
+| Private constraints: incomplete             [Review privately]         |
+|                                                                        |
+| Fact                  Status          Evidence           Actions       |
+| Synthetic example     Unverified      [Add]              [Review]      |
+|                                                                        |
+| [Add fact]  [Add source]  [Publish reviewed version]                   |
+| Only verified, current facts support applications.                     |
++------------------------------------------------------------------------+
 ```
 
-A URL é proveniência; a fase 1 não a visita. Erros de validação são locais aos campos. Detectar duplicado apresenta o registro existente e opção de revisar a versão, sem criar outra candidatura silenciosamente.
+The empty state requests facts and evidence without automatic approval. Evidence details show provenance, location, validity and uses. Sensitive fields are absent from listings and the profile summary.
 
-## 3. Detalhe e análise
+## 2. Inbox and import
 
 ```text
-+------------------------------------------------------------------+
-| Junior Backend / Empresa A       [Rever requisitos] [Analisar]     |
-| Fonte e data | Vaga v1 | Perfil v1 | Algoritmo 0.2                |
-| Score 68/100  | Cobertura 50% | REVISÃO NECESSÁRIA                 |
-| Dados insuficientes: autorização e modalidade não confirmadas.    |
-|                                                                  |
-| Categoria       Peso     Atendimento     Cobertura               |
-| Skills          30%      80%             100%                    |
-| Experiência     20%      50%             100%                    |
-| Demais          50%      desconhecido    0%                      |
-|                                                                  |
-| Atendidos [evidência] | Parciais [evidência] | Gaps | Blockers      |
-| [Ver descrição] [Guardar na shortlist] [Arquivar]                 |
-+------------------------------------------------------------------+
++------------------------------------------------------------------------+
+| Jobs                                        [Import job text]          |
+| [Country] [Working arrangement] [Score] [Status] [Review required]     |
+|                                                                        |
+| Role / synthetic company          Score    Coverage    Status          |
+| Junior Backend / Company A        68/100   50%         Review data     |
+| Graduate / Company B              —        —           Review fields   |
+|                                                                        |
+| Import: [description text.........................................]    |
+| Optional source/URL: [............................................]    |
+| [Save and review fields]                                               |
++------------------------------------------------------------------------+
 ```
 
-Exemplo segue o ADR-003. Blockers têm texto, não dependem de cor. Mostrar desconhecido separado de não atendido. Se perfil mudar, marcar análise desatualizada e pedir nova execução.
+The URL is provenance; phase 1 does not visit it. Validation errors appear beside fields. Duplicate detection presents the existing record and an option to review its version, without silently creating another application.
 
-O detalhe também mostra «Início do trabalho: requer revisão» e suas flags. Uma recomendação positiva pode coexistir com sponsorship desconhecido; não esconder a vaga nem apresentar autorização de início como confirmada.
+## 3. Details and analysis
+
+```text
++------------------------------------------------------------------------+
+| Junior Backend / Company A           [Review requirements] [Analyse]   |
+| Source and date | Job v1 | Profile v1 | Algorithm 0.2                  |
+| Score 68/100 | Coverage 50% | REVIEW REQUIRED                          |
+| Insufficient data: authorisation and working arrangement unconfirmed.  |
+|                                                                        |
+| Category         Weight     Attainment     Coverage                    |
+| Skills           30%        80%            100%                        |
+| Experience       20%        50%            100%                        |
+| Other            50%        unknown        0%                          |
+|                                                                        |
+| Met [evidence] | Partial [evidence] | Gaps | Blockers                  |
+| [View description] [Save to shortlist] [Archive]                       |
++------------------------------------------------------------------------+
+```
+
+The example follows ADR-003. Blockers have text and do not depend on colour. Display unknown separately from unmet. If the profile changes, mark the analysis as stale and request a new run.
+
+The details also show ‘Starting work: review required’ and the associated flags. A positive recommendation can coexist with unknown sponsorship; do not hide the job or present permission to start as confirmed.
 
 ## 4. Tracker
 
 ```text
-+------------------------------------------------------------------+
-| Candidaturas            [Estado] [Empresa] [Registrar envio manual]|
-| Shortlist       | Enviadas        | Entrevistas     | Encerradas   |
-| Empresa A       | Empresa B       |                 |             |
-|                                                                  |
-| Detalhe da candidatura                                           |
-| Timeline: criada → anotação → envio manual confirmado             |
-| Canal: [........]  Data: [........]  Comprovante: [........]       |
-| [Confirmar registro manual]                                      |
-+------------------------------------------------------------------+
++------------------------------------------------------------------------+
+| Applications        [Status] [Company] [Record manual submission]      |
+| Shortlist          | Submitted        | Interviews      | Closed       |
+| Company A          | Company B        |                 |              |
+|                                                                        |
+| Application details                                                    |
+| Timeline: created → note → confirmed manual submission                 |
+| Channel: [........]  Date: [........]  Supporting record: [........]   |
+| [Confirm manual record]                                                |
++------------------------------------------------------------------------+
 ```
 
-Registrar envio manual atualiza histórico, não envia nada externamente. A futura tela de pacote mostrará CV, carta, diff, evidências e campos sensíveis; aprovação de pacote e confirmação final de envio serão ações distintas.
+Recording a manual submission updates history and sends nothing externally. The future package screen will show the CV, letter, diff, evidence and sensitive fields; package approval and final submission confirmation will be separate actions.
 
-## Interação comum
+## Shared interaction
 
-Navegação por teclado, foco visível, labels explícitos, contraste adequado, mensagens de carregamento/vazio/erro e confirmação de sucesso. Em telas pequenas, cards/lista substituem tabelas e Kanban. Não habilitar ações que exijam snapshot válido quando faltam requisitos.
+Keyboard navigation, visible focus, explicit labels, adequate contrast, loading/empty/error messages and success confirmation. On small screens, cards/lists replace tables and Kanban. Do not enable actions requiring a valid snapshot when requirements are missing.

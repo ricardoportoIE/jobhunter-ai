@@ -1,31 +1,31 @@
-# Validação técnica final da fase 1
+# Final phase 1 technical validation
 
-Executada localmente em 2026-09-20. Implementação em dez etapas com commits locais; sem publicação remota.
+Run locally on 2026-09-20. Implemented in ten stages with local commits; no remote publication.
 
-| Check | Resultado |
+| Check | Result |
 |---|---|
-| API: Ruff + formatação + mypy estrito | Aprovados |
-| API: testes unitários/integração PostgreSQL | 36 aprovados; nenhum skipped na execução completa |
-| Web: ESLint + Prettier + TypeScript estrito | Aprovados |
-| Web: Vitest/jsdom | 9 aprovados |
-| Browser E2E: desktop 1440px + mobile emulado | 2 aprovados no Edge 153 headless |
-| Builds | wheel/sdist Python, bundle Vite e imagens Docker aprovados |
-| Compose com banco vazio | Migrations, papel restrito, três serviços saudáveis e smoke aprovados |
-| Smoke HTTP | Assets, API direta/proxy, OpenAPI e readiness PostgreSQL aprovados |
-| Recuperação de banco | Liveness 200 durante indisponibilidade; readiness 503 e retorno 200 sem reiniciar API/web |
-| Contratos de design | Validador público da fase 0 aprovado |
-| Dataset real derivado | 20 casos executados; resultados e divergências versionados |
-| GitHub Actions | Schema YAML validado; cinco jobs preparados, execução remota não realizada |
+| API: Ruff + formatting + strict mypy | Passed |
+| API: unit/PostgreSQL integration tests | 36 passed; none skipped in the complete run |
+| Web: ESLint + Prettier + strict TypeScript | Passed |
+| Web: Vitest/jsdom | 9 passed |
+| Browser E2E: 1440px desktop + emulated mobile | 2 passed in headless Edge 153 |
+| Builds | Python wheel/sdist, Vite bundle and Docker images passed |
+| Compose with an empty database | Migrations, restricted role, three healthy services and smoke test passed |
+| HTTP smoke | Assets, direct/proxied API, OpenAPI and PostgreSQL readiness passed |
+| Database recovery | Liveness 200 during the outage; readiness 503 and return to 200 without restarting API/web |
+| Design contracts | Public phase 0 validator passed |
+| Derived real-world dataset | 20 cases run; results and disagreements versioned |
+| GitHub Actions | YAML schema validated; five jobs prepared, no remote run |
 
-O E2E percorre login por teclado → evidência revisada → fato verificado → publicação de perfil → importação → revisão de requisito → avaliação com fato → score/cobertura → abertura de evidência do snapshot → shortlist → registro confirmado de envio manual → exportação → logout. Verifica ausência de execução de script importado, erros JavaScript e overflow horizontal. O banco usado é `jobhunter_test_e2e`, com dados fictícios.
+E2E covers keyboard login → reviewed evidence → verified fact → profile publication → import → requirement review → fact-based assessment → score/coverage → opening snapshot evidence → shortlist → confirmed manual submission record → export → logout. It checks that imported scripts do not execute and that there are no JavaScript errors or horizontal overflow. The database is `jobhunter_test_e2e`, with synthetic data.
 
-A inicialização do zero foi verificada em um projeto Compose separado, com portas e volume próprios, removido ao término. O volume pessoal foi preservado. Nos testes de API, falha injetada de auditoria comprovou rollback; UPDATE/DELETE/TRUNCATE de auditoria e alterações de snapshots foram negadas ao papel runtime.
+Startup from scratch was verified in a separate Compose project with its own ports and volume, removed on completion. The personal volume was preserved. In API tests, an injected audit failure proved rollback; audit UPDATE/DELETE/TRUNCATE and snapshot modifications were denied to the runtime role.
 
-## Limites conhecidos
+## Known limitations
 
-- O download do Chromium Playwright expirou; foi usado o canal oficial do Edge já instalado. O workflow Linux está configurado para Chromium. Não houve execução remota desse workflow.
-- Há dois avisos de depreciação upstream no cliente de testes Starlette/httpx e AnyIO. Permanecem visíveis; não são falhas de testes.
-- O dataset público não é gold humano e não contém o perfil factual privado. Sua execução preservou controles conservadores, mas teve divergências que exigem revisão; [detalhes](evaluation-results.md).
-- Não há importação automática do CV privado, parser semântico, geração de pacote, envio, provider de IA ou recursos cloud nesta fase.
+- The Playwright Chromium download timed out; the already installed official Edge channel was used. The Linux workflow is configured for Chromium. That workflow was not run remotely.
+- There are two upstream deprecation warnings in the Starlette/httpx and AnyIO test client. They remain visible and are not test failures.
+- The public dataset is not a human gold set and does not contain the private factual profile. Its execution preserved conservative controls but produced disagreements requiring review; [details](evaluation-results.md).
+- This phase has no automatic private CV import, semantic parser, package generation, submission, AI provider or cloud resources.
 
-Comandos reproduzíveis: [desenvolvimento local](../local-development.md). Fontes da automação de navegador: [Playwright webServer](https://playwright.dev/docs/test-webserver) e [CI](https://playwright.dev/docs/ci).
+Reproducible commands: [local development](../local-development.md). Browser automation sources: [Playwright webServer](https://playwright.dev/docs/test-webserver) and [CI](https://playwright.dev/docs/ci).

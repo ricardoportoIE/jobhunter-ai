@@ -1,20 +1,20 @@
-# Desenvolvimento local — P1, P2 e P3
+# Local development — P1, P2 and P3
 
-O núcleo inclui login, perfil factual, evidências, revisão de vagas, matching determinístico,
-Inbox, tracker manual e exportação. P2 adiciona IA por chamada explícita e busca semântica.
-Veja [configuração, privacidade, custos e benchmark de P2](phase-2/operations.md).
-P3 adiciona estratégia, documentos e aprovação: [operação](phase-3/operations.md)
-e [validação](phase-3/validation.md). `python-docx` e ReportLab estão no lock da API;
-Word e LibreOffice não são necessários para executar a aplicação.
-AWS e canais de envio continuam fora do runtime atual.
+The core includes login, a factual profile, evidence, vacancy review, deterministic matching,
+an Inbox, a manual tracker and export. P2 adds explicitly requested AI calls and semantic search.
+See [P2 configuration, privacy, costs and benchmark](phase-2/operations.md).
+P3 adds strategy, documents and approval: [operation](phase-3/operations.md)
+and [validation](phase-3/validation.md). `python-docx` and ReportLab are in the API lockfile;
+Word and LibreOffice are not required to run the application.
+AWS and submission channels remain outside the current runtime.
 
-## Pré-requisitos
+## Prerequisites
 
-Docker Desktop com containers Linux e Compose com `--wait`; Python e uv 0.12.7. Para desenvolver o frontend/testar E2E: Node 24 e npm. A API usa Python 3.13; `uv sync` instala a versão selecionada quando necessário.
+Docker Desktop with Linux containers and Compose supporting `--wait`; Python and uv 0.12.7. Frontend development and E2E testing require Node 24 and npm. The API uses Python 3.13; `uv sync` installs the selected version when required.
 
-## Iniciar
+## Start
 
-Na raiz:
+From the repository root:
 
 ```powershell
 python scripts/init_env.py
@@ -25,18 +25,18 @@ uv run --project apps/api --env-file .env python -m jobhunter_api.manage bootstr
 python scripts/smoke_local.py
 ```
 
-Abra http://127.0.0.1:5173. Entre como `local`, usando a senha de `.private/local-login.txt`. O bootstrap preserva a conta existente. `.env` contém duas credenciais distintas para administração e runtime; o inicializador preserva valores existentes e acrescenta a credencial runtime em uma instalação antiga. Não imprima nem publique `.env`.
+Open http://127.0.0.1:5173. Sign in as `local` using the password in `.private/local-login.txt`. Bootstrap preserves an existing account. `.env` contains separate administrative and runtime credentials; the initialiser preserves existing values and adds the runtime credential to older installations. Do not print or publish `.env`.
 
-O Compose inicia PostgreSQL, executa migrations/grants no serviço efêmero `migrate` e inicia API/web após os healthchecks. `migrate` terminar com código 0 é esperado. API e web executam sem root, com filesystem somente leitura e `/tmp` temporário. O runtime não recebe a senha administrativa no Compose.
+Compose starts PostgreSQL, runs migrations/grants in the temporary `migrate` service, and starts the API/web after health checks. It is normal for `migrate` to finish with exit code 0. The API and web run without root, with read-only filesystems and temporary `/tmp` storage. Compose does not pass the administrative password to the runtime.
 
-| Serviço | Endereço padrão |
+| Service | Default address |
 |---|---|
-| Aplicação | http://127.0.0.1:5173 |
-| Documentação da API | http://127.0.0.1:5173/api/docs |
-| API direta | http://127.0.0.1:8000 |
+| Application | http://127.0.0.1:5173 |
+| API documentation | http://127.0.0.1:5173/api/docs |
+| Direct API | http://127.0.0.1:8000 |
 | PostgreSQL | `127.0.0.1:5433` |
 
-Todas as portas são loopback. `WEB_PORT`, `API_PORT` e `JOBHUNTER_DB_PORT` em `.env` permitem trocar portas ocupadas. O Compose ajusta as origens permitidas à porta web. O Swagger usa assets CDN padrão; a aplicação usa assets locais.
+All ports bind to loopback. `WEB_PORT`, `API_PORT` and `JOBHUNTER_DB_PORT` in `.env` allow occupied ports to be changed. Compose adjusts the allowed origins to the web port. Swagger uses its default CDN assets; the application uses local assets.
 
 ```powershell
 docker compose ps
@@ -44,26 +44,26 @@ docker compose logs --tail 80 api web migrate
 docker compose down
 ```
 
-`down` preserva o banco. **Não use `down --volumes` em uma parada normal**, pois elimina os dados. Editar senhas em `.env` não altera automaticamente as senhas já persistidas no PostgreSQL.
+`down` preserves the database. **Do not use `down --volumes` for a normal shutdown**, because it erases the data. Editing passwords in `.env` does not automatically change passwords already stored in PostgreSQL.
 
-## Primeiro fluxo
+## First workflow
 
-1. Em Perfil e evidências, registre uma evidência e confirme sua revisão.
-2. Registre um fato com evidência, uso `matching` e revisão explícita; publique a versão do perfil.
-3. Importe o texto de uma vaga; confirme seus campos e requisitos.
-4. Avalie os requisitos com justificativas e fatos válidos. Observe score e cobertura juntos.
-5. Abra as evidências do resultado; adicione à shortlist e acompanhe em Candidaturas.
-6. Registre uma submissão somente se você já a realizou fora da aplicação, com data/canal/comprovante.
+1. In the profile and evidence screen, record evidence and confirm its review.
+2. Record a fact with evidence, the `matching` use and explicit review; publish the profile version.
+3. Import vacancy text and confirm its fields and requirements.
+4. Assess requirements using reasons and valid facts. Consider score and coverage together.
+5. Open the result's evidence; add the vacancy to the shortlist and track it in applications.
+6. Record a submission only if you have already made it outside the application, with a date, channel and reference.
 
-Alternativamente, o comando abaixo cria um **perfil fictício**, recusando um perfil que já tenha fatos. Não o use para misturar dados fictícios com o seu perfil real:
+Alternatively, the following command creates a **fictitious profile** and refuses to run if the profile already has facts. Do not use it to mix fictitious data with your real profile:
 
 ```powershell
 uv run --project apps/api --env-file .env python -m jobhunter_api.manage seed
 ```
 
-O CV e os fatos privados da fase 0 não foram importados automaticamente. [Contratos e decisões de runtime](phase-1/runtime-contracts.md).
+The phase 0 CV and private facts were not imported automatically. See [runtime contracts and decisions](phase-1/runtime-contracts.md).
 
-## Recarga automática
+## Automatic reload
 
 ```powershell
 docker compose stop api web
@@ -72,7 +72,7 @@ uv run --project apps/api --env-file .env python -m jobhunter_api.manage provisi
 uv run --project apps/api --env-file .env uvicorn jobhunter_api.main:app --reload --host 127.0.0.1 --port 8000 --no-access-log
 ```
 
-Em outro terminal:
+In another terminal:
 
 ```powershell
 cd apps/web
@@ -80,11 +80,11 @@ npm ci
 npm run dev
 ```
 
-O Vite usa porta 5173 e proxy `/api` para 8000. Se alterar a porta da API, configure `API_PROXY_TARGET` no terminal do Vite. Se alterar a porta do Vite, defina `JOBHUNTER_ALLOWED_ORIGINS` como lista JSON no ambiente da API. Nunca passe senha como argumento de linha de comando.
+Vite uses port 5173 and proxies `/api` to 8000. If you change the API port, set `API_PROXY_TARGET` in the Vite terminal. If you change the Vite port, set `JOBHUNTER_ALLOWED_ORIGINS` to a JSON list in the API environment. Never pass a password as a command-line argument.
 
-## Testes e checks
+## Tests and checks
 
-API, dentro de `apps/api`, com PostgreSQL iniciado:
+For the API, from `apps/api`, with PostgreSQL running:
 
 ```powershell
 uv sync --locked
@@ -97,9 +97,9 @@ uv run --locked python ../../scripts/evaluate_phase1.py --check
 uv build
 ```
 
-No shell POSIX, use `export JOBHUNTER_TEST_DB_NAME=jobhunter_test` no lugar da atribuição PowerShell. Testes integram com um banco separado e recusam nomes sem prefixo `jobhunter_test`. Sem a variável, os testes PostgreSQL são marcados como skipped; isso não conta como validação completa. Dois avisos de depreciação do cliente Starlette/httpx e AnyIO permanecem visíveis.
+In a POSIX shell, use `export JOBHUNTER_TEST_DB_NAME=jobhunter_test` instead of the PowerShell assignment. Integration tests use a separate database and refuse names without the `jobhunter_test` prefix. Without the variable, PostgreSQL tests are skipped; this does not count as full validation. Two deprecation warnings from the Starlette/httpx client and AnyIO remain visible.
 
-Frontend, dentro de `apps/web`:
+For the frontend, from `apps/web`:
 
 ```powershell
 npm ci
@@ -112,24 +112,25 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-O E2E cria somente `jobhunter_test_e2e`, usa credenciais fictícias e servidores temporários nas portas 5174/8001. Não reutiliza a aplicação pessoal. Percorre perfil → importação → revisão → matching → evidência → tracker → exportação em desktop e mobile. No Windows, se o download do Chromium estiver indisponível e o Edge já estiver instalado:
+E2E testing creates only `jobhunter_test_e2e`, uses fictitious credentials and temporary servers on ports 5174/8001, and does not reuse the personal application. It follows profile → import → review → matching → evidence → tracker → export on desktop and mobile. On Windows, if Chromium cannot be downloaded and Edge is already installed:
 
 ```powershell
 $env:PLAYWRIGHT_CHANNEL='msedge'
 npm run test:e2e
 ```
 
-Screenshots/traces ficam em `apps/web/test-results/` e o relatório em `apps/web/playwright-report/`, ignorados pelo Git. O frontend usa Prettier (`npm run format`), ESLint e TypeScript estrito.
+Screenshots/traces are saved in `apps/web/test-results/` and the report in `apps/web/playwright-report/`; Git ignores both. The frontend uses Prettier (`npm run format`), ESLint and strict TypeScript.
 
-Na raiz, com Compose iniciado:
+From the root, with Compose running:
 
 ```powershell
 python scripts/smoke_local.py
 python scripts/smoke_local.py --exercise-db-recovery
+python scripts/check_documentation.py
 ```
 
-O segundo comando interrompe brevemente o `db` deste projeto, verifica liveness 200/readiness 503 e o reinicia em `finally`, sem apagar dados. `--web-url`/`--api-url` permitem portas diferentes. Os cinco jobs de CI cobrem API, frontend, Compose, browser E2E e contratos de design. O workflow está preparado; não foi executado no GitHub sem remote configurado.
+The second command briefly stops this project's `db`, verifies liveness 200/readiness 503, and restarts it in `finally` without deleting data. `--web-url`/`--api-url` allow different ports. The five CI jobs cover the API, frontend, Compose, browser E2E and design contracts. The workflow is ready; it has not run on GitHub because no remote is configured.
 
-## Privacidade
+## Privacy
 
-Exporte pela tela Privacidade. A eliminação completa dos dados da aplicação é um comando administrativo com confirmação explícita; veja [segurança e dados](phase-1/security-and-data.md). Não há endpoint de envio, coleta remota ou montagem de `.private/` nos containers. Backups/exportações privados não devem entrar no Git.
+Export data from the privacy screen. Complete application data erasure is an administrative command requiring explicit confirmation; see [security and data](phase-1/security-and-data.md). There is no submission endpoint, remote collection or `.private/` mount in the containers. Private backups and exports must not enter Git.

@@ -1,4 +1,4 @@
-"""Validate phase-0 design artifacts; no production domain logic or network calls."""
+"""Validate phase-0 design artefacts; no production domain logic or network calls."""
 
 from copy import deepcopy
 import argparse
