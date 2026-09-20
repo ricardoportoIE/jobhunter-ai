@@ -333,6 +333,9 @@ form {
   display: grid;
   gap: 18px;
 }
+[hidden] {
+  display: none !important;
+}
 label {
   display: grid;
   gap: 7px;

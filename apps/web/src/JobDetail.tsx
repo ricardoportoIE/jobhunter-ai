@@ -44,6 +44,11 @@ export default function JobDetail({
     "review",
   );
   const [match, setMatch] = useState<Match | null>(null);
+  const [notice, setNotice] = useState("");
+  const jobIdentity = job?.id;
+  useEffect(() => {
+    if (jobIdentity) document.getElementById("job-stage")?.focus();
+  }, [tab, jobIdentity]);
   useEffect(() => {
     let active = true;
     Promise.all([
@@ -119,6 +124,8 @@ export default function JobDetail({
           {t("4. Application package")}
         </button>
       </nav>
+      <div id="job-stage" tabIndex={-1} />
+      {notice && tab === "analyse" && <p role="status">{t(notice)}</p>}
       {tab === "package" && (
         <PackagePanel
           key={`${job.id}:${job.version}:${profile.version}`}
@@ -144,7 +151,14 @@ export default function JobDetail({
         <JobReview
           key={job.version}
           job={job}
-          saved={() => setRefresh(refresh + 1)}
+          saved={(updated) => {
+            setJob(updated);
+            setMatch(null);
+            setNotice(
+              "Job review saved. Continue with the requirement assessment.",
+            );
+            setTab("analyse");
+          }}
         />
       )}
       {tab === "analyse" && (
@@ -153,6 +167,7 @@ export default function JobDetail({
           job={job}
           profile={profile}
           facts={facts}
+          onReview={() => setTab("review")}
           onResult={(result) => {
             setMatch(result);
             setTab("result");
@@ -176,7 +191,13 @@ export default function JobDetail({
     </>
   );
 }
-function JobReview({ job, saved }: { job: Job; saved: () => void }) {
+function JobReview({
+  job,
+  saved,
+}: {
+  job: Job;
+  saved: (updated: Job) => void;
+}) {
   const [requirements, setRequirements] = useState<Requirement[]>(
     job.requirements,
   );
@@ -207,7 +228,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
             const currency = optional(data, "currency");
             const period = optional(data, "period");
             void task.run(async () => {
-              await api(`/jobs/${job.id}`, "PATCH", {
+              const updated = await api<Job>(`/jobs/${job.id}`, "PATCH", {
                 expected_version: job.version,
                 title: optional(data, "title"),
                 company_name: optional(data, "company_name"),
@@ -235,7 +256,7 @@ function JobReview({ job, saved }: { job: Job; saved: () => void }) {
                 archived: data.has("archived"),
                 review_confirmed: data.has("review_confirmed"),
               });
-              saved();
+              saved(updated);
             });
           }}
         >
@@ -530,11 +551,13 @@ function AnalysisForm({
   profile,
   facts,
   onResult,
+  onReview,
 }: {
   job: Job;
   profile: Profile;
   facts: Fact[];
   onResult: (result: Match) => void;
+  onReview: () => void;
 }) {
   const task = useTask();
   const [aiRun, setAiRun] = useState<string | null>(null);
@@ -567,6 +590,18 @@ function AnalysisForm({
           )}
         </p>
         <a href="#profile">{t("Review profile \u2192")}</a>
+      </section>
+    );
+  if (!job.requirements.length)
+    return (
+      <section className="empty">
+        <h2>{t("Add requirements before assessing this job")}</h2>
+        <p>
+          {t(
+            "Return to the job review to extract or add its requirements, then save and continue.",
+          )}
+        </p>
+        <button onClick={onReview}>{t("Back to job review")}</button>
       </section>
     );
   return (

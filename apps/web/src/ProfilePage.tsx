@@ -22,6 +22,10 @@ export default function ProfilePage({
   const [editingFact, setEditingFact] = useState<Fact | null>(null);
   const [editingEvidence, setEditingEvidence] = useState<Evidence | null>(null);
   const [tab, setTab] = useState<"profile" | "facts" | "evidence">("profile");
+  const [dirtyProfileVersion, setDirtyProfileVersion] = useState<number | null>(
+    null,
+  );
+  const profileDirty = dirtyProfileVersion === profile.version;
   return (
     <>
       <div className="page-heading">
@@ -55,12 +59,15 @@ export default function ProfilePage({
         ))}
       </nav>
       {task.feedback}
-      {tab === "profile" && <CvImport profile={profile} refresh={refresh} />}
-      {tab === "profile" && (
-        <section className="panel">
+      <div hidden={tab !== "profile"}>
+        <CvImport profile={profile} refresh={refresh} />
+      </div>
+      {
+        <section className="panel" hidden={tab !== "profile"}>
           <h2>{t("Search direction")}</h2>
           <form
             key={profile.version}
+            onChange={() => setDirtyProfileVersion(profile.version)}
             onSubmit={(event) => {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
@@ -74,6 +81,7 @@ export default function ProfilePage({
                   work_modes: data.getAll("work_modes"),
                 });
                 await refresh();
+                setDirtyProfileVersion(null);
               });
             }}
           >
@@ -135,13 +143,18 @@ export default function ProfilePage({
             </button>
           </form>
           <div className="review-callout">
+            {profileDirty && (
+              <p role="status">
+                {t("Save your profile changes before publishing this version.")}
+              </p>
+            )}
             <p>
               {t(
                 "Review the facts and their sources before publishing a version. Any edit invalidates previous analyses.",
               )}
             </p>
             <button
-              disabled={task.busy}
+              disabled={task.busy || profileDirty}
               onClick={() => {
                 void task.run(async () => {
                   await api("/candidate/profile/review", "POST", {
@@ -155,7 +168,7 @@ export default function ProfilePage({
             </button>
           </div>
         </section>
-      )}
+      }
       {tab === "evidence" && (
         <div className="split">
           <section className="panel">

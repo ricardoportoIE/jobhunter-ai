@@ -2,10 +2,18 @@
 
 ## Import a CV
 
-On the profile screen, choose a PDF or Word `.docx`, confirm sending its extracted
+On the profile screen, choose a PDF, Word `.docx` or Markdown `.md`, confirm sending its extracted
 text to OpenAI and select **Extract CV with AI**. The original file is not sent to
 the provider. The draft shows the proposed name, facts, exact source excerpts and
 warnings. Existing search preferences are retained; the model does not invent them.
+
+The `cv-extraction-2.0` contract supplies numbered source lines. The model selects
+an inclusive line range for each claim; the server copies the original contiguous
+passage, including internal whitespace and intervening lines. It rejects invalid
+ranges, blank or oversized passages, unsupported names and empty fact lists.
+This avoids rejecting a valid PDF merely because the model reflowed a quotation.
+The source reference establishes where a suggestion came from; it does not prove
+that the model's interpretation is correct. Every claim still requires human review.
 
 Add, edit or remove claims and check the original extracted text. A source excerpt
 must remain a literal passage; leave it blank for a new candidate declaration.
@@ -22,6 +30,14 @@ disposable process with a 25-second timeout, without inherited API/database secr
 Linux also imposes memory and CPU limits. DOCX extraction reads bounded XML without
 extracting archives to disk, resolving external entities or running macros. The
 process is not a separate container or a complete security sandbox.
+Markdown must use UTF-8 (an optional BOM is accepted). It is read as plain source
+text: embedded HTML, scripts, images and links are never rendered, executed or fetched.
+
+When extraction fails, the profile stays unchanged and **Retry CV extraction** makes
+an explicit new attempt. Requests use idempotency keys, successful extractions remain
+cached and the existing budget and retry limits still apply. No automatic paid retry
+is performed. You can also upload an alternative supported format. Draft text survives
+switching between profile sections; comma-separated preferences retain spaces while typing.
 
 Private drafts retain extracted text, a source-file hash, excerpts and the AI run
 reference locally. They are included in authenticated export and administrative
@@ -60,6 +76,17 @@ message identify it when submission is attempted without confirmation. The archi
 help icon explains that archiving hides an opportunity from the active Inbox while
 retaining its history, and how to restore it through the archived filter.
 
+**Save vacancy review** advances to **2. Assess requirements** only after a successful
+save. The next step receives the saved job version immediately and keyboard focus
+moves to the stage content. Failed saves keep the current form and entered values.
+If the profile needs publishing or the vacancy has no requirements, the next step
+explains what is missing and offers a route back to the appropriate screen.
+Unsaved search-profile edits must be saved before publishing its version.
+Switching between vacancy link and text import preserves both inputs.
+Transient connection failures on read-only API requests are retried once. Write
+requests, including paid extraction, are never automatically repeated. Persistent
+connection failures show a translated recovery message rather than a browser error.
+
 ## Interface language
 
 Use **Language** on the login screen or session bar to select **English (UK)** or
@@ -97,10 +124,20 @@ These checks did not change candidate facts or add a vacancy to the personal Inb
 Their paid calls used the existing budget ledger. They are integration smoke tests,
 not a measurement of extraction accuracy across CV layouts or vacancy websites.
 
-Local validation passed 111 API tests, 15 frontend tests and eight browser tests
-(four workflows at desktop and mobile sizes), plus type, lint, formatting, build,
+Local validation passed 113 API tests, 18 frontend tests and ten browser tests
+(five workflows at desktop and mobile sizes), plus type, lint, formatting, build,
 historical evaluation and documentation checks. Browser tests used Microsoft Edge
 locally; CI retains its configured Chromium installation.
+
+A follow-up regression check used the privately supplied two-page PDF. The original
+contract reproduced a validation failure: copied quotations changed layout whitespace
+and one quotation joined non-adjacent passages. The replacement contract extracted
+35 draft facts with exact source passages; a repeat used the cache. Candidate records
+were not changed. The source CV and detailed results remain private. Public regression
+fixtures cover wrapped source lines, invalid ranges, UTF-8 Markdown, explicit retry
+after validation failure, draft resumption, multi-word preferences, failed job saves
+and automatic progression. Desktop and mobile browser checks also cover the existing
+matching, evidence, application package, tracker and export workflows.
 
 The wording changes have new prompt versions: parser `job-parser-1.4-en-GB`, matching
 `evidence-matching-1.3-en-GB`, strategy `application-strategy-1.2-en-GB` and public

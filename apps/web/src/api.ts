@@ -21,7 +21,7 @@ export async function api<T>(
   extra?: Record<string, string>,
 ): Promise<T> {
   const binary = data instanceof Blob;
-  const response = await fetch(`/api/v1${path}`, {
+  const options: RequestInit = {
     method,
     credentials: "same-origin",
     cache: "no-store",
@@ -37,7 +37,26 @@ export async function api<T>(
       ...extra,
     },
     body: data === undefined ? undefined : binary ? data : JSON.stringify(data),
-  });
+  };
+  const connectionError = () =>
+    new ApiError(
+      0,
+      t(
+        "Connection lost. Check the local service and try again. Your input remains on this screen.",
+      ),
+    );
+  let response: Response;
+  try {
+    response = await fetch(`/api/v1${path}`, options);
+  } catch {
+    // A failed read is safe to retry once. Never replay a write or paid AI operation.
+    if (method !== "GET") throw connectionError();
+    try {
+      response = await fetch(`/api/v1${path}`, options);
+    } catch {
+      throw connectionError();
+    }
+  }
   if (!response.ok) {
     if (response.status === 401 && path !== "/session")
       window.dispatchEvent(new Event("session-expired"));

@@ -158,7 +158,11 @@ export function ImportJob() {
     <>
       <p className="eyebrow">{t("NEW OPPORTUNITY")}</p>
       <h1>{t("Import advert")}</h1>
-      <p>{t("Import an advert to get started, or adjust the filters.")}</p>
+      <p>
+        {t(
+          "Start with a public vacancy link, or paste the advert text. Review the extracted details in the next step.",
+        )}
+      </p>
       <section className="panel narrow">
         <nav className="tabs" aria-label={t("Import method")}>
           <button
@@ -176,8 +180,9 @@ export function ImportJob() {
             {t("Paste text")}
           </button>
         </nav>
-        {mode === "url" && (
+        {
           <form
+            hidden={mode !== "url"}
             onSubmit={(event) => {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
@@ -233,9 +238,10 @@ export function ImportJob() {
                 : t("Extract from link")}
             </button>
           </form>
-        )}
-        {mode === "text" && (
+        }
+        {
           <form
+            hidden={mode !== "text"}
             onSubmit={(event) => {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
@@ -286,7 +292,7 @@ export function ImportJob() {
               {task.busy ? t("Importing\u2026") : t("Import and review")}
             </button>
           </form>
-        )}
+        }
       </section>
     </>
   );

@@ -1,5 +1,5 @@
 import { t } from "./i18n";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
 import type { Fact, Profile } from "./types";
 import { Field } from "./ui";
@@ -40,6 +40,8 @@ export default function CvImport({
   const [savedDrafts, setSavedDrafts] = useState<Draft[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
+  const extractionKey = useRef(crypto.randomUUID());
+  const [lastAction, setLastAction] = useState<"extract" | "draft">("extract");
   const [reviewed, setReviewed] = useState(false);
   const [allowed, setAllowed] = useState<string[]>([
     "matching",
@@ -72,6 +74,7 @@ export default function CvImport({
     }
   }
   async function saveDraft() {
+    setLastAction("draft");
     if (!draft) throw new Error(t("Choose a draft first."));
     const result = await api<Draft>(
       `/candidate/cv/drafts/${draft.id}`,
@@ -94,12 +97,14 @@ export default function CvImport({
       <h2>{t("Start with your CV")}</h2>
       <p>
         {t(
-          "Upload a PDF or Word .docx to prepare your profile and evidence. Review, add, edit or remove suggestions before applying them. Existing facts are preserved.",
+          "Upload a PDF, Word .docx or Markdown .md to prepare your profile and evidence. Review, add, edit or remove suggestions before applying them. Existing facts are preserved.",
         )}
       </p>
       <form
+        id="cv-extract-form"
         onSubmit={(event) => {
           event.preventDefault();
+          setLastAction("extract");
           void task.run(async () => {
             if (!file || !consent)
               throw new Error(
@@ -107,6 +112,10 @@ export default function CvImport({
               );
             if (file.size > 4 * 1024 * 1024)
               throw new Error(t("The CV must be no larger than 4 MiB."));
+            if (!/\.(pdf|docx|md)$/i.test(file.name))
+              throw new Error(
+                t("Choose a PDF, Word .docx or Markdown .md file."),
+              );
             const result = await api<Draft>(
               "/candidate/cv/extract",
               "POST",
@@ -114,6 +123,7 @@ export default function CvImport({
               {
                 "X-CV-Filename": encodeURIComponent(file.name),
                 "X-AI-Consent": "true",
+                "Idempotency-Key": extractionKey.current,
               },
             );
             if (result.status === "applied")
@@ -125,18 +135,22 @@ export default function CvImport({
             setDraft(result);
             setReviewed(false);
             await loadDrafts();
+            requestAnimationFrame(() =>
+              document.getElementById("cv-draft-heading")?.focus(),
+            );
           }, t("CV draft ready. Review the suggestions below."));
         }}
       >
         <fieldset disabled={task.busy}>
-          <Field label={t("CV document (PDF or Word .docx)")}>
+          <Field label={t("CV document (PDF, Word .docx or Markdown .md)")}>
             <input
               type="file"
-              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept=".pdf,.docx,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain"
               required
               onChange={(event) => {
                 setFile(event.target.files?.[0] ?? null);
                 setConsent(false);
+                extractionKey.current = crypto.randomUUID();
               }}
             />
           </Field>
@@ -196,6 +210,22 @@ export default function CvImport({
         </Field>
       )}
       {task.feedback}
+      {task.error && lastAction === "extract" && file && consent && (
+        <button
+          type="button"
+          disabled={task.busy}
+          onClick={() => {
+            extractionKey.current = crypto.randomUUID();
+            (
+              document.getElementById(
+                "cv-extract-form",
+              ) as HTMLFormElement | null
+            )?.requestSubmit();
+          }}
+        >
+          {t("Retry CV extraction")}
+        </button>
+      )}
       {draft && (
         <form
           onSubmit={(event) => {
@@ -222,7 +252,14 @@ export default function CvImport({
           }}
         >
           <fieldset disabled={task.busy}>
-            <h3>{t("Review your CV draft")}</h3>
+            <h3 id="cv-draft-heading" tabIndex={-1}>
+              {t("Review your CV draft")}
+            </h3>
+            <p>
+              {t(
+                "Check each claim and its source. Save your draft at any time; apply it only when you have finished reviewing.",
+              )}
+            </p>
             <p>
               {t(
                 "AI extraction is a suggestion, not independent verification. Check names, dates, qualifications and every claim against the source.",
@@ -244,31 +281,35 @@ export default function CvImport({
             </Field>
             <Field label={t("Target roles (comma-separated)")}>
               <input
-                value={draft.target_roles.join(", ")}
+                value={draft.target_roles.join(",")}
                 onChange={(event) =>
                   change({
-                    target_roles: event.target.value
-                      .split(",")
-                      .map((value) => value.trim()),
+                    target_roles: event.target.value.split(","),
                   })
                 }
                 onBlur={() =>
-                  change({ target_roles: draft.target_roles.filter(Boolean) })
+                  change({
+                    target_roles: draft.target_roles
+                      .map((value) => value.trim())
+                      .filter(Boolean),
+                  })
                 }
               />
             </Field>
             <Field label={t("Locations (comma-separated)")}>
               <input
-                value={draft.locations.join(", ")}
+                value={draft.locations.join(",")}
                 onChange={(event) =>
                   change({
-                    locations: event.target.value
-                      .split(",")
-                      .map((value) => value.trim()),
+                    locations: event.target.value.split(","),
                   })
                 }
                 onBlur={() =>
-                  change({ locations: draft.locations.filter(Boolean) })
+                  change({
+                    locations: draft.locations
+                      .map((value) => value.trim())
+                      .filter(Boolean),
+                  })
                 }
               />
             </Field>

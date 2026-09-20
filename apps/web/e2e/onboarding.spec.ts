@@ -22,7 +22,7 @@ test("CV draft editing, language persistence and public link review", async ({
     .getByRole("link", { name: "Profile and evidence", exact: true })
     .click();
   await page
-    .getByLabel("CV document (PDF or Word .docx)")
+    .getByLabel("CV document (PDF, Word .docx or Markdown .md)")
     .setInputFiles(`e2e/fixtures/${filename}`);
   await page
     .getByLabel(
@@ -52,6 +52,23 @@ test("CV draft editing, language persistence and public link review", async ({
     "Built a Python API in 2025 for a personal project.",
   );
   await page.getByLabel("Idioma", { exact: true }).selectOption("en-GB");
+  await page.getByRole("button", { name: /^Facts \(/ }).click();
+  await page.getByRole("button", { name: "Profile", exact: true }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Claim 2", exact: true }),
+  ).toHaveValue("I prefer hybrid roles.");
+  await page
+    .getByRole("textbox", {
+      name: "Target roles (comma-separated)",
+      exact: true,
+    })
+    .pressSequentially("Backend developer, Python developer");
+  await expect(
+    page.getByRole("textbox", {
+      name: "Target roles (comma-separated)",
+      exact: true,
+    }),
+  ).toHaveValue("Backend developer, Python developer");
   await page.getByRole("button", { name: "Save draft for later" }).click();
   await expect(page.getByRole("status")).toHaveText(
     "Draft saved. Your profile has not changed.",
@@ -63,6 +80,12 @@ test("CV draft editing, language persistence and public link review", async ({
   await expect(
     page.getByRole("textbox", { name: "Claim 2", exact: true }),
   ).toHaveValue("I prefer hybrid roles.");
+  await expect(
+    page.getByRole("textbox", {
+      name: "Target roles (comma-separated)",
+      exact: true,
+    }),
+  ).toHaveValue("Backend developer,Python developer");
   await page
     .locator(".cv-import")
     .screenshot({ path: testInfo.outputPath("cv-draft.png") });
@@ -113,6 +136,12 @@ test("CV draft editing, language persistence and public link review", async ({
     .getByRole("button", { name: "Save vacancy review", exact: true })
     .click();
   await expect(page.getByText(/PARSED · VERSION/)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "2. Assess requirements", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("link", { name: "Review profile →" }),
+  ).toBeVisible();
   await page.getByLabel("Language", { exact: true }).selectOption("pt");
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("lang", "pt");

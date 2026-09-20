@@ -704,5 +704,19 @@
   "Disqualifying requirement not yet confirmed:": "Requisito eliminatório ainda não confirmado:",
   "The positive assessment has no valid facts for matching.": "A avaliação positiva não tem fatos válidos para matching.",
   "Advanced seniority confirmed in the job review.": "Nível avançado confirmado na revisão da vaga.",
-  "No confirmed assessment.": "Sem avaliação confirmada."
+  "No confirmed assessment.": "Sem avaliação confirmada.",
+  "Upload a PDF, Word .docx or Markdown .md to prepare your profile and evidence. Review, add, edit or remove suggestions before applying them. Existing facts are preserved.": "Envie um PDF, Word .docx ou Markdown .md para preparar seu perfil e evidências. Revise, acrescente, edite ou remova sugestões antes de aplicá-las. Os fatos existentes são preservados.",
+  "CV document (PDF, Word .docx or Markdown .md)": "Documento do CV (PDF, Word .docx ou Markdown .md)",
+  "Choose a PDF, Word .docx or Markdown .md file.": "Escolha um arquivo PDF, Word .docx ou Markdown .md.",
+  "The document could not be read. Use a text-based PDF, .docx or UTF-8 .md file, up to 4 MiB and 20 PDF pages; scanned PDFs need OCR first.": "Não foi possível ler o documento. Use PDF com texto, .docx ou .md em UTF-8, até 4 MiB e 20 páginas PDF. PDFs digitalizados precisam de OCR primeiro.",
+  "We could not create a fully supported CV draft. Your profile is unchanged. Try extraction again, or use a text-based .docx or .md file.": "Não foi possível criar um rascunho de CV totalmente sustentado pela fonte. Seu perfil não foi alterado. Tente a extração novamente ou use um arquivo .docx ou .md com texto.",
+  "Retry CV extraction": "Tentar extrair CV novamente",
+  "Check each claim and its source. Save your draft at any time; apply it only when you have finished reviewing.": "Confira cada afirmação e sua fonte. Salve o rascunho a qualquer momento; aplique-o apenas quando terminar a revisão.",
+  "Job review saved. Continue with the requirement assessment.": "Revisão da vaga salva. Continue com a avaliação dos requisitos.",
+  "Add requirements before assessing this job": "Adicione requisitos antes de avaliar esta vaga",
+  "Return to the job review to extract or add its requirements, then save and continue.": "Volte à revisão da vaga para extrair ou adicionar os requisitos e depois salve para continuar.",
+  "Back to job review": "Voltar à revisão da vaga",
+  "Start with a public vacancy link, or paste the advert text. Review the extracted details in the next step.": "Comece com um link público da vaga ou cole o texto do anúncio. Revise os detalhes extraídos na próxima etapa.",
+  "Save your profile changes before publishing this version.": "Salve as alterações do perfil antes de publicar esta versão.",
+  "Connection lost. Check the local service and try again. Your input remains on this screen.": "Conexão perdida. Verifique o serviço local e tente novamente. Os dados preenchidos continuam nesta tela."
 }
