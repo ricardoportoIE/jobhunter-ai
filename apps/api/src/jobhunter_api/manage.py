@@ -80,7 +80,7 @@ def provision(settings: Settings) -> None:
         db.execute(
             sql.SQL(
                 "GRANT SELECT,INSERT,UPDATE,DELETE ON "
-                "records,login_limits,idempotency,job_keys TO {}"
+                "records,login_limits,idempotency,job_keys,discovery_secrets TO {}"
             ).format(role)
         )
         db.execute(sql.SQL("GRANT SELECT,INSERT ON audit_events,snapshots TO {}").format(role))
@@ -105,6 +105,7 @@ def erase(settings: Settings, confirmation: str) -> None:
                 (user["id"],),
             )
             for table in (
+                "discovery_secrets",
                 "ai_embeddings",
                 "job_keys",
                 "idempotency",
