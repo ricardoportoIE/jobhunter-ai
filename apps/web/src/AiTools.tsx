@@ -175,6 +175,7 @@ type Run = {
   error_code: string | null;
 };
 const operations: Record<string, string> = {
+  strategy: "Estratégia de candidatura",
   parse: "Extração",
   suggest: "Sugestão de matching",
   embed: "Indexação ou busca",

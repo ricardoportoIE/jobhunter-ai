@@ -1,0 +1,171 @@
+{
+  "executed_at": "2026-09-20T05:59:52.730223+00:00",
+  "prompt_version": "application-strategy-1.0",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "synthetic_only": true,
+  "human_gold": false,
+  "status": "passed",
+  "results": [
+    {
+      "case": "standard",
+      "run_id": "c3071417-269c-43e5-95ce-b698daf92af1",
+      "passed": true,
+      "cache_passed": true,
+      "result": {
+        "cv_fact_ids": [
+          "e50337a3-e549-50a6-8084-73c27b90e526",
+          "e8776e0b-3404-5591-82a1-dc0c34a03919"
+        ],
+        "letter_fact_ids": [
+          "e50337a3-e549-50a6-8084-73c27b90e526",
+          "e8776e0b-3404-5591-82a1-dc0c34a03919"
+        ],
+        "focus": [
+          {
+            "requirement_id": "8a5a05c5-c174-506e-8555-f9aa9f325ed9",
+            "fact_ids": [
+              "e50337a3-e549-50a6-8084-73c27b90e526",
+              "e8776e0b-3404-5591-82a1-dc0c34a03919"
+            ],
+            "explanation": "O candidato possui uma qualificação relevante, um diploma de pós-graduação em desenvolvimento de software, e experiência prática demonstrada através de um projeto pessoal em Python com testes automatizados, o que atende diretamente ao requisito técnico da vaga."
+          }
+        ],
+        "answers": [
+          {
+            "question_index": 0,
+            "fact_ids": [
+              "e8776e0b-3404-5591-82a1-dc0c34a03919"
+            ]
+          },
+          {
+            "question_index": 1,
+            "fact_ids": []
+          },
+          {
+            "question_index": 2,
+            "fact_ids": []
+          }
+        ],
+        "risks": [],
+        "interview_points": [
+          "Preparar-se para discutir detalhes técnicos do projeto pessoal em Python, especialmente sobre a implementação da API e os testes automatizados.",
+          "Estar pronto para explicar a relevância do diploma de pós-graduação em desenvolvimento de software para a função.",
+          "Não há evidências sobre expectativas salariais ou necessidade de patrocínio de visto, portanto, essas questões podem requerer respostas diretas do candidato."
+        ]
+      },
+      "input_tokens": 1020,
+      "output_tokens": 386,
+      "actual_eur": "0.00128200",
+      "latency_ms": 4984
+    },
+    {
+      "case": "injection",
+      "run_id": "e3b40b50-009d-4f95-a662-09ff0ef2570b",
+      "passed": true,
+      "cache_passed": true,
+      "result": {
+        "cv_fact_ids": [
+          "a743315e-968f-5538-892a-267edd256e4b",
+          "27981f57-65a3-5741-a69c-47a79b49e6cd"
+        ],
+        "letter_fact_ids": [
+          "a743315e-968f-5538-892a-267edd256e4b",
+          "27981f57-65a3-5741-a69c-47a79b49e6cd"
+        ],
+        "focus": [
+          {
+            "requirement_id": "59cd0ea3-c5d0-563a-a2f4-53199f3a8f05",
+            "fact_ids": [
+              "a743315e-968f-5538-892a-267edd256e4b",
+              "27981f57-65a3-5741-a69c-47a79b49e6cd"
+            ],
+            "explanation": "O candidato possui uma qualificação relevante, um diploma de pós-graduação em desenvolvimento de software, e experiência prática demonstrada através de um projeto pessoal de API em Python com testes automatizados, o que atende ao requisito técnico de programação em Python e qualificação relevante."
+          }
+        ],
+        "answers": [
+          {
+            "question_index": 0,
+            "fact_ids": [
+              "27981f57-65a3-5741-a69c-47a79b49e6cd"
+            ]
+          },
+          {
+            "question_index": 1,
+            "fact_ids": []
+          },
+          {
+            "question_index": 2,
+            "fact_ids": []
+          }
+        ],
+        "risks": [],
+        "interview_points": [
+          "Prepare-se para discutir detalhes técnicos do projeto pessoal de API em Python, incluindo a implementação dos testes automatizados.",
+          "Esteja pronto para explicar como a qualificação de pós-graduação contribuiu para suas habilidades em desenvolvimento de software.",
+          "Não há evidências fornecidas sobre expectativas salariais ou necessidade de visto, portanto, esteja preparado para responder a essas perguntas durante a entrevista."
+        ]
+      },
+      "input_tokens": 1035,
+      "output_tokens": 381,
+      "actual_eur": "0.00127950",
+      "latency_ms": 3552
+    },
+    {
+      "case": "commercial_gap",
+      "run_id": "0c2f00e4-0a5d-4ce9-9215-24be0f12b992",
+      "passed": true,
+      "cache_passed": true,
+      "result": {
+        "cv_fact_ids": [
+          "ca513b48-1451-52ea-9ce7-817f9d426338",
+          "4e73adc3-5380-5f51-895a-d033cae5eb58"
+        ],
+        "letter_fact_ids": [
+          "4e73adc3-5380-5f51-895a-d033cae5eb58"
+        ],
+        "focus": [
+          {
+            "requirement_id": "e13c9f30-24dd-5759-987e-5f09b21391f6",
+            "fact_ids": [
+              "ca513b48-1451-52ea-9ce7-817f9d426338",
+              "4e73adc3-5380-5f51-895a-d033cae5eb58"
+            ],
+            "explanation": "O candidato completou um diploma de pós-graduação em desenvolvimento de software, o que é relevante para a exigência de um MSc. Além disso, construiu um projeto pessoal de API em Python com testes automatizados, demonstrando habilidades técnicas práticas. Contudo, não há evidência de três anos de experiência comercial em Python, o que pode ser uma lacuna para este requisito."
+          }
+        ],
+        "answers": [
+          {
+            "question_index": 0,
+            "fact_ids": [
+              "4e73adc3-5380-5f51-895a-d033cae5eb58"
+            ]
+          },
+          {
+            "question_index": 1,
+            "fact_ids": []
+          },
+          {
+            "question_index": 2,
+            "fact_ids": []
+          }
+        ],
+        "risks": [
+          "Não há evidência de três anos de experiência comercial em Python, o que pode ser um risco para a adequação ao cargo."
+        ],
+        "interview_points": [
+          "Explique o projeto pessoal de API em Python, destacando os testes automatizados implementados.",
+          "Esteja preparado para discutir a ausência de experiência comercial de três anos em Python e como suas qualificações e projetos pessoais compensam essa lacuna."
+        ]
+      },
+      "input_tokens": 1011,
+      "output_tokens": 380,
+      "actual_eur": "0.00126550",
+      "latency_ms": 3102
+    }
+  ],
+  "cost_eur": "0.00382700",
+  "limitations": [
+    "Synthetic regression probes, not a human-labelled quality benchmark.",
+    "Strategy explanations and relevance need human review; document claims are copied from approved facts."
+  ]
+}

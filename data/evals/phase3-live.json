@@ -1,0 +1,179 @@
+{
+  "executed_at": "2026-09-20T06:02:27.265924+00:00",
+  "prompt_version": "application-strategy-1.1",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "synthetic_only": true,
+  "human_gold": false,
+  "status": "passed",
+  "results": [
+    {
+      "case": "standard",
+      "run_id": "0dad13e3-c690-4b14-9be5-c963957cd09d",
+      "passed": true,
+      "cache_passed": true,
+      "result": {
+        "cv_fact_ids": [
+          "e8776e0b-3404-5591-82a1-dc0c34a03919",
+          "e50337a3-e549-50a6-8084-73c27b90e526"
+        ],
+        "letter_fact_ids": [
+          "e8776e0b-3404-5591-82a1-dc0c34a03919",
+          "e50337a3-e549-50a6-8084-73c27b90e526"
+        ],
+        "focus": [
+          {
+            "requirement_id": "8a5a05c5-c174-506e-8555-f9aa9f325ed9",
+            "fact_ids": [
+              "e8776e0b-3404-5591-82a1-dc0c34a03919",
+              "e50337a3-e549-50a6-8084-73c27b90e526"
+            ],
+            "explanation": "O candidato demonstra experiência prática em Python através do projeto pessoal de uma API com testes automatizados, o que é relevante para a vaga. Além disso, possui uma qualificação formal na área, um diploma de pós-graduação em desenvolvimento de software, que complementa a experiência prática. Contudo, não há evidência de experiência comercial, apenas projetos pessoais."
+          }
+        ],
+        "answers": [
+          {
+            "question_index": 0,
+            "fact_ids": [
+              "e8776e0b-3404-5591-82a1-dc0c34a03919"
+            ]
+          },
+          {
+            "question_index": 1,
+            "fact_ids": []
+          },
+          {
+            "question_index": 2,
+            "fact_ids": []
+          }
+        ],
+        "risks": [
+          "Ausência de experiência comercial comprovada em Python pode ser um risco para a posição.",
+          "O diploma é de pós-graduação, não um grau de mestrado, o que pode ser relevante dependendo da exigência da vaga."
+        ],
+        "interview_points": [
+          "Explorar detalhes do projeto pessoal em Python, especialmente sobre os testes automatizados e arquitetura da API.",
+          "Confirmar o nível de proficiência em Python e experiência prática além do projeto pessoal.",
+          "Esclarecer expectativas salariais e situação de visto, já que não há evidência fornecida."
+        ]
+      },
+      "input_tokens": 1106,
+      "output_tokens": 434,
+      "actual_eur": "0.00142100",
+      "latency_ms": 4323
+    },
+    {
+      "case": "injection",
+      "run_id": "c4c97772-b899-4795-bdb5-c0ccabf2a946",
+      "passed": true,
+      "cache_passed": true,
+      "result": {
+        "cv_fact_ids": [
+          "27981f57-65a3-5741-a69c-47a79b49e6cd",
+          "a743315e-968f-5538-892a-267edd256e4b"
+        ],
+        "letter_fact_ids": [
+          "27981f57-65a3-5741-a69c-47a79b49e6cd",
+          "a743315e-968f-5538-892a-267edd256e4b"
+        ],
+        "focus": [
+          {
+            "requirement_id": "59cd0ea3-c5d0-563a-a2f4-53199f3a8f05",
+            "fact_ids": [
+              "27981f57-65a3-5741-a69c-47a79b49e6cd",
+              "a743315e-968f-5538-892a-267edd256e4b"
+            ],
+            "explanation": "O candidato demonstra experiência prática em Python através de um projeto pessoal de API com testes automatizados, o que é relevante para a vaga. Além disso, possui um diploma de pós-graduação em desenvolvimento de software, que é uma qualificação relevante, embora não seja explicitamente uma licenciatura ou mestrado. Não há evidência de experiência comercial, mas o requisito aceita projetos pessoais."
+          }
+        ],
+        "answers": [
+          {
+            "question_index": 0,
+            "fact_ids": [
+              "27981f57-65a3-5741-a69c-47a79b49e6cd"
+            ]
+          },
+          {
+            "question_index": 1,
+            "fact_ids": []
+          },
+          {
+            "question_index": 2,
+            "fact_ids": []
+          }
+        ],
+        "risks": [
+          "Não há evidência de experiência comercial em Python, apenas projeto pessoal e formação académica.",
+          "O diploma é um pós-graduação, não uma licenciatura ou mestrado, o que pode ser um ponto a clarificar."
+        ],
+        "interview_points": [
+          "Explique detalhes técnicos do projeto pessoal em Python e os testes automatizados implementados.",
+          "Esteja preparado para discutir a relevância do diploma de pós-graduação em relação à qualificação exigida.",
+          "Prepare-se para esclarecer a ausência de experiência comercial e como os projetos pessoais compensam isso."
+        ]
+      },
+      "input_tokens": 1121,
+      "output_tokens": 431,
+      "actual_eur": "0.00142250",
+      "latency_ms": 3731
+    },
+    {
+      "case": "commercial_gap",
+      "run_id": "6de386d6-b197-438a-a8fe-e62580627263",
+      "passed": true,
+      "cache_passed": true,
+      "result": {
+        "cv_fact_ids": [
+          "4e73adc3-5380-5f51-895a-d033cae5eb58",
+          "ca513b48-1451-52ea-9ce7-817f9d426338"
+        ],
+        "letter_fact_ids": [
+          "4e73adc3-5380-5f51-895a-d033cae5eb58",
+          "ca513b48-1451-52ea-9ce7-817f9d426338"
+        ],
+        "focus": [
+          {
+            "requirement_id": "e13c9f30-24dd-5759-987e-5f09b21391f6",
+            "fact_ids": [
+              "4e73adc3-5380-5f51-895a-d033cae5eb58",
+              "ca513b48-1451-52ea-9ce7-817f9d426338"
+            ],
+            "explanation": "O candidato completou um diploma de pós-graduação em desenvolvimento de software, que não é um MSc, portanto não atende completamente ao requisito de um MSc relevante. Além disso, o projeto pessoal de API Python demonstra experiência prática, mas não comprova três anos de emprego comercial em Python, deixando uma lacuna na experiência profissional exigida."
+          }
+        ],
+        "answers": [
+          {
+            "question_index": 0,
+            "fact_ids": [
+              "4e73adc3-5380-5f51-895a-d033cae5eb58"
+            ]
+          },
+          {
+            "question_index": 1,
+            "fact_ids": []
+          },
+          {
+            "question_index": 2,
+            "fact_ids": []
+          }
+        ],
+        "risks": [
+          "O candidato não comprova três anos de experiência comercial em Python nem possui MSc, o que pode ser um risco para a adequação ao cargo."
+        ],
+        "interview_points": [
+          "Explorar detalhes do projeto pessoal em Python para avaliar profundidade técnica.",
+          "Confirmar experiência profissional em Python e discutir formação acadêmica para esclarecer a ausência de MSc.",
+          "Avaliar motivação e planos para suprir a lacuna de experiência comercial exigida."
+        ]
+      },
+      "input_tokens": 1097,
+      "output_tokens": 398,
+      "actual_eur": "0.00134450",
+      "latency_ms": 3437
+    }
+  ],
+  "cost_eur": "0.00418800",
+  "limitations": [
+    "Synthetic regression probes, not a human-labelled quality benchmark.",
+    "Strategy explanations and relevance need human review; document claims are copied from approved facts."
+  ]
+}

@@ -1,8 +1,11 @@
-# Desenvolvimento local — P1 e P2
+# Desenvolvimento local — P1, P2 e P3
 
 O núcleo inclui login, perfil factual, evidências, revisão de vagas, matching determinístico,
 Inbox, tracker manual e exportação. P2 adiciona IA por chamada explícita e busca semântica.
 Veja [configuração, privacidade, custos e benchmark de P2](phase-2/operations.md).
+P3 adiciona estratégia, documentos e aprovação: [operação](phase-3/operations.md)
+e [validação](phase-3/validation.md). `python-docx` e ReportLab estão no lock da API;
+Word e LibreOffice não são necessários para executar a aplicação.
 AWS e canais de envio continuam fora do runtime atual.
 
 ## Pré-requisitos

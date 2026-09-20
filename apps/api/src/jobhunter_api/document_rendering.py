@@ -89,6 +89,9 @@ def docx_bytes(content: Row, kind: Kind) -> bytes:
         style.font.name = "Arial"
         style.font.size = Pt(size)
         style.font.color.rgb = RGBColor(0, 0, 0)
+        style.font.bold = name in {"Title", "Heading 1"}
+        style.font.italic = False
+        style.paragraph_format.space_before = Pt(9 if name == "Heading 1" else 0)
         style.paragraph_format.space_after = Pt(7)
         style.paragraph_format.line_spacing = 1.1
         # British English proofing without changing any canonical names or claims.
@@ -96,6 +99,10 @@ def docx_bytes(content: Row, kind: Kind) -> bytes:
         language = OxmlElement("w:lang")
         language.set(qn("w:val"), "en-GB")
         rpr.append(language)
+    # Word templates can inherit a coloured title border even with black title text.
+    for element in document.styles.element.iter():
+        for border in list(element.findall(qn("w:pBdr"))):
+            element.remove(border)
     for style, text in paragraphs(content, kind):
         p = document.add_paragraph(
             text, style=style if style not in {"Body", "Contact"} else "Normal"

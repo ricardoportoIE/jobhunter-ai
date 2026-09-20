@@ -2,7 +2,7 @@
 
 Plataforma de inteligência de carreira que compara vagas com um perfil baseado em evidências e prepara candidaturas para revisão humana.
 
-**Estado: P1 e P2 concluídos para uso local com revisão humana.** Extração com IA e citações, rascunhos revisáveis, embeddings, busca semântica, revisão de duplicados, matching assistido e controle de custos. Testes reais OpenAI executados: GPT-4.1 mini selecionado, com 20/20 extrações válidas e 79/80 campos básicos corretos no dataset público derivado. A interpretação de requisitos continua sujeita à revisão humana; não é um gold set humano. Teto do projeto: €10/mês de IA e €25 combinados.
+**Estado: P1, P2 e P3 concluídos para uso local com revisão humana.** Extração com IA e citações, embeddings, busca semântica, matching assistido e pacotes de candidatura com estratégia, CV/carta DOCX/PDF, respostas, evidências, histórico e aprovação. Testes reais OpenAI executados com GPT-4.1 mini; as avaliações e seus limites estão documentados por fase. Teto do projeto: €10/mês de IA e €25 combinados.
 
 ## Iniciar localmente
 
@@ -24,6 +24,10 @@ Para os recursos de IA, veja [operação e privacidade de P2](docs/phase-2/opera
 [etapas e commits](docs/phase-2/progress.md) e [validação e limites da avaliação](docs/phase-2/validation.md).
 A chave é configurada somente no backend, em `.env`, usando `python scripts/configure_openai.py CAMINHO_DO_ARQUIVO`.
 Depois de configurar, recrie a API com `docker compose up --detach --wait api`.
+
+Para gerar documentos, abra uma vaga revisada e escolha **4. Pacote de candidatura**.
+Veja [operação de P3](docs/phase-3/operations.md), [etapas e commits](docs/phase-3/progress.md)
+e [testes reais e verificação visual](docs/phase-3/validation.md).
 
 ## Começar pela fase 0
 
@@ -47,7 +51,7 @@ Depois de configurar, recrie a API com `docker compose up --detach --wait api`.
 - [ADR-003: evidências, scoring e aprovação](docs/adr/0003-evidence-and-approval.md)
 - [ADR-004: orçamento e AWS temporária](docs/adr/0004-local-first-budget.md)
 
-Fluxo implementado: registrar evidências e fatos, publicar o perfil, importar texto de uma vaga, extrair um rascunho com IA ou preencher manualmente, confirmar requisitos, revisar sugestões fundamentadas, visualizar score/cobertura/lacunas e acompanhar candidatura manual. O cálculo final continua determinístico.
+Fluxo implementado: registrar evidências e fatos, publicar o perfil, importar texto de uma vaga, confirmar requisitos, revisar matching, preparar estratégia e documentos, revisar respostas/diferenças, aprovar o pacote e acompanhar candidatura manual. O cálculo do score continua determinístico.
 
 ## Dados e validação
 

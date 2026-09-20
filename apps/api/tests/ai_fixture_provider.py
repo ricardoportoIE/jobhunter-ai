@@ -55,7 +55,9 @@ class BrowserFixtureProvider:
                     {
                         "requirement_id": r["id"],
                         "fact_ids": [fact["id"]],
-                        "explanation": "Projeto documentado relevante; emprego comercial não inferido.",
+                        "explanation": (
+                            "Projeto documentado relevante; emprego comercial não inferido."
+                        ),
                     }
                     for r in payload["job"]["requirements"]
                 ],

@@ -34,6 +34,8 @@ def test_approved_artifacts_same_facts_and_no_private_metadata(signed_client: Te
             doc = Document(BytesIO(bundle.read(stem + ".docx")))
             assert fact["claim"] in "\n".join(p.text for p in doc.paragraphs)
             assert doc.core_properties.author == ""
+            for style in ("Normal", "Title", "Heading 1"):
+                assert "w:pBdr" not in doc.styles[style].element.xml
             pdf = PdfReader(BytesIO(bundle.read(stem + ".pdf")))
             assert len(pdf.pages) == 1
             assert fact["claim"] in " ".join(p.extract_text() for p in pdf.pages)
