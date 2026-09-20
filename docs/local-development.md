@@ -1,4 +1,4 @@
-# Local development — P1, P2 and P3
+# Local development — P1 to P4
 
 The core includes login, a factual profile, evidence, vacancy review, deterministic matching,
 an Inbox, a manual tracker and export. P2 adds explicitly requested AI calls and semantic search.
@@ -7,6 +7,11 @@ P3 adds strategy, documents and approval: [operation](phase-3/operations.md)
 and [validation](phase-3/validation.md). `python-docx` and ReportLab are in the API lockfile;
 Word and LibreOffice are not required to run the application.
 AWS and submission channels remain outside the current runtime.
+
+P4 adds the local discovery worker, Greenhouse and optional read-only Gmail alerts:
+[operations](phase-4/operations.md), [Gmail setup](phase-4/gmail-setup.md) and
+[validation](phase-4/validation.md). Sources start disabled. No Google credentials
+are needed to start the application or run the synthetic test suite.
 
 ## Prerequisites
 
@@ -28,6 +33,11 @@ python scripts/smoke_local.py
 Open http://127.0.0.1:5173. Sign in as `local` using the password in `.private/local-login.txt`. Bootstrap preserves an existing account. `.env` contains separate administrative and runtime credentials; the initialiser preserves existing values and adds the runtime credential to older installations. Do not print or publish `.env`.
 
 Compose starts PostgreSQL, runs migrations/grants in the temporary `migrate` service, and starts the API/web after health checks. It is normal for `migrate` to finish with exit code 0. The API and web run without root, with read-only filesystems and temporary `/tmp` storage. Compose does not pass the administrative password to the runtime.
+
+The `discovery` worker starts after migration and checks only due, enabled sources.
+Its heartbeat health check detects stalled scheduling. Use `docker compose logs --tail 50 discovery`
+to inspect redacted failures. Stopping the stack pauses discovery; data and
+source configuration remain in PostgreSQL.
 
 | Service | Default address |
 |---|---|
@@ -137,4 +147,4 @@ The second command briefly stops this project's `db`, verifies liveness 200/read
 
 ## Privacy
 
-Export data from the privacy screen. Complete application data erasure is an administrative command requiring explicit confirmation; see [security and data](phase-1/security-and-data.md). There is no submission endpoint, remote collection or `.private/` mount in the containers. Private backups and exports must not enter Git.
+Export data from the privacy screen. Complete application data erasure is an administrative command requiring explicit confirmation; see [security and data](phase-1/security-and-data.md). Discovery reads only enabled, reviewed sources. There is no submission endpoint or `.private/` mount in the containers. Private backups and exports must not enter Git.

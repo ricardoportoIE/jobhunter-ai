@@ -102,6 +102,12 @@ services:
     build:
       context: ./apps/api
     command: ["python", "-m", "jobhunter_api.discovery_worker"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "from pathlib import Path; import time; p=Path('/tmp/discovery-heartbeat'); assert p.exists() and time.time()-p.stat().st_mtime<180"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     environment:
       JOBHUNTER_DB_HOST: db
       JOBHUNTER_DB_PORT: "5432"

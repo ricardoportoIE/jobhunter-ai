@@ -336,6 +336,12 @@ def access_token(settings: Settings, source: Row, deadline: float) -> str:
 
 
 def gmail_get(path: str, token: str, deadline: float) -> Row:
+    if not (
+        path == "/labels"
+        or path.startswith("/messages?")
+        or re.fullmatch(r"/messages/[A-Za-z0-9_-]+\?format=full", path)
+    ):
+        raise SourceFailure("SOURCE_ENDPOINT_REJECTED", stop=True)
     return request_json(
         GMAIL_URL + path, headers={"Authorization": "Bearer " + token}, deadline=deadline
     )[2]
@@ -475,11 +481,16 @@ def read_gmail(settings: Settings, source: Row) -> DiscoveryBatch:
         raise SourceFailure("SOURCE_INVALID_RESPONSE")
     cursor = payload.get("nextPageToken")
     if source["data"].get("cursor"):
-        older = gmail_get(
-            "/messages?" + urlencode({**params, "pageToken": source["data"]["cursor"]}),
-            token,
-            deadline,
-        )
+        try:
+            older = gmail_get(
+                "/messages?" + urlencode({**params, "pageToken": source["data"]["cursor"]}),
+                token,
+                deadline,
+            )
+        except SourceFailure as error:
+            if error.code == "SOURCE_HTTP_ERROR":
+                raise SourceFailure("GMAIL_CURSOR_EXPIRED") from None
+            raise
         backlog = older.get("messages", [])
         if not isinstance(backlog, list) or len(backlog) > 20:
             raise SourceFailure("SOURCE_INVALID_RESPONSE")

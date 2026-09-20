@@ -1,6 +1,6 @@
 # Initial threat model
 
-Status: phase 1 local controls implemented and tested; AI, connector, renderer and cloud controls remain scheduled for their respective phases. See [runtime security and data](../phase-1/security-and-data.md). Initial validation owner: project maintainer. Real data remains separate in `.private/`; only synthetic examples and derived data without contact details may be versioned. See [trust boundaries](../architecture/overview.md).
+Status: local controls, AI validation, document rendering and P4 connectors are implemented and tested. Cloud and submission controls remain scheduled for later phases. See [runtime security and data](../phase-1/security-and-data.md) and [P4 validation](../phase-4/validation.md). Initial validation owner: project maintainer. Real data remains separate in `.private/`; only synthetic examples and derived data without contact details may be versioned. See [trust boundaries](../architecture/overview.md).
 
 Assets: factual profile, personal data, documents, source/provider credentials, approvals, history and budget. Potential attackers: a malicious source, submitted file, unauthorised session or compromised dependency.
 
@@ -21,6 +21,15 @@ Assets: factual profile, personal data, documents, source/provider credentials, 
 | T13 / P0 | External text becomes HTML/script in the browser | Escape by default, no raw HTML; sanitise if necessary; CSP on deployment | XSS in titles/descriptions/evidence does not execute; phase 1 |
 
 ## Retention, logging and approval
+
+P4 connectors use fixed provider hosts, pinned public DNS, rejected redirects, byte/time
+limits and serialised reads. Sources require a current access review. OAuth state is
+single-use, session-bound and expires after ten minutes; PKCE and same-origin CSRF
+protection cover code exchange. Tokens use context-bound Fernet encryption outside
+exported records. Gmail reads only the chosen label, rechecks message labels and does
+not follow email links or request attachment downloads. Pending advert changes block
+new matching/strategy use and invalidate dependent packages. Tests cover these controls
+with synthetic provider data; Google's production verification remains an external requirement.
 
 Logs contain correlation IDs, duration, counts, error codes and costs, without full profile, prompt or CV bodies. Record decision summaries and evidence, without the model's internal reasoning. Append-only auditing is a control against the application role; do not promise absolute immutability against administrators.
 

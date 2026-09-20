@@ -10,7 +10,7 @@ local commit after its checks; the complete phase is pushed only after final rev
 | P4-02 | Greenhouse reader, synchronisation, revisions and deduplication | Implemented |
 | P4-03 | Gmail OAuth, dedicated-label reader and configuration guide | Implemented; live connection awaits credentials |
 | P4-04 | Discovery interface, preference hints and company research hand-off | Implemented |
-| P4-05 | End-to-end validation, security review and operational documentation | Pending |
+| P4-05 | End-to-end validation, security review and operational documentation | Implemented |
 
 ## Source controls
 
@@ -83,3 +83,18 @@ Component tests cover explicit actions, errors, email boundaries, permission rev
 OAuth query removal and confirmed replacement. The browser journey covers activation,
 synchronisation, filtering, dismissal/restoration, review hand-off, Portuguese, axe
 checks and a 320-pixel viewport on desktop and mobile. Screenshots were visually reviewed.
+
+## P4-05 final review
+
+The full local suite passed: 145 API tests without skips, 31 component tests and
+16 desktop/mobile browser tests. Static checks, builds, offline evaluation contracts,
+private-data/secret scans and the British English documentation check passed. Docker
+services, including the discovery worker, are healthy after rebuilding. The database
+outage/recovery check passed without restarting the API or frontend.
+
+Final review tightened cancelled-run handling, read-only Gmail endpoint boundaries,
+revoked-token/cursor recovery, source URL deduplication and version-bound comparisons.
+The Gmail configuration helper was checked with disposable files for key preservation
+and rejection of an unregistered redirect; actual credentials were not changed.
+See [validation](validation.md) and [operations](operations.md) for reproduction and
+limits. Live Gmail configuration remains the explicitly agreed operator follow-up.

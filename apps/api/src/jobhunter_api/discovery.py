@@ -326,6 +326,7 @@ def apply_source_update(
 ) -> Row:
     import hashlib
 
+    from jobhunter_api.deduplication import identity_keys
     from jobhunter_api.discovery_sync import snapshot_item
     from jobhunter_api.jobs import JobEdit
 
@@ -348,6 +349,20 @@ def apply_source_update(
         job = get_record(db, actor.id, "job", UUID(value["job_id"]))
         if job["version"] != data.expected_job_version:
             raise Problem(409, "VERSION_CONFLICT", "The saved review changed. Compare it again.")
+        keys = identity_keys({**job["data"], "source_url": value["url"]})
+        conflict = db.execute(
+            "SELECT 1 FROM job_keys WHERE owner_id=%s AND key=ANY(%s) AND job_id<>%s LIMIT 1",
+            (actor.id, keys, job["id"]),
+        ).fetchone()
+        if conflict:
+            raise Problem(
+                409, "DUPLICATE_CONFLICT", "The new reference belongs to another saved vacancy."
+            )
+        for key in keys:
+            db.execute(
+                "INSERT INTO job_keys VALUES (%s,%s,%s) ON CONFLICT DO NOTHING",
+                (actor.id, key, job["id"]),
+            )
         # Existing assessment and package version checks invalidate approvals automatically.
         snapshot_item(db, {**job, "kind": "job"})
         fields = JobEdit(expected_version=job["version"]).model_dump(

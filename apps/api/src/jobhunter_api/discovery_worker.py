@@ -2,6 +2,8 @@
 
 import logging
 import time
+from pathlib import Path
+from tempfile import gettempdir
 
 from jobhunter_api.discovery_sync import synchronise
 from jobhunter_api.settings import Settings
@@ -26,6 +28,7 @@ def main() -> None:
     while True:
         try:
             tick(settings)
+            (Path(gettempdir()) / "discovery-heartbeat").touch()
         except Exception as error:
             logging.getLogger(__name__).warning(
                 "Discovery check deferred: %s", type(error).__name__

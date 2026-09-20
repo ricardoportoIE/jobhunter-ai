@@ -189,6 +189,13 @@ def run_sync(settings: Settings, owner: UUID, source_id: UUID, reader: Reader | 
             status = "failed"
         else:
             counts = capture(db, owner, source, batch) if not batch.not_modified else {}
+            if batch.not_modified:
+                db.execute(
+                    "UPDATE records SET data=jsonb_set(data,'{last_seen_at}',%s) "
+                    "WHERE owner_id=%s AND kind='discovery_item' AND NOT deleted "
+                    "AND data->>'source_id'=%s AND data->>'availability'='listed'",
+                    (Jsonb(now.isoformat()), owner, str(source_id)),
+                )
             status = "unchanged" if batch.not_modified else "completed"
         successful = status in {"unchanged", "completed"}
         next_time = now + (timedelta(days=1) if successful else timedelta(minutes=15))
@@ -201,8 +208,17 @@ def run_sync(settings: Settings, owner: UUID, source_id: UUID, reader: Reader | 
             "next_sync_at": next_time.isoformat(),
             "last_error": failure.code if failure else None,
         }
-        if failure and failure.stop:
+        if status == "cancelled":
+            values = {**current["data"], "active_run": None, "lease_until": None}
+        if status == "failed" and failure and failure.code == "GMAIL_CURSOR_EXPIRED":
+            values["cursor"] = None
+        if status == "failed" and failure and failure.stop:
             values["enabled"] = False
+            if data["provider"] == "gmail" and failure.code in {
+                "GMAIL_RECONNECT",
+                "SOURCE_ACCESS_DENIED",
+            }:
+                values["connected"] = False
         if successful:
             values["last_synced_at"] = now.isoformat()
             if not batch.not_modified:

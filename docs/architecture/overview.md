@@ -23,6 +23,14 @@ One backend, one database and modules with explicit boundaries. The domain does 
 
 Implemented structure: `apps/api` and `apps/web`, with tests alongside each application and validation scripts at the root. The pure scoring engine is in `jobhunter_api/scoring.py`, without FastAPI or PostgreSQL. Workers, the renderer, MCP and cloud infrastructure are introduced when their phases need them. [Contracts implemented in phase 1](../phase-1/runtime-contracts.md).
 
+## Local discovery — phase 4
+
+P4 adds a local `discovery` worker sharing the API package and database. Reviewed
+source records determine whether a fixed provider connector can run. A session lock
+serialises provider batches, short transactions claim/finalise runs and snapshots
+preserve source revisions. Gmail OAuth credentials use a separate encrypted table;
+source content remains untrusted. See [discovery operations](../phase-4/operations.md).
+
 ## AWS evolution — reference for phase 5
 
 ```mermaid

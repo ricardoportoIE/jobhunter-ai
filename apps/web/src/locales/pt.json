@@ -897,5 +897,9 @@
   "Applying the new source text resets extracted fields and makes previous assessments and packages out of date. Review and assess the vacancy again.": "Aplicar o novo texto da fonte repõe os campos extraídos e torna as avaliações e os pacotes anteriores desactualizados. Reveja e avalie a vaga novamente.",
   "I have compared the texts and want to replace the saved advert for a new review.": "Comparei os textos e quero substituir o anúncio guardado para uma nova revisão.",
   "Apply update and review again": "Aplicar actualização e rever novamente",
-  "The advert changed. Compare and apply its source update before continuing.": "O anúncio mudou. Compare e aplique a actualização da fonte antes de continuar."
+  "The advert changed. Compare and apply its source update before continuing.": "O anúncio mudou. Compare e aplique a actualização da fonte antes de continuar.",
+  "Connected sources and email alerts": "Fontes ligadas e alertas por email",
+  "1 item": "1 item",
+  "Your export includes discovery sources, check history, imported alerts and previous advert text. OAuth tokens are encrypted separately and excluded from exports. Discovery does not send email content to AI.": "A exportação inclui fontes de descoberta, histórico de verificações, alertas importados e texto anterior dos anúncios. Os tokens OAuth são cifrados separadamente e excluídos da exportação. A descoberta não envia conteúdo de emails à IA.",
+  "Pause a source to stop checks. Disconnect Gmail to remove saved access, or use local data erasure to delete imported records. Imported alerts are retained until you erase them; disconnecting alone keeps them.": "Pause uma fonte para parar as verificações. Desligue o Gmail para remover o acesso guardado ou use a eliminação local de dados para apagar os registos importados. Os alertas são mantidos até os eliminar; desligar a conta não os apaga."
 }

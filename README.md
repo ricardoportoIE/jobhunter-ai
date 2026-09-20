@@ -8,7 +8,7 @@ Job searching involves more than matching keywords. A useful decision needs to a
 
 This portfolio project demonstrates full-stack development, applied AI, data modelling, security and automated testing through a working local application. Its central engineering principle is simple: **AI proposes; verifiable rules and human review control what becomes an accepted fact, a score or an approved document.**
 
-**Available now:** a Docker-based local application with profile and vacancy imports, evidence-backed matching, application documents and a manual tracker. The interface defaults to English (UK), with a persistent Portuguese option. All authored project documentation is in British English.
+**Available now:** a Docker-based local application with profile and vacancy imports, opt-in Greenhouse discovery, optional read-only Gmail alerts, evidence-backed matching, application documents and a manual tracker. The interface defaults to English (UK), with a persistent Portuguese option. All authored project documentation is in British English.
 
 ## The user journey
 
@@ -22,6 +22,8 @@ The workflow preserves drafts and form input, explains review requirements and g
 
 The [frontend experience](docs/frontend-experience.md) keeps the everyday journey focused: three main destinations, CV-first onboarding, filters for saved vacancies and expandable detail controls. AI can prepare the first assessment draft; the user confirms it before the deterministic score is calculated.
 
+The [discovery workflow](docs/phase-4/operations.md) adds daily checks of sources the user enables. New and changed adverts retain provenance, while reviewed jobs are preserved until an explicit update. Email digests remain alerts with individual links to review. Gmail needs a separately configured Google OAuth client; its integration is tested with synthetic responses, while Greenhouse also has a recorded live read.
+
 ## Engineering skills demonstrated
 
 | Area | Technologies and skills | How they are applied |
@@ -32,6 +34,7 @@ The [frontend experience](docs/frontend-experience.md) keeps the everyday journe
 | Applied AI | OpenAI Responses API, structured outputs, embeddings, semantic retrieval | CV and vacancy extraction, cited matching, fact selection, second assessments and explicitly requested public web research. |
 | Reliability and evaluation | Deterministic rules, contract validation, frozen evaluation sets | Reproducible scoring, source checks, clarification gates, disagreement handling and recorded model comparisons with stated limitations. |
 | Security and privacy | Argon2, session cookies, CSRF protection, authorisation, SSRF controls | User isolation, protected writes, restricted public URL fetching, bounded document parsing and backend-only credentials. |
+| External integrations | Greenhouse Job Board API, Gmail OAuth, PKCE, Fernet, conditional requests | Reviewed source activation, a bounded local worker, encrypted credentials, traceable updates and recovery from interrupted reads. |
 | Document processing | pypdf, python-docx, ReportLab | Importing source material and producing reviewable DOCX/PDF documents from approved facts. |
 | Quality assurance | pytest, Vitest, Testing Library, Playwright, axe | Domain, API, database, component and browser tests, including failure recovery, accessibility checks and desktop/mobile journeys. |
 | Developer tooling and delivery | Docker Compose, Nginx, GitHub Actions, uv, npm, Ruff, mypy, ESLint, Prettier | Reproducible environments, locked dependencies, static analysis, production builds, health checks and continuous integration. |
@@ -116,7 +119,7 @@ Stop the application with `docker compose down`; this retains the database. See 
 
 The [GitHub Actions workflow](.github/workflows/ci.yml) defines five jobs: API, frontend, Docker Compose, browser end-to-end tests and design contracts. It checks formatting, types, application behaviour, evaluation contracts, builds and database outage recovery. Automated tests use synthetic data; recorded live AI results are validated without making paid calls in CI.
 
-Local verification on **20 September 2026** passed **115 API tests, 24 frontend tests and 12 desktop/mobile browser tests**, with no skipped API tests. Static checks, package and frontend builds, evaluation contracts, documentation checks, axe accessibility checks and database outage/recovery checks also passed. Two upstream Python deprecation warnings remain; browser tests used Microsoft Edge.
+Local verification on **20 September 2026** passed **145 API tests, 31 frontend tests and 16 desktop/mobile browser tests**, with no skipped API tests. Static checks, package and frontend builds, evaluation contracts, documentation checks, axe accessibility checks and database outage/recovery checks also passed. Two upstream Python deprecation warnings remain; browser tests used Microsoft Edge. See [P4 validation](docs/phase-4/validation.md) for coverage and the pending live Gmail setup.
 
 Run the API tests against a separate test database, with the local PostgreSQL service running:
 
@@ -150,13 +153,12 @@ The [development guide](docs/local-development.md) lists the lint, type, build a
 
 ## Project scope and next steps
 
-The local core, AI assistance and application package workflow are implemented. The project currently supports individual use with human review. There is no hosted production service, email integration or automated application submission.
+The local core, AI assistance, application packages and P4 discovery workflow are implemented. The project supports individual use with human review. Gmail is optional and awaits live validation with the operator's OAuth client. There is no hosted production service or automated application submission.
 
 Further work includes broader user-labelled evaluations, testing with more document layouts and sources, and a carefully scoped pilot. The planned stages extend the engineering skills above:
 
 | Planned stage | Skills and technologies to develop | Intended purpose |
 |---|---|---|
-| Discovery | Opt-in email integration, permitted APIs, source provenance and alerts | Bring traceable opportunities into the review workflow. |
 | Temporary AWS demonstration | Terraform, IAM, Secrets Manager, Cognito, API Gateway, Lambda, ECS Fargate, RDS, S3, EventBridge, Step Functions and observability | Validate reproducible deployment, access controls, backups, cost monitoring and clean-up. The topology remains subject to budget and design validation. |
 | Controlled orchestration | Resumable workflows, idempotent integrations and scoped approval; LangGraph or MCP only where justified | Test one permitted channel or sandbox with final confirmation and auditable outcomes. |
 
@@ -172,6 +174,7 @@ These are future plans, not deployed capabilities. Bedrock is an inference optio
 | Security, ownership and personal data | [Threat model](docs/security/threat-model.md) · [Privacy and erasure](docs/phase-1/security-and-data.md) |
 | AI quality, costs and limitations | [AI operations](docs/phase-2/operations.md) · [Evaluation results](docs/phase-2/validation.md) · [Model migration evidence](docs/evals/luna-migration.md) |
 | Application documents and approval | [Package workflow](docs/phase-3/operations.md) · [Validation and visual checks](docs/phase-3/validation.md) |
+| Discovery, alerts and source updates | [Operations](docs/phase-4/operations.md) · [Gmail setup](docs/phase-4/gmail-setup.md) · [P4 validation](docs/phase-4/validation.md) |
 | Development and documentation conventions | [Local development](docs/local-development.md) · [Documentation policy](docs/documentation-policy.md) · [Project conventions](AGENTS.md) |
 
 Public fixtures are fictitious. Real-vacancy evaluation cases are paraphrased and pseudonymised; their design labels are not a complete human gold set. Personal CVs, contact details, original private evidence and credentials are excluded from the repository.

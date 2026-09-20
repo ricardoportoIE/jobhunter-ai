@@ -219,7 +219,9 @@ export default function Discovery({ profile }: { profile: Profile }) {
           </form>
           <div className="section-heading">
             <h2>{t("Latest discoveries")}</h2>
-            <span className="quiet-label">{t("{0} items", [page.total])}</span>
+            <span className="quiet-label">
+              {page.total === 1 ? t("1 item") : t("{0} items", [page.total])}
+            </span>
           </div>
           {page.total === 0 ? (
             <section className="empty-state panel">
@@ -287,6 +289,7 @@ function DiscoveryCard({
   const task = useTask();
   const hints = preferenceHints(item, profile);
   const [savedJob, setSavedJob] = useState<Job | null>(null);
+  const [comparedVersion, setComparedVersion] = useState<number | null>(null);
   const [replace, setReplace] = useState(false);
   return (
     <article className="panel discovery-card">
@@ -434,6 +437,7 @@ function DiscoveryCard({
             onClick={() =>
               void task.run(async () => {
                 setSavedJob(await api<Job>(`/jobs/${item.job_id}`));
+                setComparedVersion(item.version);
                 setReplace(false);
               }, "")
             }
@@ -460,14 +464,16 @@ function DiscoveryCard({
                 )}
               </label>
               <button
-                disabled={task.busy || !replace}
+                disabled={
+                  task.busy || !replace || comparedVersion !== item.version
+                }
                 onClick={() =>
                   void task.run(async () => {
                     const job = await api<Job>(
                       `/discovery/items/${item.id}/apply-update`,
                       "POST",
                       {
-                        expected_version: item.version,
+                        expected_version: comparedVersion,
                         expected_job_version: savedJob.version,
                         replacement_confirmed: true,
                       },

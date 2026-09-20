@@ -253,8 +253,8 @@ def suggest(job_id: UUID, data: SuggestInput, actor: Actor, request: Request) ->
         lambda output: reliable(output, payload),
     )
     with connect(settings) as db:
-        current_job = get_record(db, actor.id, "job", job_id)
         owner_lock(db, actor.id)
+        current_job = get_record(db, actor.id, "job", job_id)
         current_profile = profile(db, actor.id)
         stale = (
             current_job["version"] != data.job_version

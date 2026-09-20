@@ -264,3 +264,43 @@ def test_message_limits() -> None:
         message_text({"mimeType": "text/plain", "body": {"data": "x" * 100001}})
     with pytest.raises(SourceFailure):
         message_text({}, depth=13)
+
+
+def test_oauth_return_cannot_move_to_another_session(
+    signed_client: TestClient, db_settings: Settings
+) -> None:
+    from conftest import TEST_PASSWORD
+
+    configure(signed_client, db_settings)
+    source = add_source(signed_client, "gmail")
+    query = start(signed_client, source)
+    renewed = signed_client.post(
+        "/api/v1/session", json={"username": "local", "password": TEST_PASSWORD}
+    )
+    signed_client.headers["X-CSRF-Token"] = renewed.json()["csrf_token"]
+    result = signed_client.post(
+        "/api/v1/discovery/gmail/complete", json={"state": query["state"][0], "code": "synthetic"}
+    )
+    assert result.status_code == 403 and result.json()["error"]["code"] == "OAUTH_STATE_INVALID"
+
+
+def test_cursor_expiry_is_recoverable_without_unlabelled_reads(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("jobhunter_api.gmail.access_token", lambda *args: "synthetic-access")
+
+    def get(path: str, *_: Any) -> Row:
+        if path == "/labels":
+            return {"labels": [{"id": "Label_1", "name": "Alerts", "type": "user"}]}
+        assert "labelIds=Label_1" in path
+        if "pageToken=" in path:
+            raise SourceFailure("SOURCE_HTTP_ERROR")
+        return {"messages": []}
+
+    monkeypatch.setattr("jobhunter_api.gmail.gmail_get", get)
+    with pytest.raises(SourceFailure) as failure:
+        read_gmail(
+            Settings(db_password="synthetic"),
+            {"data": {"label_id": "Label_1", "cursor": "expired"}},
+        )
+    assert failure.value.code == "GMAIL_CURSOR_EXPIRED"

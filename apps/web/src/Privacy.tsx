@@ -38,6 +38,20 @@ export default function Privacy() {
         </button>
       </section>
       <section className="panel narrow">
+        <h2>{t("Connected sources and email alerts")}</h2>
+        <p>
+          {t(
+            "Your export includes discovery sources, check history, imported alerts and previous advert text. OAuth tokens are encrypted separately and excluded from exports. Discovery does not send email content to AI.",
+          )}
+        </p>
+        <p>
+          {t(
+            "Pause a source to stop checks. Disconnect Gmail to remove saved access, or use local data erasure to delete imported records. Imported alerts are retained until you erase them; disconnecting alone keeps them.",
+          )}
+        </p>
+        <a href="#discover">{t("Manage sources")}</a>
+      </section>
+      <section className="panel narrow">
         <h2>{t("Processing by OpenAI")}</h2>
         <p>
           {t(

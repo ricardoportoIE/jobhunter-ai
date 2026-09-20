@@ -83,6 +83,8 @@ def request_json(
                     )
                 continue
             if status != 200:
+                if status == 400 and url == "https://oauth2.googleapis.com/token":
+                    raise SourceFailure("GMAIL_RECONNECT", stop=True)
                 raise SourceFailure("SOURCE_NOT_FOUND" if status == 404 else "SOURCE_HTTP_ERROR")
             if result_headers.get("content-encoding", "identity") not in {"identity", ""}:
                 raise SourceFailure("SOURCE_INVALID_RESPONSE")
