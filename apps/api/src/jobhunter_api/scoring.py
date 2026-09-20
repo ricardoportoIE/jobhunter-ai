@@ -23,8 +23,10 @@ def rounded(value: Decimal) -> float:
     return float(value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-def eligible(fact: Document, evidence: dict[str, Document], at: datetime) -> bool:
-    if fact.get("status") != "verified" or "matching" not in fact.get("allowed_uses", []):
+def eligible(
+    fact: Document, evidence: dict[str, Document], at: datetime, use: str = "matching"
+) -> bool:
+    if fact.get("status") != "verified" or use not in fact.get("allowed_uses", []):
         return False
     if not fact.get("reviewed_at") or not fact.get("reviewed_by") or not fact.get("evidence_ids"):
         return False
