@@ -343,8 +343,9 @@ def main() -> None:
     output = {
         "version": "reasoning-comparison-1.0",
         "human_gold": False,
-        "authorship\": \"Assistant-authored synthetic acceptance cases; labels frozen "
-        "before inference.",
+        "authorship": (
+            "Assistant-authored synthetic acceptance cases; labels frozen before inference."
+        ),
         "cases": cases,
     }
     (ROOT / "data/evals/reasoning-cases.json").write_text(

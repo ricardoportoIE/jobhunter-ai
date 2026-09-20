@@ -54,14 +54,17 @@ supplied work-permission/hours conditions explicitly conflict with non-negotiabl
 Provide short Portuguese reasons, decisive quotes and questions to resolve uncertainty. Do not
 estimate interview/offer probability or turn technical suitability into legal authorisation.
 """
+QUOTE_CLARIFICATION = """\nFor vacancy_quote and candidate_quote, copy one exact contiguous substring
+from the respective input field. Do not add quotation marks, ellipses, a slash, translated words
+or concatenate separate passages. JSON delimiters are sufficient. All factual statements in the
+reason must be supported by the supplied text; preserve the stated qualification level.
+"""
 
 
 class TriageResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     decision: Literal["VIABLE_AFTER_REVIEW", "NEEDS_CLARIFICATION", "BLOCKED"]
-    employment_gate: Literal[
-        "READY_WITHIN_CONFIRMED_LIMITS", "REVIEW_BEFORE_START", "BLOCKED"
-    ]
+    employment_gate: Literal["READY_WITHIN_CONFIRMED_LIMITS", "REVIEW_BEFORE_START", "BLOCKED"]
     reason: str = Field(min_length=1, max_length=2500)
     vacancy_quote: str = Field(min_length=1, max_length=1000)
     candidate_quote: str = Field(min_length=1, max_length=1000)
@@ -72,10 +75,11 @@ def identity(value: str) -> str:
     return str(uuid5(NAMESPACE_URL, VERSION + value))
 
 
-def task_input(case: Row) -> tuple[Row, str, type[BaseModel]]:
+def task_input(case: Row, protocol: str = "baseline") -> tuple[Row, str, type[BaseModel]]:
     # No labels, case IDs, rationale or task names are sent to the model.
     if case["task"] == "triage_probe":
-        return copy.deepcopy(case["input"]), TRIAGE_PROMPT, TriageResult
+        prompt = TRIAGE_PROMPT + (QUOTE_CLARIFICATION if protocol == "refined" else "")
+        return copy.deepcopy(case["input"]), prompt, TriageResult
     value = case["input"]
     fact_id, evidence_id = (
         identity(case["id"] + "fact"),
@@ -125,12 +129,8 @@ def grading(case: Row, raw: Row, validated: Row | None) -> Row:
         actual = {"status": raw["assessments"][0]["status"]}
         post = {"status": validated["assessments"][0]["status"]} if validated else None
         # Both falsely accepting and falsely rejecting deserve separate reporting.
-        false_positive = (
-            actual["status"] == "met" and case["expected"]["status"] != "met"
-        )
-        false_negative = (
-            actual["status"] == "unmet" and case["expected"]["status"] != "unmet"
-        )
+        false_positive = actual["status"] == "met" and case["expected"]["status"] != "met"
+        false_negative = actual["status"] == "unmet" and case["expected"]["status"] != "unmet"
         unsafe_start = False
     else:
         actual = {key: raw[key] for key in case["expected"]}
@@ -140,8 +140,7 @@ def grading(case: Row, raw: Row, validated: Row | None) -> Row:
             and case["expected"]["decision"] != "VIABLE_AFTER_REVIEW"
         )
         false_negative = (
-            actual["decision"] == "BLOCKED"
-            and case["expected"]["decision"] != "BLOCKED"
+            actual["decision"] == "BLOCKED" and case["expected"]["decision"] != "BLOCKED"
         )
         unsafe_start = (
             actual["employment_gate"] == "READY_WITHIN_CONFIRMED_LIMITS"
@@ -173,13 +172,9 @@ class Probe:
         self.metadata: Row = {}
         self.raw: Row | None = None
 
-    def call(
-        self, model: str, prompt: str, serialized: str, schema: type[BaseModel]
-    ) -> Completion:
+    def call(self, model: str, prompt: str, serialized: str, schema: type[BaseModel]) -> Completion:
         options: dict[str, Any] = (
-            {"reasoning": {"effort": "high"}}
-            if model == "gpt-5.6-luna"
-            else {"temperature": 0}
+            {"reasoning": {"effort": "high"}} if model == "gpt-5.6-luna" else {"temperature": 0}
         )
         start = monotonic()
         try:
@@ -200,9 +195,7 @@ class Probe:
                 **options,
             )
         except APIStatusError as exc:
-            detail = (
-                exc.body.get("error", exc.body) if isinstance(exc.body, dict) else {}
-            )
+            detail = exc.body.get("error", exc.body) if isinstance(exc.body, dict) else {}
             # Only stable non-secret provider codes, never response text or headers.
             self.metadata["provider_code"] = (
                 detail.get("code") if isinstance(detail, dict) else None
@@ -220,14 +213,10 @@ class Probe:
             returned_model=response.model,
             reasoning_tokens=usage.output_tokens_details.reasoning_tokens,
             cached_input_tokens=usage.input_tokens_details.cached_tokens,
-            provider_reasoning=response.reasoning.model_dump()
-            if response.reasoning
-            else None,
+            provider_reasoning=response.reasoning.model_dump() if response.reasoning else None,
         )
         try:
-            self.raw = schema.model_validate_json(response.output_text).model_dump(
-                mode="json"
-            )
+            self.raw = schema.model_validate_json(response.output_text).model_dump(mode="json")
         except ValueError:
             self.metadata["unparsed_output"] = response.output_text
         return Completion(
@@ -240,8 +229,10 @@ class Probe:
         )
 
 
-def run_one(settings: Settings, owner: UUID, case: Row, model: str, repeat: int) -> Row:
-    payload, prompt, schema = task_input(case)
+def run_one(
+    settings: Settings, owner: UUID, case: Row, model: str, repeat: int, protocol: str = "baseline"
+) -> Row:
+    payload, prompt, schema = task_input(case, protocol)
     serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
     contract = json.dumps(strict_schema(schema.model_json_schema()))
     probe = Probe(settings)
@@ -252,7 +243,8 @@ def run_one(settings: Settings, owner: UUID, case: Row, model: str, repeat: int)
         "repeat": repeat,
         "effort": "high" if model == "gpt-5.6-luna" else None,
     }
-    key = f"{VERSION}:{case['id']}:{model}:{repeat}"
+    version = VERSION if protocol == "baseline" else "reasoning-comparison-1.1"
+    key = f"{version}:{case['id']}:{model}:{repeat}"
     validated = None
 
     def check(completion: Completion) -> Row:
@@ -277,7 +269,7 @@ def run_one(settings: Settings, owner: UUID, case: Row, model: str, repeat: int)
                 "effort": row["effort"],
             },
             model,
-            VERSION,
+            version,
             len((prompt + serialized + contract).encode()) + 2048,
             6000,
             lambda: probe.call(model, prompt, serialized, schema),
@@ -301,12 +293,7 @@ def run_one(settings: Settings, owner: UUID, case: Row, model: str, repeat: int)
             (owner, key),
         ).fetchone()
     if call:
-        row.update(
-            {
-                k: str(v) if isinstance(v, (Decimal, UUID)) else v
-                for k, v in call.items()
-            }
-        )
+        row.update({k: str(v) if isinstance(v, (Decimal, UUID)) else v for k, v in call.items()})
     if row.get("raw"):
         row["grading"] = grading(case, row["raw"], validated)
     return row
@@ -330,9 +317,7 @@ def summarize(rows: list[Row]) -> Row:
             part = [r for r in subset if r["task"] == task]
             repeated = {}
             for row in part:
-                repeated.setdefault(row["case_id"], []).append(
-                    row.get("grading", {}).get("actual")
-                )
+                repeated.setdefault(row["case_id"], []).append(row.get("grading", {}).get("actual"))
             item[task] = {
                 "attempted": len(part),
                 **{
@@ -361,26 +346,44 @@ def main() -> None:
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--protocol", choices=("baseline", "refined"), default="baseline")
     parser.add_argument("--max-additional-eur", type=Decimal, default=Decimal("3.00"))
     args = parser.parse_args()
     dataset = json.loads(DATA.read_text(encoding="utf-8"))
     dataset_hash = hashlib.sha256(DATA.read_bytes()).hexdigest()
     assert len(dataset["cases"]) == 32
+    destination = (
+        REPORT
+        if args.protocol == "baseline"
+        else REPORT.with_name("reasoning-comparison-refined.json")
+    )
+    selected_cases = [
+        c for c in dataset["cases"] if args.protocol == "baseline" or c["task"] == "triage_probe"
+    ]
     if args.check:
-        report = json.loads(REPORT.read_text(encoding="utf-8"))
+        report = json.loads(destination.read_text(encoding="utf-8"))
         assert report["dataset_sha256"] == dataset_hash
         assert report["summary"] == summarize(report["results"])
-        assert len(report["results"]) == 128 and report["status"] == "complete"
+        assert len(report["results"]) == len(selected_cases) * 4
+        assert report["status"] == "complete"
+        assert {(r["case_id"], r["model"], r["repeat"]) for r in report["results"]} == {
+            (c["id"], model, repeat)
+            for c in selected_cases
+            for model in MODELS
+            for repeat in (1, 2)
+        }
         for row in report["results"]:
             case = next(c for c in dataset["cases"] if c["id"] == row["case_id"])
             if row.get("raw"):
                 assert row["grading"] == grading(case, row["raw"], row.get("validated"))
+                if row.get("validated"):
+                    payload, _, schema = task_input(case, args.protocol)
+                    schema.model_validate(row["raw"])
+                    assert row["validated"] == validate_result(case, payload, row["raw"])
         print("Comparison report checked offline; no API calls.")
         return
     if not args.live:
-        print(
-            "Use --live for the bounded synthetic comparison; --smoke runs two calls first."
-        )
+        print("Use --live for the bounded synthetic comparison; --smoke runs two calls first.")
         return
     assert Decimal(0) < args.max_additional_eur <= Decimal(3)
     settings = Settings().runtime()
@@ -399,7 +402,8 @@ def main() -> None:
     # Only this evaluation process recognises Luna prices. No production model/config change.
     PRICES["gpt-5.6-luna"] = (Decimal("0.20"), Decimal("1.20"))
     report: Row = {
-        "version": VERSION,
+        "version": VERSION if args.protocol == "baseline" else "reasoning-comparison-1.1",
+        "protocol": args.protocol,
         "dataset_sha256": dataset_hash,
         "human_gold": False,
         "synthetic_only": True,
@@ -409,27 +413,20 @@ def main() -> None:
         "status": "running",
         "results": [],
     }
-    cases = dataset["cases"][:1] if args.smoke else dataset["cases"]
+    cases = selected_cases[:1] if args.smoke else selected_cases
     repeats = (1,) if args.smoke else (1, 2)
-    jobs = [
-        (case, model, repeat)
-        for repeat in repeats
-        for case in cases
-        for model in MODELS
-    ]
+    jobs = [(case, model, repeat) for repeat in repeats for case in cases for model in MODELS]
     with ThreadPoolExecutor(max_workers=2) as pool:
         pending = [
-            pool.submit(run_one, settings, owner["id"], case, model, repeat)
+            pool.submit(run_one, settings, owner["id"], case, model, repeat, args.protocol)
             for case, model, repeat in jobs
         ]
         for future in as_completed(pending):
             row = future.result()
             report["results"].append(row)
-            report["results"].sort(
-                key=lambda r: (r["case_id"], r["model"], r["repeat"])
-            )
+            report["results"].sort(key=lambda r: (r["case_id"], r["model"], r["repeat"]))
             report["summary"] = summarize(report["results"])
-            REPORT.write_text(
+            destination.write_text(
                 json.dumps(report, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
@@ -442,7 +439,7 @@ def main() -> None:
                 flush=True,
             )
     report["status"] = "smoke_complete" if args.smoke else "complete"
-    REPORT.write_text(
+    destination.write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(json.dumps(report["summary"], indent=2))
