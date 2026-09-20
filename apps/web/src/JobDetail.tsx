@@ -402,15 +402,15 @@ function JobReview({
               className="disclosure"
               key={req.id}
               open={expandedRequirement === req.id}
-              onToggle={(event) => {
-                if (event.currentTarget.open) setExpandedRequirement(req.id);
-                else
-                  setExpandedRequirement((current) =>
-                    current === req.id ? null : current,
-                  );
-              }}
             >
-              <summary>
+              <summary
+                onClick={(event) => {
+                  event.preventDefault();
+                  setExpandedRequirement((current) =>
+                    current === req.id ? null : req.id,
+                  );
+                }}
+              >
                 {req.text || t("New requirement")}
                 {req.is_eliminatory && (
                   <span className="tag blocker">{t("Explicit blocker")}</span>

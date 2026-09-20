@@ -343,15 +343,15 @@ export default function CvImport({
                 className="draft-fact"
                 key={index}
                 open={expandedFact === index}
-                onToggle={(event) => {
-                  if (event.currentTarget.open) setExpandedFact(index);
-                  else
-                    setExpandedFact((current) =>
-                      current === index ? null : current,
-                    );
-                }}
               >
-                <summary>
+                <summary
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setExpandedFact((current) =>
+                      current === index ? null : index,
+                    );
+                  }}
+                >
                   <span className="fact-summary">
                     <strong>{t("Claim {0}", [index + 1])}</strong> ·{" "}
                     {fact.claim || t("Add your experience")}

@@ -36,7 +36,17 @@ test("CV draft editing, language persistence and public link review", async ({
     .getByRole("textbox", { name: "Claim 1", exact: true })
     .fill("Built a Python API in 2025 for a personal project.");
   await page.locator(".draft-fact summary").nth(1).click();
-  await page.getByRole("button", { name: "Remove claim", exact: true }).click();
+  await expect(page.locator(".draft-fact[open]")).toHaveCount(1);
+  await expect(page.locator(".draft-fact").first()).not.toHaveAttribute("open");
+  await page.locator(".draft-fact summary").nth(1).press("Enter");
+  await expect(page.locator(".draft-fact[open]")).toHaveCount(0);
+  await page.locator(".draft-fact summary").nth(1).press("Space");
+  await expect(page.locator(".draft-fact[open]")).toHaveCount(1);
+  await page
+    .locator(".draft-fact")
+    .nth(1)
+    .getByRole("button", { name: "Remove claim", exact: true })
+    .click();
   await page.getByRole("button", { name: "Add a claim", exact: true }).click();
   await page
     .getByRole("textbox", { name: "Claim 2", exact: true })
