@@ -85,7 +85,8 @@ scope and first-draft versus second-assessment behaviour.
 Playwright exercises the new navigation and filters alongside the existing CV,
 extraction, matching, document, tracker, privacy and recovery journeys. The guided
 journey captures login, onboarding, profile, import and populated opportunities screens
-on desktop and mobile. It also checks layout at 320 pixels and runs axe checks for
+on desktop and mobile. It also checks layout at 320 pixels with an alternative system
+font, compares content width against the requested viewport and runs axe checks for
 WCAG A/AA rules on the principal screens. These automated checks complement visual
 inspection and keyboard tests; they are not a claim of complete accessibility certification.
 

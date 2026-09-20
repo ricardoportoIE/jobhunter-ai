@@ -164,6 +164,9 @@ test("simple navigation, responsive screens and combined vacancy filters", async
     ),
   ).toBe(true);
   await page.setViewportSize({ width: 320, height: 800 });
+  await page.addStyleTag({
+    content: ":root { font-family: Arial, sans-serif; }",
+  });
   for (const name of [
     "My profile",
     "Import vacancy",
@@ -171,12 +174,21 @@ test("simple navigation, responsive screens and combined vacancy filters", async
     "Opportunities",
   ]) {
     await page.getByRole("link", { name, exact: true }).click();
+    const layout = await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      overflowing: [...document.querySelectorAll("body *")]
+        .filter((element) => element.getBoundingClientRect().right > 321)
+        .slice(0, 10)
+        .map((element) => ({
+          tag: element.tagName,
+          className: element.className,
+          right: element.getBoundingClientRect().right,
+        })),
+    }));
     expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth,
-      ),
-      `${name} at 320px`,
-    ).toBe(true);
+      layout.width,
+      `${name} at 320px: ${JSON.stringify(layout)}`,
+    ).toBeLessThanOrEqual(320);
   }
   await checkAccessibility();
   expect(errors).toEqual([]);

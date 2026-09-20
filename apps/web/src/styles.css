@@ -1254,6 +1254,32 @@ footer {
     align-items: flex-start;
   }
 }
+@media (max-width: 380px) {
+  .sidebar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sidebar .brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .sidebar-import {
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+  }
+  .sidebar > nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .sidebar > nav a {
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 4px;
+    font-size: 11px;
+  }
+  .sidebar-tools {
+    grid-row: 4;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
