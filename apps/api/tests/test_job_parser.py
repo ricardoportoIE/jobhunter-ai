@@ -56,6 +56,30 @@ def test_quotes_unknowns_and_domain_validation() -> None:
         validate_extraction(data, RAW)
 
 
+def test_unknown_annotations_become_notes_without_inventing_values() -> None:
+    raw = RAW + " Salary described without numeric amount."
+    data = parsed()
+    data["salary"] = {
+        "value": {"minimum": None, "maximum": None, "currency": None, "period": None},
+        "quote": "Salary described without numeric amount.",
+        "confidence": 1,
+    }
+    result = validate_extraction(data, raw)
+    assert result["fields"]["salary"] is None
+    assert "salary" not in result["citations"]
+    assert "Salary described without numeric amount." in result["risk_flags"][0]
+    data["salary"]["quote"] = "Competitive invented salary"
+    with pytest.raises(ValueError):
+        validate_extraction(data, raw)
+    data["salary"] = {"value": None, "quote": None, "confidence": 0.8}
+    with pytest.raises(ValueError):
+        validate_extraction(data, raw)
+    data["salary"] = {"value": None, "quote": None, "confidence": 0}
+    data["sponsorship"] = {"value": "available", "quote": None, "confidence": 0}
+    with pytest.raises(ValueError):
+        validate_extraction(data, raw)
+
+
 def test_parser_is_idempotent_and_never_publishes(signed_client: TestClient) -> None:
     client = signed_client
     job = client.post("/api/v1/jobs/import", json={"raw_text": RAW}).json()
