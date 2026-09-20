@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("CV draft editing, language persistence and public link review", async ({
   page,
@@ -18,9 +18,7 @@ test("CV draft editing, language persistence and public link review", async ({
   );
   await page.getByLabel("Idioma", { exact: true }).selectOption("en-GB");
   await page.getByRole("button", { name: "Log in", exact: true }).click();
-  await page
-    .getByRole("link", { name: "Profile and evidence", exact: true })
-    .click();
+  await page.getByRole("link", { name: "My profile", exact: true }).click();
   await page
     .getByLabel("CV document (PDF, Word .docx or Markdown .md)")
     .setInputFiles(`e2e/fixtures/${filename}`);
@@ -33,13 +31,12 @@ test("CV draft editing, language persistence and public link review", async ({
   await expect(
     page.getByRole("heading", { name: "Review your CV draft" }),
   ).toBeVisible();
+  await page.locator(".draft-fact summary").nth(0).click();
   await page
     .getByRole("textbox", { name: "Claim 1", exact: true })
     .fill("Built a Python API in 2025 for a personal project.");
-  await page
-    .getByRole("button", { name: "Remove claim", exact: true })
-    .nth(1)
-    .click();
+  await page.locator(".draft-fact summary").nth(1).click();
+  await page.getByRole("button", { name: "Remove claim", exact: true }).click();
   await page.getByRole("button", { name: "Add a claim", exact: true }).click();
   await page
     .getByRole("textbox", { name: "Claim 2", exact: true })
@@ -52,6 +49,7 @@ test("CV draft editing, language persistence and public link review", async ({
     "Built a Python API in 2025 for a personal project.",
   );
   await page.getByLabel("Idioma", { exact: true }).selectOption("en-GB");
+  await page.getByText("Manage facts and sources", { exact: true }).click();
   await page.getByRole("button", { name: /^Facts \(/ }).click();
   await page.getByRole("button", { name: "Profile", exact: true }).click();
   await expect(
@@ -77,6 +75,7 @@ test("CV draft editing, language persistence and public link review", async ({
   await page
     .getByRole("combobox", { name: "Resume a saved CV draft" })
     .selectOption({ label: filename });
+  await page.locator(".draft-fact summary").nth(1).click();
   await expect(
     page.getByRole("textbox", { name: "Claim 2", exact: true }),
   ).toHaveValue("I prefer hybrid roles.");
@@ -100,6 +99,7 @@ test("CV draft editing, language persistence and public link review", async ({
   await expect(
     page.getByRole("heading", { name: "Review your CV draft" }),
   ).toHaveCount(0);
+  await page.getByText("Manage facts and sources", { exact: true }).click();
   await page.getByRole("button", { name: /^Facts \(/ }).click();
   await expect(
     page.getByRole("heading", { name: "I prefer hybrid roles.", exact: true }),

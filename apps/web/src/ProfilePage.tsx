@@ -21,6 +21,7 @@ export default function ProfilePage({
   const task = useTask();
   const [editingFact, setEditingFact] = useState<Fact | null>(null);
   const [editingEvidence, setEditingEvidence] = useState<Evidence | null>(null);
+  const [draftActive, setDraftActive] = useState(false);
   const [tab, setTab] = useState<"profile" | "facts" | "evidence">("profile");
   const [dirtyProfileVersion, setDirtyProfileVersion] = useState<number | null>(
     null,
@@ -30,118 +31,150 @@ export default function ProfilePage({
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">{t("YOUR FACTUAL BASE")}</p>
-          <h1>{t("Profile and evidence")}</h1>
+          <p className="eyebrow">{t("YOUR STORY, YOUR NEXT STEP")}</p>
+          <h1>{t("My profile")}</h1>
           <p>
-            {t("Version ")}
-            {profile.version} ·{" "}
-            {profile.status === "reviewed"
-              ? t("Reviewed")
-              : t("Review pending")}
+            {t(
+              "Start with your CV. We will help turn your experience into a profile you can trust.",
+            )}
           </p>
         </div>
+        <span className="tag">
+          {t("Version ")}
+          {profile.version} ·{" "}
+          {profile.status === "reviewed" ? t("Reviewed") : t("Review pending")}
+        </span>
       </div>
       <nav className="tabs" aria-label={t("Profile sections")}>
-        {(["profile", "facts", "evidence"] as const).map((key) => (
-          <button
-            key={key}
-            aria-pressed={tab === key}
-            onClick={() => setTab(key)}
-          >
-            {
-              {
-                profile: t("Profile"),
-                facts: t("Facts ({0})", [facts.length]),
-                evidence: t("Evidence ({0})", [evidence.length]),
-              }[key]
-            }
-          </button>
-        ))}
+        <button
+          aria-pressed={tab === "profile"}
+          onClick={() => setTab("profile")}
+        >
+          {t("Profile")}
+        </button>
+        <details className="profile-tools">
+          <summary>{t("Manage facts and sources")}</summary>
+          <div className="actions">
+            {(["facts", "evidence"] as const).map((key) => (
+              <button
+                key={key}
+                aria-pressed={tab === key}
+                onClick={() => setTab(key)}
+              >
+                {
+                  {
+                    profile: t("Profile"),
+                    facts: t("Facts ({0})", [facts.length]),
+                    evidence: t("Evidence ({0})", [evidence.length]),
+                  }[key]
+                }
+              </button>
+            ))}
+          </div>
+        </details>
       </nav>
       {task.feedback}
       <div hidden={tab !== "profile"}>
-        <CvImport profile={profile} refresh={refresh} />
+        <CvImport
+          profile={profile}
+          refresh={refresh}
+          onDraftChange={setDraftActive}
+        />
       </div>
       {
-        <section className="panel" hidden={tab !== "profile"}>
+        <section
+          className="panel narrow"
+          hidden={tab !== "profile" || draftActive}
+        >
           <h2>{t("Search direction")}</h2>
-          <form
-            key={profile.version}
-            onChange={() => setDirtyProfileVersion(profile.version)}
-            onSubmit={(event) => {
-              event.preventDefault();
-              const data = new FormData(event.currentTarget);
-              void task.run(async () => {
-                await api("/candidate/profile", "PATCH", {
-                  expected_version: profile.version,
-                  display_name: optional(data, "display_name"),
-                  target_roles: lines(data, "target_roles"),
-                  locations: lines(data, "locations"),
-                  markets: data.getAll("markets"),
-                  work_modes: data.getAll("work_modes"),
+          <p className="muted">
+            {t(
+              "Tell us what you would like to do next. You can change these preferences at any time.",
+            )}
+          </p>
+          {!!profile.target_roles.length && (
+            <p>{profile.target_roles.join(" · ")}</p>
+          )}
+          <details className="profile-preferences">
+            <summary>{t("Edit details and preferences")}</summary>
+            <form
+              key={profile.version}
+              onChange={() => setDirtyProfileVersion(profile.version)}
+              onSubmit={(event) => {
+                event.preventDefault();
+                const data = new FormData(event.currentTarget);
+                void task.run(async () => {
+                  await api("/candidate/profile", "PATCH", {
+                    expected_version: profile.version,
+                    display_name: optional(data, "display_name"),
+                    target_roles: lines(data, "target_roles"),
+                    locations: lines(data, "locations"),
+                    markets: data.getAll("markets"),
+                    work_modes: data.getAll("work_modes"),
+                  });
+                  await refresh();
+                  setDirtyProfileVersion(null);
                 });
-                await refresh();
-                setDirtyProfileVersion(null);
-              });
-            }}
-          >
-            <Field label={t("Display name")}>
-              <input
-                name="display_name"
-                defaultValue={profile.display_name ?? ""}
-                maxLength={200}
-              />
-            </Field>
-            <Field label={t("Desired roles (comma-separated)")}>
-              <input
-                name="target_roles"
-                defaultValue={profile.target_roles.join(", ")}
-              />
-            </Field>
-            <Field label={t("Locations (comma-separated)")}>
-              <input
-                name="locations"
-                defaultValue={profile.locations.join(", ")}
-              />
-            </Field>
-            <fieldset>
-              <legend>{t("Markets")}</legend>
-              {["IE", "GB"].map((market) => (
-                <label className="check" key={market}>
-                  <input
-                    type="checkbox"
-                    name="markets"
-                    value={market}
-                    defaultChecked={profile.markets.includes(market)}
-                  />
-                  {market === "IE" ? t("Ireland") : t("United Kingdom")}
-                </label>
-              ))}
-            </fieldset>
-            <fieldset>
-              <legend>{t("Working arrangements")}</legend>
-              {["hybrid", "remote", "onsite"].map((mode) => (
-                <label className="check" key={mode}>
-                  <input
-                    type="checkbox"
-                    name="work_modes"
-                    value={mode}
-                    defaultChecked={profile.work_modes.includes(mode)}
-                  />
-                  {
+              }}
+            >
+              <Field label={t("Display name")}>
+                <input
+                  name="display_name"
+                  defaultValue={profile.display_name ?? ""}
+                  maxLength={200}
+                />
+              </Field>
+              <Field label={t("Desired roles (comma-separated)")}>
+                <input
+                  name="target_roles"
+                  defaultValue={profile.target_roles.join(", ")}
+                />
+              </Field>
+              <Field label={t("Locations (comma-separated)")}>
+                <input
+                  name="locations"
+                  defaultValue={profile.locations.join(", ")}
+                />
+              </Field>
+              <fieldset>
+                <legend>{t("Markets")}</legend>
+                {["IE", "GB"].map((market) => (
+                  <label className="check" key={market}>
+                    <input
+                      type="checkbox"
+                      name="markets"
+                      value={market}
+                      defaultChecked={profile.markets.includes(market)}
+                    />
+                    {market === "IE" ? t("Ireland") : t("United Kingdom")}
+                  </label>
+                ))}
+              </fieldset>
+              <fieldset>
+                <legend>{t("Working arrangements")}</legend>
+                {["hybrid", "remote", "onsite"].map((mode) => (
+                  <label className="check" key={mode}>
+                    <input
+                      type="checkbox"
+                      name="work_modes"
+                      value={mode}
+                      defaultChecked={profile.work_modes.includes(mode)}
+                    />
                     {
-                      hybrid: t("Hybrid"),
-                      remote: t("Remote"),
-                      onsite: t("On-site"),
-                    }[mode]
-                  }
-                </label>
-              ))}
-            </fieldset>
-            <button className="primary" disabled={task.busy}>
-              {t("Save profile")}
-            </button>
-          </form>
+                      {
+                        hybrid: t("Hybrid"),
+                        remote: t("Remote"),
+                        onsite: t("On-site"),
+                      }[mode]
+                    }
+                  </label>
+                ))}
+              </fieldset>
+              <button className="primary" disabled={task.busy}>
+                {t("Save profile")}
+              </button>
+            </form>
+          </details>
           <div className="review-callout">
             {profileDirty && (
               <p role="status">
@@ -150,7 +183,7 @@ export default function ProfilePage({
             )}
             <p>
               {t(
-                "Review the facts and their sources before publishing a version. Any edit invalidates previous analyses.",
+                "Check your information and sources, then confirm your profile to start comparing vacancies.",
               )}
             </p>
             <button
@@ -164,8 +197,13 @@ export default function ProfilePage({
                 }, t("Profile version reviewed and preserved."));
               }}
             >
-              {t("Confirm review and publish version")}
+              {t("Confirm my profile")}
             </button>
+            {profile.status === "reviewed" && (
+              <a className="button primary" href="#inbox">
+                {t("Explore opportunities")} →
+              </a>
+            )}
           </div>
         </section>
       }

@@ -98,7 +98,7 @@ export default function JobDetail({
           </p>
         </div>
       </div>
-      <nav className="tabs" aria-label={t("Opportunity stages")}>
+      <nav className="tabs step-tabs" aria-label={t("Opportunity stages")}>
         <button
           aria-pressed={tab === "review"}
           onClick={() => setTab("review")}
@@ -135,17 +135,24 @@ export default function JobDetail({
         />
       )}
       {tab === "review" && (
-        <AiJobTools job={job} saved={() => setRefresh(refresh + 1)} />
+        <details
+          className="disclosure"
+          open={!job.title && !job.requirements.length}
+        >
+          <summary>{t("AI reading assistant")}</summary>
+          <AiJobTools job={job} saved={() => setRefresh(refresh + 1)} />
+        </details>
       )}
       {tab === "review" && (
-        <ResearchPanel key={`${job.id}:${job.version}`} job={job} />
-      )}
-      {tab === "review" && (
-        <DuplicateReview
-          key={`duplicates-${job.version}`}
-          job={job}
-          saved={() => setRefresh(refresh + 1)}
-        />
+        <details className="disclosure">
+          <summary>{t("Research and duplicate checks")}</summary>
+          <ResearchPanel key={`${job.id}:${job.version}`} job={job} />
+          <DuplicateReview
+            key={`duplicates-${job.version}`}
+            job={job}
+            saved={() => setRefresh(refresh + 1)}
+          />
+        </details>
       )}
       {tab === "review" && (
         <JobReview
@@ -203,6 +210,9 @@ function JobReview({
   );
   const task = useTask();
   const [reviewError, setReviewError] = useState(false);
+  const [expandedRequirement, setExpandedRequirement] = useState<string | null>(
+    null,
+  );
   function change(id: string, update: Partial<Requirement>) {
     setRequirements((items) =>
       items.map((item) => (item.id === id ? { ...item, ...update } : item)),
@@ -211,7 +221,12 @@ function JobReview({
   return (
     <div className="split review-layout">
       <section className="panel">
-        <h2>{t("Structured fields")}</h2>
+        <h2>{t("Check the essentials")}</h2>
+        <p className="muted">
+          {t(
+            "Review the details below. Leave anything the advert does not tell you as unknown.",
+          )}
+        </p>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -301,61 +316,71 @@ function JobReview({
               placeholder="graduate, junior, mid, senior…"
             />
           </Field>
-          <fieldset>
-            <legend>{t("Salary \u2014 leave empty if absent")}</legend>
-            <div className="form-grid">
-              <Field label={t("Minimum")}>
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  name="salary_min"
-                  defaultValue={job.salary?.minimum ?? ""}
-                />
-              </Field>
-              <Field label={t("Maximum")}>
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  name="salary_max"
-                  defaultValue={job.salary?.maximum ?? ""}
-                />
-              </Field>
-              <Field label={t("Currency")}>
-                <input
-                  name="currency"
-                  pattern="[A-Z]{3}"
-                  placeholder="EUR"
-                  defaultValue={job.salary?.currency ?? ""}
-                />
-              </Field>
-              <Field label={t("Period")}>
-                <select name="period" defaultValue={job.salary?.period ?? ""}>
-                  <option value="">{t("Unknown")}</option>
-                  <option value="year">{t("Year")}</option>
-                  <option value="month">{t("Month")}</option>
-                  <option value="day">{t("Day")}</option>
-                  <option value="hour">{t("Hour")}</option>
-                </select>
-              </Field>
-            </div>
-          </fieldset>
-          <Field label={t("Declared sponsorship")}>
-            <select name="sponsorship" defaultValue={job.sponsorship ?? ""}>
-              <option value="">{t("Unknown")}</option>
-              <option value="available">{t("Available")}</option>
-              <option value="unavailable">{t("Explicitly unavailable")}</option>
-              <option value="conditional">{t("Conditional")}</option>
-            </select>
-          </Field>
-          <Field label={t("Authorisation / restrictions in advert")}>
-            <textarea
-              name="work_authorisation"
-              defaultValue={job.work_authorisation ?? ""}
-              rows={2}
-            />
-          </Field>
+          <details className="disclosure">
+            <summary>
+              {t("Salary and work eligibility")}
+              {(job.sponsorship || job.work_authorisation) && (
+                <span className="tag">{t("Review required")}</span>
+              )}
+            </summary>
+            <fieldset>
+              <legend>{t("Salary \u2014 leave empty if absent")}</legend>
+              <div className="form-grid">
+                <Field label={t("Minimum")}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    name="salary_min"
+                    defaultValue={job.salary?.minimum ?? ""}
+                  />
+                </Field>
+                <Field label={t("Maximum")}>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    name="salary_max"
+                    defaultValue={job.salary?.maximum ?? ""}
+                  />
+                </Field>
+                <Field label={t("Currency")}>
+                  <input
+                    name="currency"
+                    pattern="[A-Z]{3}"
+                    placeholder="EUR"
+                    defaultValue={job.salary?.currency ?? ""}
+                  />
+                </Field>
+                <Field label={t("Period")}>
+                  <select name="period" defaultValue={job.salary?.period ?? ""}>
+                    <option value="">{t("Unknown")}</option>
+                    <option value="year">{t("Year")}</option>
+                    <option value="month">{t("Month")}</option>
+                    <option value="day">{t("Day")}</option>
+                    <option value="hour">{t("Hour")}</option>
+                  </select>
+                </Field>
+              </div>
+            </fieldset>
+            <Field label={t("Declared sponsorship")}>
+              <select name="sponsorship" defaultValue={job.sponsorship ?? ""}>
+                <option value="">{t("Unknown")}</option>
+                <option value="available">{t("Available")}</option>
+                <option value="unavailable">
+                  {t("Explicitly unavailable")}
+                </option>
+                <option value="conditional">{t("Conditional")}</option>
+              </select>
+            </Field>
+            <Field label={t("Authorisation / restrictions in advert")}>
+              <textarea
+                name="work_authorisation"
+                defaultValue={job.work_authorisation ?? ""}
+                rows={2}
+              />
+            </Field>
+          </details>
           <Field label={t("Review points (one per line)")}>
             <textarea
               name="risk_flags"
@@ -373,102 +398,130 @@ function JobReview({
             )}
           </p>
           {requirements.map((req, index) => (
-            <fieldset key={req.id}>
-              <legend>
-                {t("Requirement ")}
-                {index + 1}
-              </legend>
-              <Field label={t("Requirement description")}>
-                <input
-                  required
-                  value={req.text}
-                  onChange={(event) =>
-                    change(req.id, { text: event.target.value })
-                  }
-                />
-              </Field>
-              <Field label={t("Requirement category")}>
-                <select
-                  value={req.category}
-                  onChange={(event) =>
-                    change(req.id, { category: event.target.value as Category })
-                  }
-                >
-                  {Object.entries(categories).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label={t("Importance")}>
-                <select
-                  value={req.importance}
-                  onChange={(event) =>
-                    change(req.id, {
-                      importance: event.target
-                        .value as Requirement["importance"],
-                    })
-                  }
-                >
-                  <option value="required">{t("Mandatory")}</option>
-                  <option value="preferred">{t("Desirable")}</option>
-                </select>
-              </Field>
-              <Field label={t("Location in the advert")}>
-                <input
-                  required
-                  value={req.source_locator}
-                  onChange={(event) =>
-                    change(req.id, { source_locator: event.target.value })
-                  }
-                />
-              </Field>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={req.is_eliminatory}
-                  onChange={(event) =>
-                    change(req.id, { is_eliminatory: event.target.checked })
-                  }
-                />
-                {t("Explicitly confirmed disqualifying requirement")}
-              </label>
-              {req.category === "work_authorisation_hours" && (
+            <details
+              className="disclosure"
+              key={req.id}
+              open={expandedRequirement === req.id}
+              onToggle={(event) => {
+                if (event.currentTarget.open) setExpandedRequirement(req.id);
+                else
+                  setExpandedRequirement((current) =>
+                    current === req.id ? null : current,
+                  );
+              }}
+            >
+              <summary>
+                {req.text || t("New requirement")}
+                {req.is_eliminatory && (
+                  <span className="tag blocker">{t("Explicit blocker")}</span>
+                )}
+                <span className="tag">
+                  {req.importance === "required"
+                    ? t("Mandatory")
+                    : t("Desirable")}
+                </span>
+              </summary>
+              <fieldset>
+                <legend>
+                  {t("Requirement ")}
+                  {index + 1}
+                </legend>
+                <Field label={t("Requirement description")}>
+                  <input
+                    required
+                    value={req.text}
+                    onChange={(event) =>
+                      change(req.id, { text: event.target.value })
+                    }
+                  />
+                </Field>
+                <Field label={t("Requirement category")}>
+                  <select
+                    value={req.category}
+                    onChange={(event) =>
+                      change(req.id, {
+                        category: event.target.value as Category,
+                      })
+                    }
+                  >
+                    {Object.entries(categories).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label={t("Importance")}>
+                  <select
+                    value={req.importance}
+                    onChange={(event) =>
+                      change(req.id, {
+                        importance: event.target
+                          .value as Requirement["importance"],
+                      })
+                    }
+                  >
+                    <option value="required">{t("Mandatory")}</option>
+                    <option value="preferred">{t("Desirable")}</option>
+                  </select>
+                </Field>
+                <Field label={t("Location in the advert")}>
+                  <input
+                    required
+                    value={req.source_locator}
+                    onChange={(event) =>
+                      change(req.id, { source_locator: event.target.value })
+                    }
+                  />
+                </Field>
                 <label className="check">
                   <input
                     type="checkbox"
-                    checked={req.future_authorisation}
+                    checked={req.is_eliminatory}
                     onChange={(event) =>
-                      change(req.id, {
-                        future_authorisation: event.target.checked,
-                      })
+                      change(req.id, { is_eliminatory: event.target.checked })
                     }
                   />
-                  {t("Future possibility of authorisation / sponsorship")}
+                  {t("Explicitly confirmed disqualifying requirement")}
                 </label>
-              )}
-              <button
-                type="button"
-                onClick={() =>
-                  setRequirements((items) =>
-                    items.filter((item) => item.id !== req.id),
-                  )
-                }
-              >
-                {t("Remove requirement ")}
-                {index + 1}
-              </button>
-            </fieldset>
+                {req.category === "work_authorisation_hours" && (
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      checked={req.future_authorisation}
+                      onChange={(event) =>
+                        change(req.id, {
+                          future_authorisation: event.target.checked,
+                        })
+                      }
+                    />
+                    {t("Future possibility of authorisation / sponsorship")}
+                  </label>
+                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRequirements((items) =>
+                      items.filter((item) => item.id !== req.id),
+                    )
+                  }
+                >
+                  {t("Remove requirement ")}
+                  {index + 1}
+                </button>
+              </fieldset>
+            </details>
           ))}
           <button
             type="button"
             disabled={requirements.length >= 100}
-            onClick={() =>
+            onClick={() => {
+              const id = crypto.randomUUID();
+              setExpandedRequirement(id);
               setRequirements((items) => [
                 ...items,
                 {
-                  id: crypto.randomUUID(),
+                  id,
                   text: "",
                   category: "technical_skills",
                   importance: "required",
@@ -476,8 +529,8 @@ function JobReview({
                   source_locator: "",
                   future_authorisation: false,
                 },
-              ])
-            }
+              ]);
+            }}
           >
             {t("Add requirement")}
           </button>
@@ -527,20 +580,22 @@ function JobReview({
         </form>
       </section>
       <aside className="panel source">
-        <h2>{t("Original advert")}</h2>
-        <p>
-          {t("Source: ")}
-          {job.source_name}
-        </p>
-        {job.source_url && (
-          <a href={job.source_url} target="_blank" rel="noopener noreferrer">
-            {t("Open external reference \u2197")}
-          </a>
-        )}
-        <p className="preserve">{job.raw_text}</p>
         <details>
-          <summary>{t("Text integrity")}</summary>
-          <p className="muted">SHA-256: {job.content_sha256}</p>
+          <summary>{t("Original advert")}</summary>
+          <p>
+            {t("Source: ")}
+            {job.source_name}
+          </p>
+          {job.source_url && (
+            <a href={job.source_url} target="_blank" rel="noopener noreferrer">
+              {t("Open external reference \u2197")}
+            </a>
+          )}
+          <p className="preserve">{job.raw_text}</p>
+          <details>
+            <summary>{t("Text integrity")}</summary>
+            <p className="muted">SHA-256: {job.content_sha256}</p>
+          </details>
         </details>
       </aside>
     </div>

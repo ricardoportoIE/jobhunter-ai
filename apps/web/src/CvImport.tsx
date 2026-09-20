@@ -4,6 +4,7 @@ import { api } from "./api";
 import type { Fact, Profile } from "./types";
 import { Field } from "./ui";
 import { useTask } from "./useTask";
+import Icon from "./Icon";
 type DraftFact = {
   claim: string;
   category: Fact["category"];
@@ -31,9 +32,11 @@ const uses = ["matching", "cv", "cover_letter", "application_form"] as const;
 export default function CvImport({
   profile,
   refresh,
+  onDraftChange,
 }: {
   profile: Profile;
   refresh: () => Promise<void>;
+  onDraftChange?: (active: boolean) => void;
 }) {
   const task = useTask();
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -49,6 +52,10 @@ export default function CvImport({
     "cover_letter",
   ]);
   const [loadError, setLoadError] = useState(false);
+  const [expandedFact, setExpandedFact] = useState<number | null>(null);
+  useEffect(() => {
+    onDraftChange?.(draft !== null);
+  }, [draft, onDraftChange]);
   const loadDrafts = () =>
     api<Draft[]>("/candidate/cv/drafts").then((items) => {
       setSavedDrafts(items);
@@ -93,88 +100,101 @@ export default function CvImport({
     return result;
   }
   return (
-    <section className="panel cv-import">
-      <h2>{t("Start with your CV")}</h2>
-      <p>
-        {t(
-          "Upload a PDF, Word .docx or Markdown .md to prepare your profile and evidence. Review, add, edit or remove suggestions before applying them. Existing facts are preserved.",
-        )}
-      </p>
-      <form
-        id="cv-extract-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setLastAction("extract");
-          void task.run(async () => {
-            if (!file || !consent)
-              throw new Error(
-                t("Choose a CV and confirm AI processing first."),
-              );
-            if (file.size > 4 * 1024 * 1024)
-              throw new Error(t("The CV must be no larger than 4 MiB."));
-            if (!/\.(pdf|docx|md)$/i.test(file.name))
-              throw new Error(
-                t("Choose a PDF, Word .docx or Markdown .md file."),
-              );
-            const result = await api<Draft>(
-              "/candidate/cv/extract",
-              "POST",
-              file,
-              {
-                "X-CV-Filename": encodeURIComponent(file.name),
-                "X-AI-Consent": "true",
-                "Idempotency-Key": extractionKey.current,
-              },
-            );
-            if (result.status === "applied")
-              throw new Error(
-                t(
-                  "This CV has already been imported. Edit your existing profile and facts below.",
-                ),
-              );
-            setDraft(result);
-            setReviewed(false);
-            await loadDrafts();
-            requestAnimationFrame(() =>
-              document.getElementById("cv-draft-heading")?.focus(),
-            );
-          }, t("CV draft ready. Review the suggestions below."));
-        }}
-      >
-        <fieldset disabled={task.busy}>
-          <Field label={t("CV document (PDF, Word .docx or Markdown .md)")}>
-            <input
-              type="file"
-              accept=".pdf,.docx,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain"
-              required
-              onChange={(event) => {
-                setFile(event.target.files?.[0] ?? null);
-                setConsent(false);
-                extractionKey.current = crypto.randomUUID();
-              }}
-            />
-          </Field>
+    <section className="panel cv-import narrow">
+      <div className="cv-intro">
+        <span className="upload-icon">
+          <Icon name="upload" />
+        </span>
+        <div>
+          <h2>{t("Start with your CV")}</h2>
           <p>
             {t(
-              "Maximum 4 MiB and 20 PDF pages. Use a document with selectable text; scanned PDFs need OCR first. Convert older .doc files to .docx.",
+              "Less typing. More you. Let AI prepare a draft for your review.",
             )}
           </p>
-          <label className="check">
-            <input
-              type="checkbox"
-              required
-              checked={consent}
-              onChange={(event) => setConsent(event.target.checked)}
-            />
-            {t(
-              "I agree to send the extracted CV text, which may contain personal information, to OpenAI for this extraction.",
-            )}
-          </label>
-          <button className="primary">
-            {task.busy ? t("Extracting CV\u2026") : t("Extract CV with AI")}
-          </button>
-        </fieldset>
-      </form>
+        </div>
+      </div>
+      <details open={!draft} className="cv-upload-details">
+        <summary>{t("Upload a CV")}</summary>
+        <form
+          id="cv-extract-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setLastAction("extract");
+            void task.run(async () => {
+              if (!file || !consent)
+                throw new Error(
+                  t("Choose a CV and confirm AI processing first."),
+                );
+              if (file.size > 4 * 1024 * 1024)
+                throw new Error(t("The CV must be no larger than 4 MiB."));
+              if (!/\.(pdf|docx|md)$/i.test(file.name))
+                throw new Error(
+                  t("Choose a PDF, Word .docx or Markdown .md file."),
+                );
+              const result = await api<Draft>(
+                "/candidate/cv/extract",
+                "POST",
+                file,
+                {
+                  "X-CV-Filename": encodeURIComponent(file.name),
+                  "X-AI-Consent": "true",
+                  "Idempotency-Key": extractionKey.current,
+                },
+              );
+              if (result.status === "applied")
+                throw new Error(
+                  t(
+                    "This CV has already been imported. Edit your existing profile and facts below.",
+                  ),
+                );
+              setDraft(result);
+              setReviewed(false);
+              await loadDrafts();
+              requestAnimationFrame(() =>
+                document.getElementById("cv-draft-heading")?.focus(),
+              );
+            }, t("CV draft ready. Review the suggestions below."));
+          }}
+        >
+          <fieldset className="cv-upload" disabled={task.busy}>
+            <Field label={t("CV document (PDF, Word .docx or Markdown .md)")}>
+              <input
+                type="file"
+                accept=".pdf,.docx,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain"
+                required
+                onChange={(event) => {
+                  setFile(event.target.files?.[0] ?? null);
+                  setConsent(false);
+                  extractionKey.current = crypto.randomUUID();
+                }}
+              />
+            </Field>
+            <details>
+              <summary>{t("Supported files and limits")}</summary>
+              <p>
+                {t(
+                  "Maximum 4 MiB and 20 PDF pages. Use a document with selectable text; scanned PDFs need OCR first. Convert older .doc files to .docx.",
+                )}
+              </p>
+            </details>
+            <label className="check">
+              <input
+                type="checkbox"
+                required
+                checked={consent}
+                onChange={(event) => setConsent(event.target.checked)}
+              />
+              {t(
+                "I agree to send the extracted CV text, which may contain personal information, to OpenAI for this extraction.",
+              )}
+            </label>
+            <button className="primary">
+              {task.busy ? t("Extracting CV\u2026") : t("Extract CV with AI")}
+            </button>
+          </fieldset>
+        </form>
+      </details>
       {loadError && (
         <p role="alert">
           {t("Saved drafts could not be loaded.")}{" "}
@@ -228,6 +248,7 @@ export default function CvImport({
       )}
       {draft && (
         <form
+          className="cv-draft"
           onSubmit={(event) => {
             event.preventDefault();
             void task.run(async () => {
@@ -258,11 +279,6 @@ export default function CvImport({
             <p>
               {t(
                 "Check each claim and its source. Save your draft at any time; apply it only when you have finished reviewing.",
-              )}
-            </p>
-            <p>
-              {t(
-                "AI extraction is a suggestion, not independent verification. Check names, dates, qualifications and every claim against the source.",
               )}
             </p>
             {draft.warnings.map((warning, index) => (
@@ -313,9 +329,9 @@ export default function CvImport({
                 }
               />
             </Field>
-            <p>
+            <p className="muted">
               {t(
-                "Search markets and working arrangements retain your existing profile settings. You can adjust them in the profile form below.",
+                "Open each item to check its source or edit it. Your existing information is kept.",
               )}
             </p>
             <details>
@@ -323,104 +339,129 @@ export default function CvImport({
               <pre className="raw-text">{draft.source_text}</pre>
             </details>
             {draft.facts.map((fact, index) => (
-              <section className="draft-fact" key={index}>
-                <Field label={t("Claim {0}", [index + 1])}>
-                  <textarea
-                    required
-                    maxLength={3000}
-                    value={fact.claim}
-                    onChange={(event) =>
+              <details
+                className="draft-fact"
+                key={index}
+                open={expandedFact === index}
+                onToggle={(event) => {
+                  if (event.currentTarget.open) setExpandedFact(index);
+                  else
+                    setExpandedFact((current) =>
+                      current === index ? null : current,
+                    );
+                }}
+              >
+                <summary>
+                  <span className="fact-summary">
+                    <strong>{t("Claim {0}", [index + 1])}</strong> ·{" "}
+                    {fact.claim || t("Add your experience")}
+                  </span>
+                </summary>
+                <div className="fact-editor">
+                  <Field label={t("Claim {0}", [index + 1])}>
+                    <textarea
+                      required
+                      maxLength={3000}
+                      value={fact.claim}
+                      onChange={(event) =>
+                        change({
+                          facts: draft.facts.map((item, i) =>
+                            i === index
+                              ? { ...item, claim: event.target.value }
+                              : item,
+                          ),
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field label={t("Category {0}", [index + 1])}>
+                    <select
+                      value={fact.category}
+                      onChange={(event) =>
+                        change({
+                          facts: draft.facts.map((item, i) =>
+                            i === index
+                              ? {
+                                  ...item,
+                                  category: event.target
+                                    .value as DraftFact["category"],
+                                }
+                              : item,
+                          ),
+                        })
+                      }
+                    >
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {t(
+                            category.charAt(0).toUpperCase() +
+                              category.slice(1),
+                          )}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label={t("Source excerpt {0}", [index + 1])}>
+                    <textarea
+                      value={fact.quote}
+                      maxLength={3000}
+                      onChange={(event) =>
+                        change({
+                          facts: draft.facts.map((item, i) =>
+                            i === index
+                              ? { ...item, quote: event.target.value }
+                              : item,
+                          ),
+                        })
+                      }
+                    />
+                  </Field>
+                  <p>
+                    {t(
+                      "Keep an exact excerpt from the CV. Leave it blank only for a new statement you are declaring yourself.",
+                    )}
+                  </p>
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      checked={fact.sensitivity === "sensitive"}
+                      onChange={(event) =>
+                        change({
+                          facts: draft.facts.map((item, i) =>
+                            i === index
+                              ? {
+                                  ...item,
+                                  sensitivity: event.target.checked
+                                    ? "sensitive"
+                                    : "private",
+                                }
+                              : item,
+                          ),
+                        })
+                      }
+                    />
+                    {t(
+                      "Sensitive fact \u2014 exclude from automatic selection",
+                    )}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
                       change({
-                        facts: draft.facts.map((item, i) =>
-                          i === index
-                            ? { ...item, claim: event.target.value }
-                            : item,
-                        ),
-                      })
-                    }
-                  />
-                </Field>
-                <Field label={t("Category {0}", [index + 1])}>
-                  <select
-                    value={fact.category}
-                    onChange={(event) =>
-                      change({
-                        facts: draft.facts.map((item, i) =>
-                          i === index
-                            ? {
-                                ...item,
-                                category: event.target
-                                  .value as DraftFact["category"],
-                              }
-                            : item,
-                        ),
+                        facts: draft.facts.filter((_, i) => i !== index),
                       })
                     }
                   >
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {t(
-                          category.charAt(0).toUpperCase() + category.slice(1),
-                        )}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label={t("Source excerpt {0}", [index + 1])}>
-                  <textarea
-                    value={fact.quote}
-                    maxLength={3000}
-                    onChange={(event) =>
-                      change({
-                        facts: draft.facts.map((item, i) =>
-                          i === index
-                            ? { ...item, quote: event.target.value }
-                            : item,
-                        ),
-                      })
-                    }
-                  />
-                </Field>
-                <p>
-                  {t(
-                    "Keep an exact excerpt from the CV. Leave it blank only for a new statement you are declaring yourself.",
-                  )}
-                </p>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={fact.sensitivity === "sensitive"}
-                    onChange={(event) =>
-                      change({
-                        facts: draft.facts.map((item, i) =>
-                          i === index
-                            ? {
-                                ...item,
-                                sensitivity: event.target.checked
-                                  ? "sensitive"
-                                  : "private",
-                              }
-                            : item,
-                        ),
-                      })
-                    }
-                  />
-                  {t("Sensitive fact \u2014 exclude from automatic selection")}
-                </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    change({ facts: draft.facts.filter((_, i) => i !== index) })
-                  }
-                >
-                  {t("Remove claim")}
-                </button>
-              </section>
+                    {t("Remove claim")}
+                  </button>
+                </div>
+              </details>
             ))}
             <button
               type="button"
               disabled={draft.facts.length >= 80}
-              onClick={() =>
+              onClick={() => {
+                setExpandedFact(draft.facts.length);
                 change({
                   facts: [
                     ...draft.facts,
@@ -431,8 +472,8 @@ export default function CvImport({
                       sensitivity: "private",
                     },
                   ],
-                })
-              }
+                });
+              }}
             >
               {t("Add a claim")}
             </button>

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 test("strategy → documents → sensitive answer → diff → approval → download", async ({
   page,
 }, info) => {
@@ -7,7 +7,9 @@ test("strategy → documents → sensitive answer → diff → approval → down
     .getByLabel("Password", { exact: true })
     .fill("synthetic-browser-test-only");
   await page.getByRole("button", { name: "Log in", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Your Inbox" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Your opportunities" }),
+  ).toBeVisible();
   const session = await (await page.request.get("/api/v1/session")).json();
   const headers = {
     "X-CSRF-Token": session.csrf_token,

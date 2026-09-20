@@ -179,6 +179,8 @@ def jobs(
     limit: Annotated[int, Query(ge=1, le=100)] = 30,
     offset: Annotated[int, Query(ge=0)] = 0,
     q: str = "",
+    location: Annotated[str, Query(max_length=200)] = "",
+    work_mode: Literal["hybrid", "onsite", "remote"] | None = None,
     status: Literal["DISCOVERED", "PARSED", "SCORED"] | None = None,
     archived: bool = False,
 ) -> Row:
@@ -189,9 +191,26 @@ def jobs(
             "owner_id=%s AND kind='job' AND NOT deleted AND "
             "(data->>'archived')::boolean=%s AND "
             "(%s::text IS NULL OR data->>'status'=%s) AND "
-            "(coalesce(data->>'title','') ILIKE %s OR coalesce(data->>'company_name','') ILIKE %s)"
+            "(coalesce(data->>'title','') ILIKE %s OR coalesce(data->>'company_name','') ILIKE %s) "
+            "AND coalesce(data->>'location','') ILIKE %s "
+            "AND (%s::text IS NULL OR data->>'work_mode'=%s)"
         )
-        params = (actor.id, archived, status, status, f"%{q}%", f"%{q}%")
+
+        # Treat search terms as text, rather than allowing SQL wildcard filters.
+        def pattern(text: str) -> str:
+            return "%" + text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+
+        params = (
+            actor.id,
+            archived,
+            status,
+            status,
+            pattern(q),
+            pattern(q),
+            pattern(location),
+            work_mode,
+            work_mode,
+        )
         # conditions contains only fixed SQL; all user values are bound parameters.
         from psycopg import sql
 

@@ -9,6 +9,8 @@ import {
   type Profile,
 } from "./types";
 import { useAiTask } from "./useAiTask";
+import { eligibleMatchingFacts } from "./eligibleFacts";
+import Icon from "./Icon";
 type Suggestion = {
   run_id: string | null;
   stale: boolean;
@@ -38,56 +40,102 @@ export default function AiMatching({
   apply: (assessments: Assessment[], run: string | null) => void;
   changed?: () => void;
 }) {
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(() =>
+    eligibleMatchingFacts(facts)
+      .slice(0, 20)
+      .map((fact) => fact.id),
+  );
   const [consent, setConsent] = useState(false);
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [previous, setPrevious] = useState<Suggestion | null>(null);
-  const task = useAiTask(consent);
-  const available = facts.filter(
-    (f) =>
-      f.status === "verified" &&
-      f.allowed_uses.includes("matching") &&
-      f.sensitivity !== "sensitive",
-  );
+  const context = JSON.stringify([
+    job.id,
+    job.version,
+    profile.version,
+    selected,
+  ]);
+  const [suggestionContext, setSuggestionContext] = useState("");
+  const task = useAiTask(consent && selected.length > 0, context);
+  const selectionChanged = suggestionContext !== context;
+  const available = eligibleMatchingFacts(facts);
   return (
     <section className="ai-panel">
-      <h3>{t("Suggestions with evidence")}</h3>
+      <h3>
+        <Icon name="sparkle" />
+        {t("Let AI help with the first pass")}
+      </h3>
       <p>
         {t(
-          "Select facts that AI can evaluate. The job title, description, requirements, selected statements and excerpts of your evidence will be sent to OpenAI. Data marked as sensitive is excluded; file names and local references remain here.",
+          "{0} approved facts selected. AI will suggest how your experience fits; you review the assessment before calculating a result.",
+          [selected.length],
         )}
       </p>
-      <fieldset>
-        <legend>{t("Facts authorised for this query")}</legend>
-        {available.map((fact) => (
-          <label className="check" key={fact.id}>
-            <input
-              type="checkbox"
-              checked={selected.includes(fact.id)}
-              disabled={
-                task.busy ||
-                (!selected.includes(fact.id) && selected.length >= 20)
-              }
-              onChange={(event) => {
+      {available.length > 20 && (
+        <p role="note">
+          {t(
+            "The first 20 eligible facts are selected. Choose the most relevant facts before continuing.",
+          )}
+        </p>
+      )}
+      <details className="disclosure">
+        <summary>{t("Choose facts and review what is shared")}</summary>
+        <p>
+          {t(
+            "Select facts that AI can evaluate. The job title, description, requirements, selected statements and excerpts of your evidence will be sent to OpenAI. Data marked as sensitive is excluded; file names and local references remain here.",
+          )}
+        </p>
+        <fieldset>
+          <legend>{t("Facts authorised for this query")}</legend>
+          <div className="actions">
+            <button
+              disabled={task.busy}
+              onClick={() => {
+                setSelected(available.slice(0, 20).map((fact) => fact.id));
                 setConsent(false);
-                setSelected((previous) =>
-                  event.target.checked
-                    ? [...previous, fact.id]
-                    : previous.filter((id) => id !== fact.id),
-                );
               }}
-            />
-            {fact.claim}
-          </label>
-        ))}
-        {!available.length && (
-          <p>
-            {t(
-              "No eligible facts available. Record evidence and publish the profile.",
-            )}
-          </p>
-        )}
-      </fieldset>
+            >
+              {t("Select eligible facts")}
+            </button>
+            <button
+              disabled={task.busy}
+              onClick={() => {
+                setSelected([]);
+                setConsent(false);
+              }}
+            >
+              {t("Clear selection")}
+            </button>
+          </div>
+          {available.map((fact) => (
+            <label className="check" key={fact.id}>
+              <input
+                type="checkbox"
+                checked={selected.includes(fact.id)}
+                disabled={
+                  task.busy ||
+                  (!selected.includes(fact.id) && selected.length >= 20)
+                }
+                onChange={(event) => {
+                  setConsent(false);
+                  setSelected((previous) =>
+                    event.target.checked
+                      ? [...previous, fact.id]
+                      : previous.filter((id) => id !== fact.id),
+                  );
+                }}
+              />
+              {fact.claim}
+            </label>
+          ))}
+          {!available.length && (
+            <p>
+              {t(
+                "No eligible facts available. Record evidence and publish the profile.",
+              )}
+            </p>
+          )}
+        </fieldset>
+      </details>
       <label className="check">
         <input
           type="checkbox"
@@ -99,34 +147,12 @@ export default function AiMatching({
         )}
       </label>
       <button
-        disabled={task.busy || !consent}
+        className="primary"
+        disabled={task.busy || !consent || !selected.length}
         onClick={() =>
           void task.run(async (headers) => {
             setPrevious(suggestion);
-            setSuggestion(
-              await api<Suggestion>(
-                `/ai/jobs/${job.id}/suggest`,
-                "POST",
-                {
-                  job_version: job.version,
-                  profile_version: profile.version,
-                  fact_ids: selected,
-                  external_processing_confirmed: true,
-                },
-                headers,
-              ),
-            );
-            changed?.();
-          }, t("Suggestions ready for review."))
-        }
-      >
-        {task.busy ? t("Evaluating\u2026") : t("Suggest assessments with AI")}
-      </button>
-      <button
-        disabled={task.busy || !consent || !suggestion}
-        onClick={() =>
-          void task.run(async (headers) => {
-            const value = await api<Suggestion>(
+            const result = await api<Suggestion>(
               `/ai/jobs/${job.id}/suggest`,
               "POST",
               {
@@ -134,18 +160,57 @@ export default function AiMatching({
                 profile_version: profile.version,
                 fact_ids: selected,
                 external_processing_confirmed: true,
-                independent_review: true,
               },
               headers,
             );
-            setPrevious(suggestion);
-            setSuggestion(value);
+            setSuggestion(result);
+            setSuggestionContext(context);
+            if (!suggestion && !result.stale) {
+              apply(
+                result.result.assessments.map(
+                  ({ requirement_id, status, reason, fact_ids }) => ({
+                    requirement_id,
+                    status,
+                    reason,
+                    fact_ids,
+                  }),
+                ),
+                result.run_id,
+              );
+            }
             changed?.();
-          }, t("Second assessment available. Check disagreements before deciding."))
+          }, t("Suggestions ready for review."))
         }
       >
-        {t("Request a second assessment")}
+        {task.busy ? t("Evaluating\u2026") : t("Suggest assessments with AI")}
       </button>
+      {suggestion && (
+        <button
+          disabled={task.busy || !consent || !suggestion || selectionChanged}
+          onClick={() =>
+            void task.run(async (headers) => {
+              const value = await api<Suggestion>(
+                `/ai/jobs/${job.id}/suggest`,
+                "POST",
+                {
+                  job_version: job.version,
+                  profile_version: profile.version,
+                  fact_ids: selected,
+                  external_processing_confirmed: true,
+                  independent_review: true,
+                },
+                headers,
+              );
+              setPrevious(suggestion);
+              setSuggestion(value);
+              setSuggestionContext(context);
+              changed?.();
+            }, t("Second assessment available. Check disagreements before deciding."))
+          }
+        >
+          {t("Request a second assessment")}
+        </button>
+      )}
       {task.feedback}
       {previous && (
         <details>
@@ -159,9 +224,11 @@ export default function AiMatching({
       )}
       {suggestion && (
         <>
-          {suggestion.stale && (
+          {(suggestion.stale || selectionChanged) && (
             <p role="alert">
-              {t("The job or profile has changed. Generate a new suggestion.")}
+              {t(
+                "The job, profile or fact selection has changed. Generate a new suggestion.",
+              )}
             </p>
           )}
           {suggestion.result.assessments.map((item) => (
@@ -194,8 +261,15 @@ export default function AiMatching({
           {suggestion.result.limitations.map((item) => (
             <p key={item}>{item}</p>
           ))}
+          {!previous && !selectionChanged && !suggestion.stale && (
+            <p role="note">
+              {t(
+                "The first suggestions have filled your draft below. Check the evidence and confirm your assessment before calculating.",
+              )}
+            </p>
+          )}
           <button
-            disabled={task.busy || suggestion.stale}
+            disabled={task.busy || suggestion.stale || selectionChanged}
             onClick={() => {
               apply(
                 suggestion.result.assessments.map(

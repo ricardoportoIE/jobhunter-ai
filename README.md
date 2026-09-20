@@ -20,6 +20,8 @@ This portfolio project demonstrates full-stack development, applied AI, data mod
 
 The workflow preserves drafts and form input, explains review requirements and guides the user to the next step. Desktop and mobile browser tests exercise both the successful journey and recovery from errors.
 
+The [frontend experience](docs/frontend-experience.md) keeps the everyday journey focused: three main destinations, CV-first onboarding, filters for saved vacancies and expandable detail controls. AI can prepare the first assessment draft; the user confirms it before the deterministic score is calculated.
+
 ## Engineering skills demonstrated
 
 | Area | Technologies and skills | How they are applied |
@@ -31,7 +33,7 @@ The workflow preserves drafts and form input, explains review requirements and g
 | Reliability and evaluation | Deterministic rules, contract validation, frozen evaluation sets | Reproducible scoring, source checks, clarification gates, disagreement handling and recorded model comparisons with stated limitations. |
 | Security and privacy | Argon2, session cookies, CSRF protection, authorisation, SSRF controls | User isolation, protected writes, restricted public URL fetching, bounded document parsing and backend-only credentials. |
 | Document processing | pypdf, python-docx, ReportLab | Importing source material and producing reviewable DOCX/PDF documents from approved facts. |
-| Quality assurance | pytest, Vitest, Testing Library, Playwright | Domain, API, database, component and browser tests, including failure recovery and desktop/mobile journeys. |
+| Quality assurance | pytest, Vitest, Testing Library, Playwright, axe | Domain, API, database, component and browser tests, including failure recovery, accessibility checks and desktop/mobile journeys. |
 | Developer tooling and delivery | Docker Compose, Nginx, GitHub Actions, uv, npm, Ruff, mypy, ESLint, Prettier | Reproducible environments, locked dependencies, static analysis, production builds, health checks and continuous integration. |
 | Product and architecture | Modular monolith, threat modelling, architecture decision records | A scoped product, documented trade-offs, reviewable decisions and a clear separation between implemented features and future plans. |
 
@@ -114,7 +116,7 @@ Stop the application with `docker compose down`; this retains the database. See 
 
 The [GitHub Actions workflow](.github/workflows/ci.yml) defines five jobs: API, frontend, Docker Compose, browser end-to-end tests and design contracts. It checks formatting, types, application behaviour, evaluation contracts, builds and database outage recovery. Automated tests use synthetic data; recorded live AI results are validated without making paid calls in CI.
 
-Local verification on **20 September 2026** passed **113 API tests, 18 frontend tests and 10 desktop/mobile browser tests**, with no skipped API tests. Static checks, package and frontend builds, evaluation contracts, documentation checks and database outage/recovery checks also passed. Two upstream Python deprecation warnings remain; browser tests used Microsoft Edge.
+Local verification on **20 September 2026** passed **115 API tests, 24 frontend tests and 12 desktop/mobile browser tests**, with no skipped API tests. Static checks, package and frontend builds, evaluation contracts, documentation checks, axe accessibility checks and database outage/recovery checks also passed. Two upstream Python deprecation warnings remain; browser tests used Microsoft Edge.
 
 Run the API tests against a separate test database, with the local PostgreSQL service running:
 

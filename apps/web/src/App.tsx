@@ -61,7 +61,7 @@ export default function App() {
     return (
       <main className="login">
         <LanguageSelector />
-        <p className="eyebrow">JOBHUNTER AI · LOCAL</p>
+        <p className="eyebrow">JOBHUNTER AI</p>
         <h1>
           {t("Your next step")}
           <br />
@@ -69,7 +69,7 @@ export default function App() {
         </h1>
         <p>
           {t(
-            "Log in to organise your profile and assess opportunities with evidence.",
+            "A calmer way to find your next role. Bring your experience; we will help with the next step.",
           )}
         </p>
         <form
@@ -108,9 +108,8 @@ export default function App() {
     );
   return (
     <>
-      <div className="session-bar">
+      <header className="session-bar">
         <LanguageSelector />
-        <span>{t("Active local session")}</span>
         <button
           onClick={() => {
             void api("/session", "DELETE")
@@ -124,7 +123,7 @@ export default function App() {
           {t("Log out")}
         </button>
         {error && <span role="alert">{t(error)}</span>}
-      </div>
+      </header>
       <Workspace />
     </>
   );

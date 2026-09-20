@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { readFile } from "node:fs/promises";
 test("profile → import → review → match → evidence → manual tracker → export", async ({
   page,
@@ -12,15 +12,16 @@ test("profile → import → review → match → evidence → manual tracker �
   await expect(page.getByLabel("Password", { exact: true })).toBeFocused();
   await page.keyboard.insertText("synthetic-browser-test-only");
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { name: "Your Inbox" })).toBeVisible();
-  await page
-    .getByRole("link", { name: "Profile and evidence", exact: true })
-    .focus();
+  await expect(
+    page.getByRole("heading", { name: "Your opportunities" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "My profile", exact: true }).focus();
   await page.keyboard.press("Enter");
   await page.getByRole("link", { name: "Go to content" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("main")).toBeFocused();
   await expect(page).toHaveURL(/#profile$/);
+  await page.getByText("Manage facts and sources", { exact: true }).click();
   await page.getByRole("button", { name: /Evidence \(/ }).click();
   await page.getByLabel("Source reference").fill(`${prefix} projeto`);
   await page.getByLabel("Locator", { exact: true }).fill("README, seção 1");
@@ -54,9 +55,7 @@ test("profile → import → review → match → evidence → manual tracker �
     }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Profile", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Confirm review and publish version" })
-    .click();
+  await page.getByRole("button", { name: "Confirm my profile" }).click();
   await expect(page.getByRole("status")).toHaveText(
     "Profile version reviewed and preserved.",
   );
@@ -67,6 +66,7 @@ test("profile → import → review → match → evidence → manual tracker �
     .fill(
       `${prefix} Junior Python\nPython required. Personal projects accepted.\n<script>window.__injected = true</script>`,
     );
+  await page.getByText("Source details (optional)", { exact: true }).click();
   await page
     .getByLabel("Source", { exact: true })
     .fill("Demonstração fictícia");
@@ -161,6 +161,7 @@ test("profile → import → review → match → evidence → manual tracker �
   await expect(
     card.getByText("Comprovante de teste", { exact: false }),
   ).toBeVisible();
+  await page.getByText("More tools", { exact: true }).click();
   await page.getByRole("link", { name: "Privacy", exact: true }).click();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download export" }).click();

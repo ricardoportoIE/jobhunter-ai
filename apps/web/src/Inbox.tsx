@@ -1,154 +1,11 @@
 import { t } from "./i18n";
 import { useTask } from "./useTask";
 import { optional, value } from "./forms";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { api } from "./api";
 import type { Job } from "./types";
-import { ErrorState, Field, Loading } from "./ui";
-export function Inbox() {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("");
-  const [archived, setArchived] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [refresh, setRefresh] = useState(0);
-  const [result, setResult] = useState<{
-    items: Job[];
-    total: number;
-  } | null>(null);
-  const [error, setError] = useState("");
-  useEffect(() => {
-    let active = true;
-    api<{
-      items: Job[];
-      total: number;
-    }>(
-      `/jobs?limit=20&offset=${offset}&q=${encodeURIComponent(query)}&archived=${archived}${status ? "&status=" + status : ""}`,
-    )
-      .then((data) => {
-        if (active) {
-          setResult(data);
-          setError("");
-        }
-      })
-      .catch((reason: Error) => {
-        if (active) setError(reason.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [query, status, archived, offset, refresh]);
-  return (
-    <>
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">{t("OPPORTUNITIES")}</p>
-          <h1>{t("Your Inbox")}</h1>
-          <p>{t("One opportunity at a time, with traceable decisions.")}</p>
-        </div>
-        <a className="button primary" href="#import">
-          {t("Import vacancy")}
-        </a>
-      </div>
-      <form
-        className="filters"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const form = new FormData(event.currentTarget);
-          setResult(null);
-          setQuery(value(form, "q"));
-          setStatus(value(form, "status"));
-          setArchived(form.has("archived"));
-          setOffset(0);
-          setRefresh(refresh + 1);
-        }}
-      >
-        <Field label={t("Search title or company")}>
-          <input name="q" placeholder={t("E.g.: Junior Python")} />
-        </Field>
-        <Field label={t("Stage")}>
-          <select name="status">
-            <option value="">{t("All")}</option>
-            <option value="DISCOVERED">{t("Imported")}</option>
-            <option value="PARSED">{t("Reviewed")}</option>
-            <option value="SCORED">{t("Analysed")}</option>
-          </select>
-        </Field>
-        <label className="check">
-          <input type="checkbox" name="archived" />
-          {t("Archived")}
-        </label>
-        <button>{t("Filter")}</button>
-      </form>
-      {error ? (
-        <ErrorState error={error} retry={() => setRefresh(refresh + 1)} />
-      ) : !result ? (
-        <Loading />
-      ) : (
-        <>
-          <p className="muted">
-            {result.total}
-            {t(" opportunity(ies)")}
-          </p>
-          {!result.items.length ? (
-            <section className="empty">
-              <h2>{t("No vacancies in this selection")}</h2>
-              <p>
-                {t("Import an advert to get started, or adjust the filters.")}
-              </p>
-              <a href="#import">{t("Import first vacancy \u2192")}</a>
-            </section>
-          ) : (
-            <ul className="job-list">
-              {result.items.map((job) => (
-                <li key={job.id}>
-                  <a href={`#job/${job.id}`}>
-                    <div>
-                      <span className="tag">
-                        {
-                          {
-                            DISCOVERED: t("Imported"),
-                            PARSED: t("Reviewed"),
-                            SCORED: t("Analysed"),
-                          }[job.status]
-                        }
-                      </span>
-                      <h2>{job.title || t("Job awaiting review")}</h2>
-                      <p>
-                        {job.company_name || t("Company not provided")} ·{" "}
-                        {job.location || t("Location not provided")}
-                      </p>
-                    </div>
-                    <span aria-hidden="true">↗</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="actions">
-            <button
-              disabled={offset === 0}
-              onClick={() => {
-                setResult(null);
-                setOffset(Math.max(0, offset - 20));
-              }}
-            >
-              {t("Previous")}
-            </button>
-            <button
-              disabled={offset + 20 >= result.total}
-              onClick={() => {
-                setResult(null);
-                setOffset(offset + 20);
-              }}
-            >
-              {t("Next")}
-            </button>
-          </div>
-        </>
-      )}
-    </>
-  );
-}
+import { Field } from "./ui";
+export { default as Inbox } from "./Opportunities";
 export function ImportJob() {
   const task = useTask();
   const [key] = useState(() => crypto.randomUUID());
@@ -265,28 +122,33 @@ export function ImportJob() {
             <Field label={t("Original job text")}>
               <textarea name="raw_text" rows={12} required maxLength={50000} />
             </Field>
-            <div className="form-grid">
-              <Field label={t("Source")}>
+            <details className="disclosure">
+              <summary>{t("Source details (optional)")}</summary>
+              <div className="form-grid">
+                <Field label={t("Source")}>
+                  <input
+                    name="source_name"
+                    placeholder={t("Company website, portal\u2026")}
+                    maxLength={200}
+                  />
+                </Field>
+                <Field label={t("ID at source (optional)")}>
+                  <input name="external_id" maxLength={200} />
+                </Field>
+              </div>
+              <Field label={t("Source URL (optional)")}>
+                <input type="url" name="source_url" maxLength={2000} />
+              </Field>
+              <Field label={t("Advert location (optional)")}>
                 <input
-                  name="source_name"
-                  placeholder={t("Company website, portal\u2026")}
+                  name="location_hint"
+                  placeholder={t(
+                    "Helps distinguish adverts in different cities",
+                  )}
                   maxLength={200}
                 />
               </Field>
-              <Field label={t("ID at source (optional)")}>
-                <input name="external_id" maxLength={200} />
-              </Field>
-            </div>
-            <Field label={t("Source URL (optional)")}>
-              <input type="url" name="source_url" maxLength={2000} />
-            </Field>
-            <Field label={t("Advert location (optional)")}>
-              <input
-                name="location_hint"
-                placeholder={t("Helps distinguish adverts in different cities")}
-                maxLength={200}
-              />
-            </Field>
+            </details>
             {task.feedback}
             <button className="primary" disabled={task.busy}>
               {task.busy ? t("Importing\u2026") : t("Import and review")}

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("Markdown CV retry and failed job save retain input and advance only on success", async ({
   page,
@@ -8,9 +8,7 @@ test("Markdown CV retry and failed job save retain input and advance only on suc
     .getByLabel("Password", { exact: true })
     .fill("synthetic-browser-test-only");
   await page.getByRole("button", { name: "Log in", exact: true }).click();
-  await page
-    .getByRole("link", { name: "Profile and evidence", exact: true })
-    .click();
+  await page.getByRole("link", { name: "My profile", exact: true }).click();
   await page
     .getByLabel("CV document (PDF, Word .docx or Markdown .md)")
     .setInputFiles({

@@ -118,12 +118,13 @@ describe("interactive workflow", () => {
         refresh={refresh}
       />,
     );
+    await userEvent.click(screen.getByText("Edit details and preferences"));
     fireEvent.change(screen.getByLabelText("Display name"), {
       target: { value: "Fictício" },
     });
     expect(
       screen.getByRole("button", {
-        name: "Confirm review and publish version",
+        name: "Confirm my profile",
       }),
     ).toBeDisabled();
     expect(
@@ -135,7 +136,7 @@ describe("interactive workflow", () => {
     await waitFor(() => expect(refresh).toHaveBeenCalled());
     expect(
       screen.getByRole("button", {
-        name: "Confirm review and publish version",
+        name: "Confirm my profile",
       }),
     ).toBeEnabled();
     expect(mocked).toHaveBeenCalledWith(

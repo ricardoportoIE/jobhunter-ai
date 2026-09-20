@@ -121,6 +121,10 @@ npm run test:e2e
 
 Screenshots/traces are saved in `apps/web/test-results/` and the report in `apps/web/playwright-report/`; Git ignores both. The frontend uses Prettier (`npm run format`), ESLint and strict TypeScript.
 
+The guided design journey also checks combined vacancy filters, compact navigation,
+layout at 320 pixels and axe accessibility rules on the principal screens. See the
+[frontend experience](frontend-experience.md) for the interaction changes and test scope.
+
 From the root, with Compose running:
 
 ```powershell

@@ -2,7 +2,7 @@
 
 ## Import a CV
 
-On the profile screen, choose a PDF, Word `.docx` or Markdown `.md`, confirm sending its extracted
+On **My profile**, choose a PDF, Word `.docx` or Markdown `.md`, confirm sending its extracted
 text to OpenAI and select **Extract CV with AI**. The original file is not sent to
 the provider. The draft shows the proposed name, facts, exact source excerpts and
 warnings. Existing search preferences are retained; the model does not invent them.
@@ -15,13 +15,15 @@ This avoids rejecting a valid PDF merely because the model reflowed a quotation.
 The source reference establishes where a suggestion came from; it does not prove
 that the model's interpretation is correct. Every claim still requires human review.
 
-Add, edit or remove claims and check the original extracted text. A source excerpt
+Open a claim to edit or remove it and check the original extracted text. A source excerpt
 must remain a literal passage; leave it blank for a new candidate declaration.
 Save the draft to resume later, or confirm its accuracy and permitted uses before
 applying it. Applying updates the profile and creates reviewed facts and evidence
 in one transaction. Existing facts are retained and identical claims in the same
 category are skipped. Repeated application cannot create duplicates. Publishing a
-profile version remains a separate action.
+profile version remains a separate action, labelled **Confirm my profile**.
+Manual preferences are under **Edit details and preferences**; the detailed fact and
+evidence editors are under **Manage facts and sources**. See the [frontend experience](frontend-experience.md).
 
 Limits: 4 MiB, 20 PDF pages, 50,000 extracted characters and 80 draft facts. Older
 `.doc` files need conversion to `.docx`; scanned PDFs need OCR before upload.
@@ -124,10 +126,12 @@ These checks did not change candidate facts or add a vacancy to the personal Inb
 Their paid calls used the existing budget ledger. They are integration smoke tests,
 not a measurement of extraction accuracy across CV layouts or vacancy websites.
 
-Local validation passed 113 API tests, 18 frontend tests and ten browser tests
+Before the frontend redesign, local validation passed 113 API tests, 18 frontend tests and ten browser tests
 (five workflows at desktop and mobile sizes), plus type, lint, formatting, build,
 historical evaluation and documentation checks. Browser tests used Microsoft Edge
 locally; CI retains its configured Chromium installation.
+The subsequent [frontend validation](frontend-experience.md) extends these journeys with
+simpler navigation, filters, progressive disclosure and accessibility checks.
 
 A follow-up regression check used the privately supplied two-page PDF. The original
 contract reproduced a validation failure: copied quotations changed layout whitespace

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 test("AI drafts → grounded suggestions → manual score → semantic search", async ({
   page,
 }, info) => {
@@ -8,7 +8,9 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
     .getByLabel("Password", { exact: true })
     .fill("synthetic-browser-test-only");
   await page.getByRole("button", { name: "Log in", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Your Inbox" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Your opportunities" }),
+  ).toBeVisible();
   const session = await (await page.request.get("/api/v1/session")).json();
   const headers = {
     "X-CSRF-Token": session.csrf_token,
@@ -69,6 +71,9 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
   const jobId = page.url().split("#job/")[1];
   if (!jobId) throw new Error("Missing imported job route");
   await page
+    .getByText("Research and duplicate checks", { exact: true })
+    .click();
+  await page
     .getByLabel("Public question", { exact: true })
     .fill("Onde estão as regras oficiais atuais?");
   await page
@@ -102,6 +107,12 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
   await expect(page.getByText(/PARSED · VERSION/)).toBeVisible();
   await page.getByRole("button", { name: "2. Assess requirements" }).click();
   await page
+    .getByText("Choose facts and review what is shared", { exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Clear selection", exact: true })
+    .click();
+  await page
     .getByRole("group", { name: "Facts authorised for this query" })
     .getByLabel(claim)
     .check();
@@ -116,11 +127,12 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
   await expect(page.getByText("Suggestions ready for review.")).toBeVisible();
   await page.getByText("Check fact and evidence", { exact: true }).click();
   await expect(page.getByText(evidence.content, { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Attainment: Python")).toHaveValue("unknown");
-  await page
-    .getByRole("button", { name: "Fill in assessments for my review" })
-    .click();
   await expect(page.getByLabel("Attainment: Python")).toHaveValue("met");
+  await expect(
+    page.getByLabel(
+      "I confirm these assessments and the validity of the selected references.",
+    ),
+  ).not.toBeChecked();
   await page
     .getByRole("button", { name: "Request a second assessment" })
     .click();
@@ -142,6 +154,7 @@ test("AI drafts → grounded suggestions → manual score → semantic search", 
   await page.getByRole("button", { name: "Calculate compatibility" }).click();
   await expect(page.getByText("100%", { exact: true })).toBeVisible();
   await expect(page.getByText("30%", { exact: true })).toBeVisible();
+  await page.getByText("More tools", { exact: true }).click();
   await page
     .getByRole("link", { name: "Semantic search", exact: true })
     .click();

@@ -1,5 +1,6 @@
 """Disposable browser-test server: fixed test DB and synthetic credentials only."""
 
+import argparse
 import os
 from datetime import UTC, datetime
 from unittest.mock import patch
@@ -24,6 +25,15 @@ def main() -> None:
     admin = Settings()
     name = "jobhunter_test_e2e"
     assert admin.db_name != name
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--reset-login-limit", action="store_true")
+    args = parser.parse_args()
+    if args.reset_login_limit:
+        # Each independent browser journey starts with a clean test-only login bucket.
+        # Production throttling remains covered by the API authentication tests.
+        with connect(admin.model_copy(update={"db_name": name})) as db:
+            db.execute("DELETE FROM login_limits")
+        return
     with psycopg.connect(
         host=admin.db_host,
         port=admin.db_port,

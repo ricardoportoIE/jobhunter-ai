@@ -10,6 +10,7 @@ import { AiActivity } from "./AiTools";
 import SemanticSearch from "./SemanticSearch";
 import type { Evidence, Fact, Profile } from "./types";
 import { ErrorState, Loading } from "./ui";
+import Icon from "./Icon";
 async function loadProfile() {
   const [profile, facts, evidence] = await Promise.all([
     api<Profile>("/candidate/profile"),
@@ -74,52 +75,66 @@ export default function Workspace() {
             JobHunter <span className="brand-ai">AI</span>
           </span>
         </a>
-        <p className="eyebrow">{t("WORKSPACE")}</p>
+        <p className="eyebrow">{t("YOUR NEXT CHAPTER")}</p>
         <nav aria-label={t("Main navigation")}>
           <a
             href="#inbox"
-            aria-current={route === "inbox" ? "page" : undefined}
+            aria-current={
+              route === "inbox" ||
+              route.startsWith("job/") ||
+              route === "import"
+                ? "page"
+                : undefined
+            }
           >
-            {t("Opportunities Inbox")}
+            <Icon name="briefcase" />
+            {t("Opportunities")}
           </a>
           <a
             href="#profile"
             aria-current={route === "profile" ? "page" : undefined}
           >
-            {t("Profile and evidence")}
+            <Icon name="user" />
+            {t("My profile")}
           </a>
           <a
             href="#tracker"
             aria-current={route === "tracker" ? "page" : undefined}
           >
+            <Icon name="tracker" />
             {t("Applications")}
           </a>
-          <a
-            href="#import"
-            aria-current={route === "import" ? "page" : undefined}
-          >
-            {t("Import vacancy")}
-          </a>
-          <a
-            href="#privacy"
-            aria-current={route === "privacy" ? "page" : undefined}
-          >
-            {t("Privacy")}
-          </a>
-          <a
-            href="#search"
-            aria-current={route === "search" ? "page" : undefined}
-          >
-            {t("Semantic search")}
-          </a>
-          <a href="#ai" aria-current={route === "ai" ? "page" : undefined}>
-            {t("AI activity")}
-          </a>
         </nav>
+        <a className="button primary sidebar-import" href="#import">
+          <Icon name="plus" />
+          {t("Import vacancy")}
+        </a>
+        <details
+          className="sidebar-tools"
+          open={["privacy", "search", "ai"].includes(route) || undefined}
+        >
+          <summary>{t("More tools")}</summary>
+          <nav aria-label={t("Additional tools")}>
+            <a
+              href="#privacy"
+              aria-current={route === "privacy" ? "page" : undefined}
+            >
+              {t("Privacy")}
+            </a>
+            <a
+              href="#search"
+              aria-current={route === "search" ? "page" : undefined}
+            >
+              {t("Semantic search")}
+            </a>
+            <a href="#ai" aria-current={route === "ai" ? "page" : undefined}>
+              {t("AI activity")}
+            </a>
+          </nav>
+        </details>
         <p className="sidebar-note">
-          {t("You decide every step.")}
-          <br />
-          {t("Local data; AI under your command.")}
+          <Icon name="sparkle" />
+          {t("A little help. Your next big step.")}
         </p>
       </aside>
       <main id="workspace-main" tabIndex={-1} className="app-main">
@@ -152,7 +167,7 @@ export default function Workspace() {
             facts={data.facts}
           />
         ) : (
-          <Inbox />
+          <Inbox profile={data.profile} />
         )}
       </main>
     </div>
