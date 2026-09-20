@@ -9,14 +9,29 @@ from pathlib import Path
 from typing import Any
 from uuid import NAMESPACE_URL, uuid5
 
+from pydantic import BaseModel
+
 from jobhunter_api.ai_budget import totals
 from jobhunter_api.errors import Problem
-from jobhunter_api.job_parser import PARSER_VERSION, get_provider, parse_vacancy
+from jobhunter_api.inference import Completion, OpenAIInference
+from jobhunter_api.job_parser import PARSER_VERSION, ParsedJob, parse_vacancy, validate_extraction
 from jobhunter_api.settings import Settings
 from jobhunter_api.store import connect
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELS = ["gpt-4.1-mini-2025-04-14", "gpt-4.1-nano-2025-04-14"]
+
+
+class PublicDiagnosticProvider(OpenAIInference):
+    """Capture rejected public/synthetic benchmark output, never used by production routes."""
+
+    last: Completion | None = None
+
+    def complete(
+        self, model: str, prompt: str, data: str, schema: type[BaseModel], max_output: int
+    ) -> Completion:
+        self.last = super().complete(model, prompt, data, schema, max_output)
+        return self.last
 
 
 def source_text(case: dict[str, Any]) -> str:
@@ -64,6 +79,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "field_accuracy_on_valid_outputs": field_correct / field_count if field_count else None,
             "refusals": sum(row.get("error_code") == "MODEL_REFUSAL" for row in subset),
             "invalid_outputs": sum(row["status"] == "invalid" for row in subset),
+            "field_accuracy_all_cases": field_correct / (4 * len(subset)) if subset else None,
             "latency_p50_ms": percentile(latency, 0.5),
             "latency_p95_ms": percentile(latency, 0.95),
             "cost_eur": str(
@@ -105,7 +121,35 @@ def main() -> None:
             "not_run_billing_required",
             "interrupted",
             "executed_pending_review",
+            "executed_reviewed",
         }
+        if report["status"] == "executed_reviewed":
+            assert len(report["results"]) == len(cases) * len(MODELS)
+            assert {(r["case_id"], r["model"]) for r in report["results"]} == {
+                (c["case_id"], model) for c in cases for model in MODELS
+            }
+            assert report["metrics"] == summarize(report["results"])
+            selected = report["model_selection"]["model"]
+            assert selected in MODELS
+            assert (
+                report["metrics"][selected]["valid_output_rate"]
+                >= report["gates"]["valid_output_rate"]
+            )
+            assert (
+                report["metrics"][selected]["field_accuracy_on_valid_outputs"]
+                >= report["gates"]["field_accuracy"]
+            )
+            by_id = {c["case_id"]: c for c in cases}
+            for row in report["results"]:
+                if row["status"] != "succeeded":
+                    continue
+                raw = source_text(by_id[row["case_id"]])
+                result = row["result"]
+                spans = list(result["citations"].values()) + [
+                    r["citation"] for r in result["requirements"]
+                ]
+                assert all(raw[s["start"] : s["end"]] == s["quote"] for s in spans)
+                assert row["field_checks"] == check_fields(by_id[row["case_id"]], result)
         print("Phase 2 public benchmark contract validated; no API calls.")
         return
     report: dict[str, Any] = {
@@ -165,6 +209,7 @@ def main() -> None:
     stop = False
     for model in MODELS:
         for case in cases:
+            provider = PublicDiagnosticProvider(settings)
             identity = uuid5(NAMESPACE_URL, "jobhunter-p2-public-" + case["case_id"])
             job = {
                 "id": identity,
@@ -183,7 +228,7 @@ def main() -> None:
             try:
                 response = parse_vacancy(
                     settings,
-                    get_provider(settings),
+                    provider,
                     actor["id"],
                     job,
                     key=key,
@@ -206,6 +251,17 @@ def main() -> None:
                         )
             except Problem as exc:
                 item.update(status="failed", error_code=exc.code)
+                if exc.code == "AI_INVALID_OUTPUT" and provider.last:
+                    item["rejected_public_output"] = provider.last.text
+                    try:
+                        validate_extraction(
+                            ParsedJob.model_validate_json(provider.last.text).model_dump(
+                                mode="json"
+                            ),
+                            source_text(case),
+                        )
+                    except ValueError as validation_error:
+                        item["validation_error"] = str(validation_error)
                 # Stop on provider, billing, stale prices, budget or unknown charges; no retry loop.
                 if exc.code != "AI_INVALID_OUTPUT":
                     report.update(status="interrupted", blocked_reason=exc.code)
@@ -231,7 +287,9 @@ def main() -> None:
                 break
         if stop:
             break
-    print("Benchmark recorded; model promotion requires human review of citations and errors.")
+    print(
+        "Benchmark recorded; model selection requires a documented review of citations and errors."
+    )
 
 
 if __name__ == "__main__":

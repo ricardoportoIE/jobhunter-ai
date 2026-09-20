@@ -1,0 +1,2730 @@
+{
+  "dataset_version": "0.1.0",
+  "prompt_version": "job-parser-1.0",
+  "human_gold": false,
+  "case_count": 20,
+  "models": [
+    "gpt-4.1-mini-2025-04-14",
+    "gpt-4.1-nano-2025-04-14"
+  ],
+  "status": "executed_pending_review",
+  "results": [
+    {
+      "case_id": "REAL-01",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00127050",
+      "latency_ms": 4722,
+      "input_tokens": 981,
+      "output_tokens": 390
+    },
+    {
+      "case_id": "REAL-02",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00112950",
+      "latency_ms": 6215,
+      "input_tokens": 967,
+      "output_tokens": 323
+    },
+    {
+      "case_id": "REAL-03",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Software engineering intern",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "intern",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Software engineering intern",
+            "start": 0,
+            "end": 27,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-A",
+            "start": 28,
+            "end": 43,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: Dublin, IE",
+            "start": 44,
+            "end": 64,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: Dublin, IE",
+            "start": 44,
+            "end": 64,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Software engineering intern",
+            "start": 0,
+            "end": 27,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Degree studies in progress",
+            "category": "education",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Degree studies in progress",
+            "citation": {
+              "quote": "Degree studies in progress",
+              "start": 65,
+              "end": 91,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "collaborative programming projects",
+            "category": "portfolio",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "collaborative programming projects",
+            "citation": {
+              "quote": "collaborative programming projects",
+              "start": 96,
+              "end": 130,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "internship work contributes to production systems",
+            "category": "portfolio",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "internship work contributes to production systems",
+            "citation": {
+              "quote": "internship work contributes to production systems",
+              "start": 132,
+              "end": 181,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Mentioned technologies: Java, JavaScript",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Java, JavaScript",
+            "citation": {
+              "quote": "Mentioned technologies: Java, JavaScript",
+              "start": 183,
+              "end": 223,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "52c1f0f8-dd6e-5ca6-a40a-6ed54e5e4ac6",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00119150",
+      "latency_ms": 4561,
+      "input_tokens": 971,
+      "output_tokens": 353,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-04",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00112100",
+      "latency_ms": 2798,
+      "input_tokens": 966,
+      "output_tokens": 319
+    },
+    {
+      "case_id": "REAL-05",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00101050",
+      "latency_ms": 2917,
+      "input_tokens": 969,
+      "output_tokens": 263
+    },
+    {
+      "case_id": "REAL-06",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00110600",
+      "latency_ms": 2740,
+      "input_tokens": 972,
+      "output_tokens": 310
+    },
+    {
+      "case_id": "REAL-07",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00148550",
+      "latency_ms": 3642,
+      "input_tokens": 971,
+      "output_tokens": 500
+    },
+    {
+      "case_id": "REAL-08",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Staff backend platform engineer",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "staff",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Staff backend platform engineer",
+            "start": 0,
+            "end": 31,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-A",
+            "start": 32,
+            "end": 47,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: Dublin, IE",
+            "start": 48,
+            "end": 68,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: Dublin, IE",
+            "start": 48,
+            "end": 68,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Staff backend platform engineer",
+            "start": 0,
+            "end": 31,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Ten years of technical experience",
+            "category": "seniority_experience",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Ten years of technical experience",
+            "citation": {
+              "quote": "Ten years of technical experience",
+              "start": 69,
+              "end": 102,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Five years in strategic technical leadership",
+            "category": "seniority_experience",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "five in strategic technical leadership",
+            "citation": {
+              "quote": "five in strategic technical leadership",
+              "start": 107,
+              "end": 145,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Experience in infrastructure architecture",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "infrastructure architecture",
+            "citation": {
+              "quote": "infrastructure architecture",
+              "start": 147,
+              "end": 174,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Experience in mentoring",
+            "category": "career_value",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "mentoring",
+            "citation": {
+              "quote": "mentoring",
+              "start": 179,
+              "end": 188,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Experience with Java",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Java",
+            "citation": {
+              "quote": "Java",
+              "start": 214,
+              "end": 218,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Experience with Python",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Python",
+            "citation": {
+              "quote": "Python",
+              "start": 220,
+              "end": 226,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "d84c0968-2844-5735-9bb4-74bfeb954f95",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00132750",
+      "latency_ms": 3358,
+      "input_tokens": 967,
+      "output_tokens": 422,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-09",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00096800",
+      "latency_ms": 2271,
+      "input_tokens": 968,
+      "output_tokens": 242
+    },
+    {
+      "case_id": "REAL-10",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00121100",
+      "latency_ms": 2728,
+      "input_tokens": 986,
+      "output_tokens": 359
+    },
+    {
+      "case_id": "REAL-11",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Graduate data engineer",
+          "company_name": "EMP-B",
+          "location": "London, GB",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "graduate",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": {
+            "minimum": null,
+            "maximum": null,
+            "currency": null,
+            "period": null
+          }
+        },
+        "citations": {
+          "title": {
+            "quote": "Graduate data engineer",
+            "start": 0,
+            "end": 22,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-B",
+            "start": 23,
+            "end": 38,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: London, GB",
+            "start": 39,
+            "end": 59,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: London, GB",
+            "start": 39,
+            "end": 59,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Graduate data engineer",
+            "start": 0,
+            "end": 22,
+            "confidence": 1.0
+          },
+          "salary": {
+            "quote": "Salary described without numeric amount.",
+            "start": 175,
+            "end": 215,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Python",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Python and SQL required",
+            "citation": {
+              "quote": "Python and SQL required",
+              "start": 60,
+              "end": 83,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "SQL",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Python and SQL required",
+            "citation": {
+              "quote": "Python and SQL required",
+              "start": 60,
+              "end": 83,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "dbt",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "dbt desirable",
+            "citation": {
+              "quote": "dbt desirable",
+              "start": 85,
+              "end": 98,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "relevant degree or project experience",
+            "category": "education",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Graduate data-pipeline role accepts relevant degree or project experience",
+            "citation": {
+              "quote": "Graduate data-pipeline role accepts relevant degree or project experience",
+              "start": 100,
+              "end": 173,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "da3d1d1b-3c89-5ad6-a725-23b5fc9793a9",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00120750",
+      "latency_ms": 2846,
+      "input_tokens": 983,
+      "output_tokens": 358,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-12",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00092700",
+      "latency_ms": 2218,
+      "input_tokens": 974,
+      "output_tokens": 220
+    },
+    {
+      "case_id": "REAL-13",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00119000",
+      "latency_ms": 3134,
+      "input_tokens": 976,
+      "output_tokens": 351
+    },
+    {
+      "case_id": "REAL-14",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Game engineering graduate",
+          "company_name": "EMP-C",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "graduate",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Game engineering graduate",
+            "start": 0,
+            "end": 25,
+            "confidence": 0.9
+          },
+          "company_name": {
+            "quote": "Employer: EMP-C",
+            "start": 26,
+            "end": 41,
+            "confidence": 0.9
+          },
+          "location": {
+            "quote": "Location: Dublin, IE",
+            "start": 42,
+            "end": 62,
+            "confidence": 0.9
+          },
+          "country": {
+            "quote": "Location: Dublin, IE",
+            "start": 42,
+            "end": 62,
+            "confidence": 0.9
+          },
+          "seniority": {
+            "quote": "Game engineering graduate",
+            "start": 0,
+            "end": 25,
+            "confidence": 0.95
+          }
+        },
+        "requirements": [
+          {
+            "text": "Graduation window is January 2025 to July 2027",
+            "category": "seniority_experience",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Graduation window is January 2025 to July 2027",
+            "citation": {
+              "quote": "Graduation window is January 2025 to July 2027",
+              "start": 91,
+              "end": 137,
+              "confidence": 0.9
+            }
+          },
+          {
+            "text": "Python is accepted",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Python is accepted",
+            "citation": {
+              "quote": "Python is accepted",
+              "start": 139,
+              "end": 157,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "Unreal Engine experience is assessed",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Unreal Engine experience is assessed",
+            "citation": {
+              "quote": "Unreal Engine experience is assessed",
+              "start": 163,
+              "end": 199,
+              "confidence": 0.8
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "8d16934c-5688-5e84-a295-bd7f57a7c9a8",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00117200",
+      "latency_ms": 3018,
+      "input_tokens": 988,
+      "output_tokens": 339,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-15",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00140600",
+      "latency_ms": 3138,
+      "input_tokens": 984,
+      "output_tokens": 457
+    },
+    {
+      "case_id": "REAL-16",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00144250",
+      "latency_ms": 3464,
+      "input_tokens": 985,
+      "output_tokens": 475
+    },
+    {
+      "case_id": "REAL-17",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00115650",
+      "latency_ms": 2615,
+      "input_tokens": 989,
+      "output_tokens": 331
+    },
+    {
+      "case_id": "REAL-18",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00144150",
+      "latency_ms": 3368,
+      "input_tokens": 975,
+      "output_tokens": 477
+    },
+    {
+      "case_id": "REAL-19",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00113500",
+      "latency_ms": 4857,
+      "input_tokens": 982,
+      "output_tokens": 322
+    },
+    {
+      "case_id": "REAL-20",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "split": "evaluation",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00123600",
+      "latency_ms": 3820,
+      "input_tokens": 972,
+      "output_tokens": 375
+    },
+    {
+      "case_id": "REAL-01",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Graduate software engineer",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "graduate",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Graduate software engineer",
+            "start": 0,
+            "end": 26,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-A",
+            "start": 27,
+            "end": 42,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: Dublin, IE",
+            "start": 43,
+            "end": 63,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: Dublin, IE",
+            "start": 43,
+            "end": 63,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Graduate software engineer",
+            "start": 0,
+            "end": 26,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Programming projects and a relevant degree completed by summer 2027",
+            "category": "education",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Programming projects and a relevant degree completed by summer 2027",
+            "citation": {
+              "quote": "Programming projects and a relevant degree completed by summer 2027",
+              "start": 64,
+              "end": 131,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "previous collaborative development",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "previous collaborative development",
+            "citation": {
+              "quote": "previous collaborative development",
+              "start": 133,
+              "end": 167,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "a maximum of 18 months of professional experience",
+            "category": "seniority_experience",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "a maximum of 18 months of professional experience",
+            "citation": {
+              "quote": "a maximum of 18 months of professional experience",
+              "start": 169,
+              "end": 218,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Mentioned technologies: Java, JavaScript",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Java, JavaScript",
+            "citation": {
+              "quote": "Mentioned technologies: Java, JavaScript",
+              "start": 230,
+              "end": 270,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "7e7dd215-416d-5f8a-9c55-f31b8f713007",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00030963",
+      "latency_ms": 3106,
+      "input_tokens": 981,
+      "output_tokens": 374,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-02",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00025388",
+      "latency_ms": 3626,
+      "input_tokens": 967,
+      "output_tokens": 266
+    },
+    {
+      "case_id": "REAL-03",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Software engineering intern",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "intern",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Software engineering intern",
+            "start": 0,
+            "end": 27,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-A",
+            "start": 28,
+            "end": 43,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: Dublin, IE",
+            "start": 44,
+            "end": 64,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: Dublin, IE",
+            "start": 44,
+            "end": 64,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "internship work contributes to production systems.",
+            "start": 132,
+            "end": 182,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Degree studies in progress and collaborative programming projects",
+            "category": "education",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Degree studies in progress and collaborative programming projects",
+            "citation": {
+              "quote": "Degree studies in progress and collaborative programming projects",
+              "start": 65,
+              "end": 130,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "internship work contributes to production systems",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "internship work contributes to production systems",
+            "citation": {
+              "quote": "internship work contributes to production systems",
+              "start": 132,
+              "end": 181,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Mentioned technologies: Java, JavaScript",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Java, JavaScript",
+            "citation": {
+              "quote": "Mentioned technologies: Java, JavaScript",
+              "start": 183,
+              "end": 223,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "52c1f0f8-dd6e-5ca6-a40a-6ed54e5e4ac6",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00028438",
+      "latency_ms": 6203,
+      "input_tokens": 971,
+      "output_tokens": 326,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-04",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00022925",
+      "latency_ms": 1391,
+      "input_tokens": 966,
+      "output_tokens": 217
+    },
+    {
+      "case_id": "REAL-05",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Software engineer in payments",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": null,
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Software engineer in payments",
+            "start": 0,
+            "end": 29,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-A",
+            "start": 30,
+            "end": 45,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: Dublin, IE",
+            "start": 46,
+            "end": 66,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: Dublin, IE",
+            "start": 46,
+            "end": 66,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Requires at least two years of industry software engineering, excluding internships.",
+            "category": "seniority_experience",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Requires at least two years of industry software engineering, excluding internships.",
+            "citation": {
+              "quote": "Requires at least two years of industry software engineering, excluding internships.",
+              "start": 67,
+              "end": 151,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "b3e86a1a-83d3-5cee-ab25-6438d9508d09",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00023963",
+      "latency_ms": 3545,
+      "input_tokens": 969,
+      "output_tokens": 237,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-06",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Software engineer in tax systems",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": null,
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Software engineer in tax systems",
+            "start": 0,
+            "end": 32,
+            "confidence": 0.9
+          },
+          "company_name": {
+            "quote": "Employer: EMP-A",
+            "start": 33,
+            "end": 48,
+            "confidence": 0.9
+          },
+          "location": {
+            "quote": "Location: Dublin, IE",
+            "start": 49,
+            "end": 69,
+            "confidence": 0.9
+          },
+          "country": {
+            "quote": "Location: Dublin, IE",
+            "start": 49,
+            "end": 69,
+            "confidence": 0.9
+          }
+        },
+        "requirements": [
+          {
+            "text": "Minimum two years of industry software engineering, with independent delivery and production debugging",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Minimum two years of industry software engineering, with independent delivery and production debugging",
+            "citation": {
+              "quote": "Minimum two years of industry software engineering, with independent delivery and production debugging",
+              "start": 70,
+              "end": 172,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "language-agnostic coding requirement",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "language-agnostic coding requirement",
+            "citation": {
+              "quote": "language-agnostic coding requirement",
+              "start": 174,
+              "end": 210,
+              "confidence": 0.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "e2097c2f-06ea-5ee3-afb7-b6c96948ab0b",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00026900",
+      "latency_ms": 1847,
+      "input_tokens": 972,
+      "output_tokens": 295,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-07",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Backend API engineer",
+          "company_name": "EMP-A",
+          "location": "United Kingdom, GB",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": null,
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Backend API engineer",
+            "start": 0,
+            "end": 20,
+            "confidence": 0.9
+          },
+          "company_name": {
+            "quote": "EMP-A",
+            "start": 31,
+            "end": 36,
+            "confidence": 0.9
+          },
+          "location": {
+            "quote": "United Kingdom, GB",
+            "start": 47,
+            "end": 65,
+            "confidence": 0.9
+          },
+          "country": {
+            "quote": "GB",
+            "start": 63,
+            "end": 65,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Minimum two years of industry software engineering",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Minimum two years of industry software engineering",
+            "citation": {
+              "quote": "Minimum two years of industry software engineering",
+              "start": 66,
+              "end": 116,
+              "confidence": 0.9
+            }
+          },
+          {
+            "text": "large financial APIs",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "large financial APIs",
+            "citation": {
+              "quote": "large financial APIs",
+              "start": 118,
+              "end": 138,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "distributed collaboration",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "distributed collaboration",
+            "citation": {
+              "quote": "distributed collaboration",
+              "start": 140,
+              "end": 165,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "production support",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "production support",
+            "citation": {
+              "quote": "production support",
+              "start": 170,
+              "end": 188,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "Docker",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Docker",
+            "citation": {
+              "quote": "Docker",
+              "start": 214,
+              "end": 220,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "Kubernetes",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Kubernetes",
+            "citation": {
+              "quote": "Kubernetes",
+              "start": 222,
+              "end": 232,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "AWS",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "AWS",
+            "citation": {
+              "quote": "AWS",
+              "start": 234,
+              "end": 237,
+              "confidence": 0.8
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "6f872579-999d-54af-b597-4142a1f4d1b4",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00034988",
+      "latency_ms": 3163,
+      "input_tokens": 971,
+      "output_tokens": 457,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-08",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Staff backend platform engineer",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "staff",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Staff backend platform engineer",
+            "start": 0,
+            "end": 31,
+            "confidence": 0.9
+          },
+          "company_name": {
+            "quote": "EMP-A",
+            "start": 42,
+            "end": 47,
+            "confidence": 0.9
+          },
+          "location": {
+            "quote": "Dublin, IE",
+            "start": 58,
+            "end": 68,
+            "confidence": 0.9
+          },
+          "country": {
+            "quote": "IE",
+            "start": 66,
+            "end": 68,
+            "confidence": 0.9
+          },
+          "seniority": {
+            "quote": "Staff",
+            "start": 0,
+            "end": 5,
+            "confidence": 0.8
+          }
+        },
+        "requirements": [
+          {
+            "text": "Ten years of technical experience",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Ten years of technical experience",
+            "citation": {
+              "quote": "Ten years of technical experience",
+              "start": 69,
+              "end": 102,
+              "confidence": 0.9
+            }
+          },
+          {
+            "text": "five in strategic technical leadership",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "five in strategic technical leadership",
+            "citation": {
+              "quote": "five in strategic technical leadership",
+              "start": 107,
+              "end": 145,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "infrastructure architecture and mentoring",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "infrastructure architecture and mentoring",
+            "citation": {
+              "quote": "infrastructure architecture and mentoring",
+              "start": 147,
+              "end": 188,
+              "confidence": 0.8
+            }
+          },
+          {
+            "text": "Java, Python",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Java, Python",
+            "citation": {
+              "quote": "Java, Python",
+              "start": 214,
+              "end": 226,
+              "confidence": 0.8
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "d84c0968-2844-5735-9bb4-74bfeb954f95",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00029988",
+      "latency_ms": 2424,
+      "input_tokens": 967,
+      "output_tokens": 358,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-09",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Staff backend CI engineer",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "staff",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Staff backend CI engineer",
+            "start": 0,
+            "end": 25,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "EMP-A",
+            "start": 36,
+            "end": 41,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Dublin, IE",
+            "start": 52,
+            "end": 62,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "IE",
+            "start": 60,
+            "end": 62,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Staff",
+            "start": 0,
+            "end": 5,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Ten years of professional software development",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Ten years of professional software development",
+            "citation": {
+              "quote": "Ten years of professional software development",
+              "start": 63,
+              "end": 109,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "distributed systems, developer tools and mentoring senior engineers",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "distributed systems, developer tools and mentoring senior engineers",
+            "citation": {
+              "quote": "distributed systems, developer tools and mentoring senior engineers",
+              "start": 111,
+              "end": 178,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "cc4f83ce-799e-5210-8ce1-27ebf8c0c7d6",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00025500",
+      "latency_ms": 1770,
+      "input_tokens": 968,
+      "output_tokens": 268,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-10",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Junior software engineer",
+          "company_name": "EMP-B",
+          "location": "London",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "junior",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Junior software engineer",
+            "start": 0,
+            "end": 24,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-B",
+            "start": 25,
+            "end": 40,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: London, GB",
+            "start": 41,
+            "end": 61,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: London, GB",
+            "start": 41,
+            "end": 61,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Junior software engineer",
+            "start": 0,
+            "end": 24,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Builds frontend features and Python APIs with database access",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Builds frontend features and Python APIs with database access",
+            "citation": {
+              "quote": "Builds frontend features and Python APIs with database access",
+              "start": 108,
+              "end": 169,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Automated testing and cloud familiarity are desirable",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "automated testing and cloud familiarity are desirable",
+            "citation": {
+              "quote": "automated testing and cloud familiarity are desirable",
+              "start": 171,
+              "end": 224,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Mentioned technologies: React, Next.js, Python, SQL, TypeScript, AWS",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "React, Next.js, Python, SQL, TypeScript, AWS",
+            "citation": {
+              "quote": "React, Next.js, Python, SQL, TypeScript, AWS",
+              "start": 250,
+              "end": 294,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "71567cd3-7cc3-530e-9d7f-d35032462b5d",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": true,
+        "country": true
+      },
+      "actual_eur": "0.00029425",
+      "latency_ms": 2984,
+      "input_tokens": 986,
+      "output_tokens": 342,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-11",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "actual_eur": "0.00027538",
+      "latency_ms": 2039,
+      "input_tokens": 983,
+      "output_tokens": 305
+    },
+    {
+      "case_id": "REAL-12",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Junior software engineer",
+          "company_name": "EMP-B",
+          "location": "London",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "junior",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Junior software engineer with conflicting body",
+            "start": 0,
+            "end": 46,
+            "confidence": 0.8
+          },
+          "company_name": {
+            "quote": "Employer: EMP-B",
+            "start": 47,
+            "end": 62,
+            "confidence": 0.9
+          },
+          "location": {
+            "quote": "Location: London, GB",
+            "start": 63,
+            "end": 83,
+            "confidence": 0.9
+          },
+          "country": {
+            "quote": "Location: London, GB",
+            "start": 63,
+            "end": 83,
+            "confidence": 0.9
+          },
+          "seniority": {
+            "quote": "Junior software engineer",
+            "start": 0,
+            "end": 24,
+            "confidence": 0.8
+          }
+        },
+        "requirements": [
+          {
+            "text": "Junior software engineer",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Junior software engineer",
+            "citation": {
+              "quote": "Junior software engineer",
+              "start": 0,
+              "end": 24,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "conflicting body",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "conflicting body",
+            "citation": {
+              "quote": "conflicting body",
+              "start": 30,
+              "end": 46,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "Python",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Python",
+            "citation": {
+              "quote": "Python",
+              "start": 234,
+              "end": 240,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "SQL",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "SQL",
+            "citation": {
+              "quote": "SQL",
+              "start": 242,
+              "end": 245,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "dbt",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "dbt",
+            "citation": {
+              "quote": "dbt",
+              "start": 247,
+              "end": 250,
+              "confidence": 0.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "f5993c47-1de9-527d-9268-ebcdd18bcd90",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": false,
+        "company_name": true,
+        "location": true,
+        "country": true
+      },
+      "actual_eur": "0.00030925",
+      "latency_ms": 2784,
+      "input_tokens": 974,
+      "output_tokens": 375,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-13",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Graduate data engineer alternate board",
+          "company_name": "EMP-B",
+          "location": "London, GB",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "graduate",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Graduate data engineer alternate board",
+            "start": 0,
+            "end": 38,
+            "confidence": 0.9
+          },
+          "company_name": {
+            "quote": "EMP-B",
+            "start": 49,
+            "end": 54,
+            "confidence": 0.9
+          },
+          "location": {
+            "quote": "London, GB",
+            "start": 65,
+            "end": 75,
+            "confidence": 0.9
+          },
+          "country": {
+            "quote": "GB",
+            "start": 73,
+            "end": 75,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Graduate",
+            "start": 0,
+            "end": 8,
+            "confidence": 0.9
+          }
+        },
+        "requirements": [
+          {
+            "text": "Mentioned technologies: Python, SQL, dbt",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Python, SQL, dbt",
+            "citation": {
+              "quote": "Mentioned technologies: Python, SQL, dbt",
+              "start": 193,
+              "end": 233,
+              "confidence": 0.8
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "d9f3cfaf-41f4-5617-be3a-63bc77d985be",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00023950",
+      "latency_ms": 1418,
+      "input_tokens": 976,
+      "output_tokens": 235,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-14",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Game engineering graduate",
+          "company_name": "EMP-C",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "graduate",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Game engineering graduate",
+            "start": 0,
+            "end": 25,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "EMP-C",
+            "start": 36,
+            "end": 41,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Dublin, IE",
+            "start": 52,
+            "end": 62,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "IE",
+            "start": 60,
+            "end": 62,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "graduate",
+            "start": 17,
+            "end": 25,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Python is accepted, but Unreal Engine experience is assessed.",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Python is accepted, but Unreal Engine experience is assessed.",
+            "citation": {
+              "quote": "Python is accepted, but Unreal Engine experience is assessed.",
+              "start": 139,
+              "end": 200,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "8d16934c-5688-5e84-a295-bd7f57a7c9a8",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00023550",
+      "latency_ms": 1555,
+      "input_tokens": 988,
+      "output_tokens": 224,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-15",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Software engineer across levels",
+          "company_name": "EMP-D",
+          "location": "London",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": null,
+          "work_authorisation": null,
+          "sponsorship": "conditional",
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Software engineer across levels",
+            "start": 0,
+            "end": 31,
+            "confidence": 0.9
+          },
+          "company_name": {
+            "quote": "Employer: EMP-D",
+            "start": 32,
+            "end": 47,
+            "confidence": 0.9
+          },
+          "location": {
+            "quote": "Location: London, GB",
+            "start": 48,
+            "end": 68,
+            "confidence": 0.9
+          },
+          "country": {
+            "quote": "Location: London, GB",
+            "start": 48,
+            "end": 68,
+            "confidence": 0.9
+          },
+          "sponsorship": {
+            "quote": "The advert allows exceptions to ordinary nationality criteria.",
+            "start": 196,
+            "end": 258,
+            "confidence": 0.8
+          }
+        },
+        "requirements": [
+          {
+            "text": "Python",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Python, AWS, Terraform, Docker",
+            "citation": {
+              "quote": "Mentioned technologies: Python, AWS, Terraform, Docker",
+              "start": 259,
+              "end": 313,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "AWS",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Python, AWS, Terraform, Docker",
+            "citation": {
+              "quote": "Mentioned technologies: Python, AWS, Terraform, Docker",
+              "start": 259,
+              "end": 313,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "Terraform",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Python, AWS, Terraform, Docker",
+            "citation": {
+              "quote": "Mentioned technologies: Python, AWS, Terraform, Docker",
+              "start": 259,
+              "end": 313,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "Docker",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Python, AWS, Terraform, Docker",
+            "citation": {
+              "quote": "Mentioned technologies: Python, AWS, Terraform, Docker",
+              "start": 259,
+              "end": 313,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "security checks are mandatory",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Baseline security checks are mandatory",
+            "citation": {
+              "quote": "Baseline security checks are mandatory",
+              "start": 124,
+              "end": 162,
+              "confidence": 0.0
+            }
+          },
+          {
+            "text": "additional clearance preferred",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "additional clearance preferred",
+            "citation": {
+              "quote": "additional clearance preferred",
+              "start": 164,
+              "end": 194,
+              "confidence": 0.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "21310d8c-2537-5f55-b1f7-5d119ff25e81",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": true,
+        "country": true
+      },
+      "actual_eur": "0.00035000",
+      "latency_ms": 2746,
+      "input_tokens": 984,
+      "output_tokens": 454,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-16",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Technical support engineer",
+          "company_name": "EMP-A",
+          "location": "Dublin, IE",
+          "country": "IE",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": null,
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Technical support engineer",
+            "start": 0,
+            "end": 26,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "EMP-A",
+            "start": 37,
+            "end": 42,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Dublin, IE",
+            "start": 53,
+            "end": 63,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "IE",
+            "start": 61,
+            "end": 63,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Requires two years in B2B technical support or engineering",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Requires two years in B2B technical support or engineering",
+            "citation": {
+              "quote": "Requires two years in B2B technical support or engineering",
+              "start": 64,
+              "end": 122,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "API scripts",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "API scripts",
+            "citation": {
+              "quote": "API scripts",
+              "start": 124,
+              "end": 135,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "SQL",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "SQL",
+            "citation": {
+              "quote": "SQL",
+              "start": 137,
+              "end": 140,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "customer debugging",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "customer debugging",
+            "citation": {
+              "quote": "customer debugging",
+              "start": 145,
+              "end": 163,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Internal support experience does not automatically prove B2B experience",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Internal support experience does not automatically prove B2B experience",
+            "citation": {
+              "quote": "Internal support experience does not automatically prove B2B experience",
+              "start": 165,
+              "end": 236,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Mentioned technologies: SQL, Python, TypeScript",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: SQL, Python, TypeScript",
+            "citation": {
+              "quote": "Mentioned technologies: SQL, Python, TypeScript",
+              "start": 238,
+              "end": 285,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "b18dffc2-1e3b-5b15-893b-be35856f1229",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00034413",
+      "latency_ms": 2246,
+      "input_tokens": 985,
+      "output_tokens": 442,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-17",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Graduate infrastructure engineer",
+          "company_name": "EMP-E",
+          "location": "London, GB",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "graduate",
+          "work_authorisation": "conditional",
+          "sponsorship": "available",
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Graduate infrastructure engineer",
+            "start": 0,
+            "end": 32,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "EMP-E",
+            "start": 43,
+            "end": 48,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "London, GB",
+            "start": 59,
+            "end": 69,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "GB",
+            "start": 67,
+            "end": 69,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Final-year degree students",
+            "start": 70,
+            "end": 96,
+            "confidence": 1.0
+          },
+          "work_authorisation": {
+            "quote": "Sponsorship is available only for selected roles",
+            "start": 158,
+            "end": 206,
+            "confidence": 1.0
+          },
+          "sponsorship": {
+            "quote": "Sponsorship is available only for selected roles",
+            "start": 158,
+            "end": 206,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Linux or networking training, automation and observability",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Linux or networking training, automation and observability",
+            "citation": {
+              "quote": "Linux or networking training, automation and observability",
+              "start": 98,
+              "end": 156,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "4857a59a-73d2-5107-a29a-23e4f3d37806",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": false,
+        "country": true
+      },
+      "actual_eur": "0.00024263",
+      "latency_ms": 1440,
+      "input_tokens": 989,
+      "output_tokens": 238,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-18",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Graduate machine learning researcher",
+          "company_name": "EMP-F",
+          "location": "London",
+          "country": "GB",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "graduate",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Graduate machine learning researcher",
+            "start": 0,
+            "end": 36,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "EMP-F",
+            "start": 47,
+            "end": 52,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "London",
+            "start": 63,
+            "end": 69,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "GB",
+            "start": 71,
+            "end": 73,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Graduate",
+            "start": 0,
+            "end": 8,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Requires a relevant MSc, research track record and graduation in 2027.",
+            "category": "education",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Requires a relevant MSc, research track record and graduation in 2027.",
+            "citation": {
+              "quote": "Requires a relevant MSc, research track record and graduation in 2027.",
+              "start": 74,
+              "end": 144,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Postgraduate diploma must not be relabelled as an MSc.",
+            "category": "education",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Postgraduate diploma must not be relabelled as an MSc.",
+            "citation": {
+              "quote": "Postgraduate diploma must not be relabelled as an MSc.",
+              "start": 145,
+              "end": 199,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Mentioned technologies: Python, PyTorch",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Python, PyTorch",
+            "citation": {
+              "quote": "Mentioned technologies: Python, PyTorch",
+              "start": 200,
+              "end": 239,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "95f2536d-d710-544f-baf2-386dfa102573",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": true,
+        "country": true
+      },
+      "actual_eur": "0.00028638",
+      "latency_ms": 2115,
+      "input_tokens": 975,
+      "output_tokens": 329,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-19",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Senior software engineer outside target markets",
+          "company_name": "EMP-G",
+          "location": "Ontario",
+          "country": "OTHER",
+          "work_mode": null,
+          "employment_type": null,
+          "seniority": "senior",
+          "work_authorisation": "Canadian work rights",
+          "sponsorship": "unavailable",
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Senior software engineer outside target markets",
+            "start": 0,
+            "end": 47,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "Employer: EMP-G",
+            "start": 48,
+            "end": 63,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "Location: Ontario",
+            "start": 64,
+            "end": 81,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "Location: Ontario, OTHER",
+            "start": 64,
+            "end": 88,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Senior role in Canada",
+            "start": 89,
+            "end": 110,
+            "confidence": 1.0
+          },
+          "work_authorisation": {
+            "quote": "Existing Canadian work rights are required",
+            "start": 154,
+            "end": 196,
+            "confidence": 1.0
+          },
+          "sponsorship": {
+            "quote": "sponsorship is explicitly unavailable",
+            "start": 201,
+            "end": 238,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "requiring five years of production coding",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "requiring five years of production coding",
+            "citation": {
+              "quote": "requiring five years of production coding",
+              "start": 111,
+              "end": 152,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "Existing Canadian work rights are required",
+            "category": "work_authorisation_hours",
+            "importance": "required",
+            "is_eliminatory": true,
+            "future_authorisation": false,
+            "source_locator": "Existing Canadian work rights are required",
+            "citation": {
+              "quote": "Existing Canadian work rights are required",
+              "start": 154,
+              "end": 196,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "a5b692a5-7770-518d-9e41-6b0742b1fa50",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": true,
+        "country": true
+      },
+      "actual_eur": "0.00026675",
+      "latency_ms": 2250,
+      "input_tokens": 982,
+      "output_tokens": 288,
+      "error_code": null
+    },
+    {
+      "case_id": "REAL-20",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "evaluation",
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Senior backend Java engineer",
+          "company_name": "EMP-H",
+          "location": "London",
+          "country": "GB",
+          "work_mode": "hybrid",
+          "employment_type": null,
+          "seniority": "senior",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Senior backend Java engineer",
+            "start": 0,
+            "end": 28,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "EMP-H",
+            "start": 39,
+            "end": 44,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "London",
+            "start": 55,
+            "end": 61,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "GB",
+            "start": 63,
+            "end": 65,
+            "confidence": 1.0
+          },
+          "work_mode": {
+            "quote": "Hybrid attendance twice weekly",
+            "start": 156,
+            "end": 186,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Senior backend Java engineer",
+            "start": 0,
+            "end": 28,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Advanced commercial Java, Spring Boot and Kafka",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Advanced commercial Java, Spring Boot and Kafka",
+            "citation": {
+              "quote": "Advanced commercial Java, Spring Boot and Kafka",
+              "start": 66,
+              "end": 113,
+              "confidence": 1.0
+            }
+          },
+          {
+            "text": "leading complex multi-engineer projects",
+            "category": "career_value",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "leading complex multi-engineer projects",
+            "citation": {
+              "quote": "leading complex multi-engineer projects",
+              "start": 115,
+              "end": 154,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "92e4f906-c382-5796-a20e-194bf63660f8",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": true,
+        "country": true
+      },
+      "actual_eur": "0.00025500",
+      "latency_ms": 1948,
+      "input_tokens": 972,
+      "output_tokens": 267,
+      "error_code": null
+    }
+  ],
+  "model_selection": null,
+  "human_review": "pending",
+  "gates": {
+    "valid_output_rate": 0.95,
+    "field_accuracy": 0.95,
+    "quoted_spans_valid": 1.0,
+    "human_entailment_review": "required"
+  },
+  "limitations": [
+    "Public paraphrases, not complete original adverts.",
+    "Labels are design annotations, not human gold.",
+    "No candidate data; this benchmark cannot establish matching accuracy.",
+    "Confidence scores are not calibrated probabilities."
+  ],
+  "blocked_reason": null,
+  "executed_at": "2026-09-20T05:20:26.447416+00:00",
+  "metrics": {
+    "gpt-4.1-mini-2025-04-14": {
+      "attempted": 20,
+      "valid_outputs": 4,
+      "valid_output_rate": 0.2,
+      "field_accuracy_on_valid_outputs": 0.75,
+      "refusals": 0,
+      "invalid_outputs": 16,
+      "latency_p50_ms": 3134,
+      "latency_p95_ms": 4857,
+      "cost_eur": "0.02413500",
+      "by_split": {
+        "evaluation": {
+          "attempted": 8,
+          "valid": 1
+        },
+        "development": {
+          "attempted": 12,
+          "valid": 3
+        }
+      },
+      "human_review": "pending"
+    },
+    "gpt-4.1-nano-2025-04-14": {
+      "attempted": 20,
+      "valid_outputs": 17,
+      "valid_output_rate": 0.85,
+      "field_accuracy_on_valid_outputs": 0.8235294117647058,
+      "refusals": 0,
+      "invalid_outputs": 3,
+      "latency_p50_ms": 2246,
+      "latency_p95_ms": 3626,
+      "cost_eur": "0.00558930",
+      "by_split": {
+        "evaluation": {
+          "attempted": 8,
+          "valid": 8
+        },
+        "development": {
+          "attempted": 12,
+          "valid": 9
+        }
+      },
+      "human_review": "pending"
+    }
+  }
+}

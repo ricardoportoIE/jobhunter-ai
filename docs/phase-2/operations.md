@@ -4,8 +4,9 @@
 
 OpenAI foi escolhido pelo utilizador. A chave fornecida foi importada para `.env`, ignorado
 pelo Git, sem ser exibida. Somente a API recebe a chave; ela não entra no frontend ou nas imagens.
-As duas verificações iniciais receberam HTTP 429. O utilizador confirmou que o faturamento da
-API ainda não está configurado. Não houve nova chamada externa depois dessa confirmação.
+As duas verificações iniciais receberam HTTP 429. Após o utilizador adicionar US$10 e autorizar
+os testes, parsing, matching, embeddings e o fluxo HTTP real foram validados. Veja os
+[resultados, consumo e limites da avaliação](validation.md).
 
 Para configurar/substituir a chave, execute na raiz:
 
@@ -21,7 +22,7 @@ O arquivo original em Downloads foi preservado.
 | Configuração em `.env` | Padrão / limite |
 |---|---|
 | `JOBHUNTER_OPENAI_API_KEY` | Segredo exclusivo do backend |
-| `JOBHUNTER_AI_MODEL` | `gpt-4.1-mini-2025-04-14`, provisório |
+| `JOBHUNTER_AI_MODEL` | `gpt-4.1-mini-2025-04-14`, escolhido no benchmark para uso revisado |
 | Segundo modelo permitido | `gpt-4.1-nano-2025-04-14` |
 | Embeddings | `text-embedding-3-small`, 256 dimensões |
 | `JOBHUNTER_AI_MONTHLY_EUR` | €10; pode reduzir |
@@ -73,12 +74,13 @@ Os limites protegem esta aplicação, não outros usos da chave/conta, impostos 
 revisadas do preço. A reserva de €15 não cria AWS nem consulta seu faturamento. Totais locais
 não são uma fatura. Eliminação de dados não reinicia o orçamento.
 
-## Benchmark depois de ativar faturamento
+## Benchmark e testes reais opcionais
 
 Na raiz, para executar os 20 casos públicos com os dois candidatos:
 
 ```powershell
 uv run --project apps/api --env-file .env python scripts/evaluate_phase2.py --live --max-additional-eur 1
+uv run --project apps/api --env-file .env python scripts/validate_phase2_live.py --live
 ```
 
 Sem `--live`, não há chamadas. Limite adicional: €1, sempre dentro do teto mensal. Relatório:
@@ -86,10 +88,20 @@ Sem `--live`, não há chamadas. Limite adicional: €1, sempre dentro do teto m
 e não promove modelo automaticamente. Para uma falha já corrigida, `--attempt 2` permite a
 segunda tentativa dentro do limite diário. Nenhum documento privado participa desse dataset.
 
-Gates propostos: ≥95% de saídas válidas e ≥95% de campos básicos corretos; citações inexistentes
+O segundo comando executa provas fictícias de parsing adversarial, salário, matching, embeddings
+e cache, com até €0,25 adicionais dentro do teto mensal. Não altera o perfil do candidato.
+Resultado: `data/evals/phase2-live-acceptance.json`. Chamadas já concluídas são reutilizadas.
+Uma nova execução do benchmark substitui o relatório desse caminho por resultados sem revisão;
+use `--output OUTRO_CAMINHO.json` para preservar o relatório final selecionado.
+
+Gates técnicos: ≥95% de saídas válidas e ≥95% de campos básicos corretos; citações inexistentes
 são rejeitadas. A revisão humana deve avaliar interpretação de requisitos, desconhecidos,
 recusas, falsos duplicados e matching. Dados reformulados/pseudonimizados não são gold humano.
 Esse benchmark de parsing não mede a precisão de matching do candidato.
+Na execução final, mini passou os gates; nano falhou em validade e perdeu uma restrição de
+sponsorship. O split original foi reutilizado nos ajustes e não representa holdout intocado.
+Revisão documental pelo assistente está registrada; revisão humana continua obrigatória por
+vaga antes do score. Não existe aprovação humana de gold set implícita nesses resultados.
 
 ## Privacidade e limites
 
@@ -119,6 +131,7 @@ $env:JOBHUNTER_TEST_DB_NAME = 'jobhunter_test'
 uv run --locked --env-file ../../.env pytest
 uv run --locked mypy
 uv run --locked ruff check . ../../scripts/evaluate_phase2.py ../../scripts/configure_openai.py
+uv run --locked ruff check ../../scripts/validate_phase2_live.py
 uv run --locked python ../../scripts/evaluate_phase2.py --check
 ```
 

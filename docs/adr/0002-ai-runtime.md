@@ -1,11 +1,13 @@
 # ADR-002 — Inferência e execução de agentes
 
-Estado: estratégia adotada; provider/modelo final dependem do benchmark na fase 2. Data da consulta: 2026-09-19.
+Estado: adotado para uso local assistido. Modelo selecionado no benchmark P2 em 2026-09-20.
 
 Atualização P2, 2026-09-20: o utilizador escolheu OpenAI e forneceu chave privada. Adapter
-Responses/embeddings implementado com orçamento local e revisão humana. GPT-4.1 mini é
-padrão provisório; nano é segundo candidato. Duas tentativas retornaram HTTP 429 e o utilizador
-confirmou faturamento não configurado. Benchmark e escolha empírica permanecem pendentes.
+Responses/embeddings implementado com orçamento local e revisão humana. Após o crédito de
+US$10, o benchmark real foi executado. GPT-4.1 mini escolhido: 20/20 saídas válidas e 79/80
+campos básicos corretos. Nano: 18/20 válidas e perda de condição de sponsorship na revisão.
+O custo de mini nos 20 casos foi €0,02443300; seleção para rascunhos revisados, sem alegar
+precisão de matching pessoal ou gold humano. [Evidências e limites](../phase-2/validation.md).
 Ver [operação P2](../phase-2/operations.md).
 
 ## Distinção necessária
@@ -32,6 +34,6 @@ Bedrock é candidato preferido para a AWS; API direta é alternativa de desenvol
 
 ## Como decidir por evidência
 
-Executar os mesmos 20 casos com dois candidatos, registrar precisão de campos, recusas, saída inválida, latência p50/p95 e custo completo incluindo retries. Promover o modelo mais barato que cumpra os gates de qualidade e privacidade. Sem benchmark executado nesta fase.
+Executar os mesmos 20 casos com dois candidatos, registrar precisão de campos, recusas, saída inválida, latência p50/p95 e custo completo incluindo retries. Escolher o modelo mais barato que cumpra os gates de qualidade e privacidade. Comparação executada em P2: mini passa os gates; nano não. Novos casos com revisão humana são necessários para estimar generalização e calibração.
 
 Reavaliar AgentCore quando isolamento de browser, identidade de ferramentas ou gestão de sessões resolverem uma necessidade medida que Lambda/Fargate não atendam com simplicidade. MCP entra apenas quando ferramentas forem reutilizadas por clientes distintos.

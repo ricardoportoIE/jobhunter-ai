@@ -2,7 +2,7 @@
 
 Plataforma de inteligência de carreira que compara vagas com um perfil baseado em evidências e prepara candidaturas para revisão humana.
 
-**Estado: P1 e recursos de P2 implementados localmente.** Extração com IA e citações, rascunhos revisáveis, embeddings, busca semântica, revisão de duplicados, matching assistido e controle de custos. O benchmark real de P2 aguarda faturamento da API OpenAI: as duas tentativas iniciais retornaram HTTP 429. Não há medição de qualidade nem modelo vencedor declarado. Teto do projeto: €10/mês de IA e €25 combinados.
+**Estado: P1 e P2 concluídos para uso local com revisão humana.** Extração com IA e citações, rascunhos revisáveis, embeddings, busca semântica, revisão de duplicados, matching assistido e controle de custos. Testes reais OpenAI executados: GPT-4.1 mini selecionado, com 20/20 extrações válidas e 79/80 campos básicos corretos no dataset público derivado. A interpretação de requisitos continua sujeita à revisão humana; não é um gold set humano. Teto do projeto: €10/mês de IA e €25 combinados.
 
 ## Iniciar localmente
 
@@ -21,7 +21,7 @@ Abra [a aplicação](http://127.0.0.1:5173). O utilizador é `local`; a senha in
 Veja [desenvolvimento e testes](docs/local-development.md), [entregas por etapa](docs/phase-1/progress.md), [contratos de runtime](docs/phase-1/runtime-contracts.md), [avaliação dos 20 casos](docs/phase-1/evaluation-results.md) e [privacidade e eliminação](docs/phase-1/security-and-data.md).
 
 Para os recursos de IA, veja [operação e privacidade de P2](docs/phase-2/operations.md),
-[etapas e commits](docs/phase-2/progress.md) e [validação e pendências](docs/phase-2/validation.md).
+[etapas e commits](docs/phase-2/progress.md) e [validação e limites da avaliação](docs/phase-2/validation.md).
 A chave é configurada somente no backend, em `.env`, usando `python scripts/configure_openai.py CAMINHO_DO_ARQUIVO`.
 Depois de configurar, recrie a API com `docker compose up --detach --wait api`.
 
@@ -51,7 +51,7 @@ Fluxo implementado: registrar evidências e fatos, publicar o perfil, importar t
 
 ## Dados e validação
 
-Exemplos em `data/fixtures/` são fictícios. `data/evals/real-cases.json` contém 20 anúncios reais reformulados e pseudonimizados, com rótulos de design feitos pelo assistente; não é um benchmark executado ou gold set humano. CV, 114 fatos, 43 evidências, contatos, restrições e originais das vagas ficam em `.private/`, ignorado pelo Git.
+Exemplos em `data/fixtures/` são fictícios. `data/evals/real-cases.json` contém 20 anúncios reais reformulados e pseudonimizados, com rótulos de design feitos pelo assistente; não é um gold set humano. A execução real está em `data/evals/phase2-benchmark.json`. CV, 114 fatos, 43 evidências, contatos, restrições e originais das vagas ficam em `.private/`, ignorado pelo Git.
 
 Validação documental e de schemas:
 
@@ -62,4 +62,4 @@ python -m venv .venv
 .venv\Scripts\python scripts/validate_phase0.py --private
 ```
 
-O comando com `--private` valida também os dados privados nesta máquina e não se aplica a clones sem `.private/`. Os testes da aplicação estão no guia de desenvolvimento. Não há deploy cloud, recursos AWS, integração de email ou envio de candidatura configurados. O benchmark com faturamento ativo e a revisão humana são as pendências de validação do P2.
+O comando com `--private` valida também os dados privados nesta máquina e não se aplica a clones sem `.private/`. Os testes da aplicação estão no guia de desenvolvimento. Não há deploy cloud, recursos AWS, integração de email ou envio de candidatura configurados. P2 foi validado com faturamento ativo; cada vaga continua exigindo revisão humana antes do score. Calibração com novos rótulos humanos pertence ao piloto.

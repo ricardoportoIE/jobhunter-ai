@@ -1,0 +1,177 @@
+{
+  "executed_at": "2026-09-20T05:31:28.084230+00:00",
+  "synthetic_only": true,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "checks": {
+    "parser_injection_and_salary": true,
+    "parser_cache": true,
+    "matching_skill_supported_others_unknown": true,
+    "embedding_dimensions_and_ranking": true,
+    "embedding_cache": true
+  },
+  "runs": [
+    {
+      "probe": "parser_injection",
+      "run_id": "2ca327fe-3acc-4c33-b53a-19561f4a56f9",
+      "cached": false
+    },
+    {
+      "probe": "grounded_matching",
+      "run_id": "1c744e89-5ee0-490d-ab5b-71b0989950e6",
+      "cached": true
+    },
+    {
+      "probe": "embeddings",
+      "run_id": "7e8a45dd-ddc6-4dae-960d-618bb8b74677",
+      "cached": true
+    }
+  ],
+  "matching_result": {
+    "job_id": "3fefadd8-15cd-530e-86b6-6899f4be7aab",
+    "assessments": [
+      {
+        "reason": "O fato indica que a pessoa construiu um projeto pessoal de API em Python, demonstrando habilidades de programação em Python. Embora não haja evidência de emprego comercial, a habilidade técnica está comprovada pelo projeto pessoal.",
+        "status": "met",
+        "fact_ids": [
+          "ec6cb706-c9f4-58dc-b5ff-3e78336eb738"
+        ],
+        "citations": [
+          {
+            "fact_id": "ec6cb706-c9f4-58dc-b5ff-3e78336eb738",
+            "fact_quote": "Built a personal Python API project.",
+            "evidence_id": "402d93ec-63a2-5999-9c67-0366de3bfd93",
+            "evidence_quote": "Synthetic portfolio: a personal Python API with automated tests."
+          }
+        ],
+        "confidence": 0.9,
+        "requirement_id": "8e81e63f-8db5-5808-8691-ba964e96a0c7"
+      },
+      {
+        "reason": "Não há evidência fornecida sobre experiência comercial ou tempo de emprego na área de software.",
+        "status": "unknown",
+        "fact_ids": [],
+        "citations": [],
+        "confidence": 0.5,
+        "requirement_id": "052e8656-eaa9-5c7c-bd66-ea4374e2e0f3"
+      },
+      {
+        "reason": "Não há informações sobre autorização atual para trabalhar em tempo integral na Irlanda.",
+        "status": "unknown",
+        "fact_ids": [],
+        "citations": [],
+        "confidence": 0.5,
+        "requirement_id": "26201eae-3026-5878-8bc3-1e126c2d2b53"
+      },
+      {
+        "reason": "Requer avaliação humana específica de experiência ou estratégia.",
+        "status": "unknown",
+        "fact_ids": [],
+        "citations": [],
+        "confidence": 0,
+        "requirement_id": "14b4b599-351c-5d5e-891d-4fe859a48556"
+      }
+    ],
+    "job_version": 1,
+    "limitations": [
+      "A avaliação das habilidades em Python baseia-se apenas em um projeto pessoal, sem comprovação de uso comercial.",
+      "Não há evidências sobre experiência profissional, autorização de trabalho ou preferências de carreira."
+    ],
+    "input_snapshot": {
+      "facts": [
+        {
+          "id": "ec6cb706-c9f4-58dc-b5ff-3e78336eb738",
+          "claim": "Built a personal Python API project.",
+          "version": 1,
+          "category": "project",
+          "evidence_ids": [
+            "402d93ec-63a2-5999-9c67-0366de3bfd93"
+          ]
+        }
+      ],
+      "job_id": "3fefadd8-15cd-530e-86b6-6899f4be7aab",
+      "evidence": [
+        {
+          "id": "402d93ec-63a2-5999-9c67-0366de3bfd93",
+          "content": "Synthetic portfolio: a personal Python API with automated tests. No employment record provided.",
+          "version": 1
+        }
+      ],
+      "job_version": 1,
+      "requirements": [
+        {
+          "id": "8e81e63f-8db5-5808-8691-ba964e96a0c7",
+          "text": "Python programming skills",
+          "category": "technical_skills"
+        },
+        {
+          "id": "052e8656-eaa9-5c7c-bd66-ea4374e2e0f3",
+          "text": "Three years of commercial software employment",
+          "category": "seniority_experience"
+        },
+        {
+          "id": "26201eae-3026-5878-8bc3-1e126c2d2b53",
+          "text": "Current permission to work full time in Ireland",
+          "category": "work_authorisation_hours"
+        },
+        {
+          "id": "14b4b599-351c-5d5e-891d-4fe859a48556",
+          "text": "Best long-term career choice",
+          "category": "career_value"
+        }
+      ],
+      "profile_version": 1
+    },
+    "profile_version": 1,
+    "review_required": true
+  },
+  "similarity": {
+    "relevant": 0.5801794621685861,
+    "unrelated": 0.3160104105615285,
+    "dimensions": 256
+  },
+  "usage": [
+    {
+      "id": "1c744e89-5ee0-490d-ab5b-71b0989950e6",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "input_tokens": 898,
+      "output_tokens": 398,
+      "actual_eur": "0.00124500",
+      "latency_ms": 3369,
+      "status": "succeeded"
+    },
+    {
+      "id": "7e8a45dd-ddc6-4dae-960d-618bb8b74677",
+      "model": "text-embedding-3-small",
+      "input_tokens": 26,
+      "output_tokens": 0,
+      "actual_eur": "6.5E-7",
+      "latency_ms": 2498,
+      "status": "succeeded"
+    },
+    {
+      "id": "2ca327fe-3acc-4c33-b53a-19561f4a56f9",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "input_tokens": 1255,
+      "output_tokens": 272,
+      "actual_eur": "0.00117150",
+      "latency_ms": 3053,
+      "status": "succeeded"
+    }
+  ],
+  "cost_eur": "0.00241715",
+  "project_totals": {
+    "spent_eur": "0.13188276",
+    "reserved_eur": "0",
+    "allocated_eur": "0.13188276",
+    "limit_eur": "10",
+    "combined_allocated_eur": "15.13188276",
+    "combined_limit_eur": "25",
+    "aws_allowance_eur": "15",
+    "unreconciled": false,
+    "alerts": [],
+    "combined_alerts": [
+      50
+    ]
+  },
+  "status": "passed"
+}

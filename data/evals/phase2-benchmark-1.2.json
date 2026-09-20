@@ -1,13 +1,13 @@
 {
   "dataset_version": "0.1.0",
-  "prompt_version": "job-parser-1.3",
+  "prompt_version": "job-parser-1.2",
   "human_gold": false,
   "case_count": 20,
   "models": [
     "gpt-4.1-mini-2025-04-14",
     "gpt-4.1-nano-2025-04-14"
   ],
-  "status": "executed_reviewed",
+  "status": "executed_pending_review",
   "results": [
     {
       "case_id": "REAL-01",
@@ -77,7 +77,7 @@
           {
             "text": "previous collaborative development",
             "category": "seniority_experience",
-            "importance": "required",
+            "importance": "preferred",
             "is_eliminatory": false,
             "future_authorisation": false,
             "source_locator": "previous collaborative development",
@@ -85,7 +85,7 @@
               "quote": "previous collaborative development",
               "start": 133,
               "end": 167,
-              "confidence": 1.0
+              "confidence": 0.9
             }
           },
           {
@@ -114,10 +114,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00127750",
-      "latency_ms": 3206,
+      "actual_eur": "0.00128150",
+      "latency_ms": 3134,
       "input_tokens": 1251,
-      "output_tokens": 326,
+      "output_tokens": 328,
       "error_code": null
     },
     {
@@ -173,10 +173,10 @@
         "requirements": [],
         "risk_flags": [
           "No explicit employment type stated",
-          "No work mode stated",
+          "No explicit work mode stated",
           "No work authorisation information",
           "No sponsorship information",
-          "No salary information"
+          "Salary not stated"
         ],
         "review_required": true,
         "job_id": "1a23ecea-4ad2-5a08-b581-56b861c0dcdd",
@@ -188,10 +188,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00101850",
-      "latency_ms": 1955,
+      "actual_eur": "0.00102050",
+      "latency_ms": 3115,
       "input_tokens": 1237,
-      "output_tokens": 200,
+      "output_tokens": 201,
       "error_code": null
     },
     {
@@ -284,7 +284,21 @@
               "quote": "internship work contributes to production systems",
               "start": 132,
               "end": 181,
-              "confidence": 0.8
+              "confidence": 0.7
+            }
+          },
+          {
+            "text": "Mentioned technologies: Java, JavaScript",
+            "category": "technical_skills",
+            "importance": "preferred",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Mentioned technologies: Java, JavaScript",
+            "citation": {
+              "quote": "Mentioned technologies: Java, JavaScript",
+              "start": 183,
+              "end": 223,
+              "confidence": 0.7
             }
           }
         ],
@@ -299,10 +313,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00123250",
-      "latency_ms": 2168,
+      "actual_eur": "0.00133450",
+      "latency_ms": 3270,
       "input_tokens": 1241,
-      "output_tokens": 306,
+      "output_tokens": 357,
       "error_code": null
     },
     {
@@ -383,7 +397,7 @@
         "country": true
       },
       "actual_eur": "0.00109000",
-      "latency_ms": 2066,
+      "latency_ms": 2137,
       "input_tokens": 1236,
       "output_tokens": 236,
       "error_code": null
@@ -411,31 +425,31 @@
             "quote": "Software engineer in payments",
             "start": 0,
             "end": 29,
-            "confidence": 0.9
+            "confidence": 1.0
           },
           "company_name": {
             "quote": "Employer: EMP-A",
             "start": 30,
             "end": 45,
-            "confidence": 0.9
+            "confidence": 1.0
           },
           "location": {
             "quote": "Location: Dublin, IE",
             "start": 46,
             "end": 66,
-            "confidence": 0.9
+            "confidence": 1.0
           },
           "country": {
             "quote": "Location: Dublin, IE",
             "start": 46,
             "end": 66,
-            "confidence": 0.9
+            "confidence": 1.0
           },
           "seniority": {
             "quote": "Requires at least two years of industry software engineering, excluding internships.",
             "start": 67,
             "end": 151,
-            "confidence": 0.8
+            "confidence": 0.9
           }
         },
         "requirements": [
@@ -450,11 +464,17 @@
               "quote": "Requires at least two years of industry software engineering, excluding internships.",
               "start": 67,
               "end": 151,
-              "confidence": 0.9
+              "confidence": 1.0
             }
           }
         ],
-        "risk_flags": [],
+        "risk_flags": [
+          "No explicit work mode stated",
+          "No employment type stated",
+          "No salary information provided",
+          "No work authorisation information provided",
+          "No sponsorship information provided"
+        ],
         "review_required": true,
         "job_id": "b3e86a1a-83d3-5cee-ab25-6438d9508d09",
         "job_version": 1
@@ -465,10 +485,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00113350",
-      "latency_ms": 2372,
+      "actual_eur": "0.00116950",
+      "latency_ms": 2816,
       "input_tokens": 1239,
-      "output_tokens": 257,
+      "output_tokens": 275,
       "error_code": null
     },
     {
@@ -515,9 +535,9 @@
             "confidence": 1.0
           },
           "seniority": {
-            "quote": "Minimum two years of industry software engineering",
+            "quote": "Minimum two years of industry software engineering, with independent delivery and production debugging",
             "start": 70,
-            "end": 120,
+            "end": 172,
             "confidence": 0.9
           }
         },
@@ -562,10 +582,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00120900",
-      "latency_ms": 4432,
+      "actual_eur": "0.00122300",
+      "latency_ms": 2716,
       "input_tokens": 1242,
-      "output_tokens": 294,
+      "output_tokens": 301,
       "error_code": null
     },
     {
@@ -615,7 +635,7 @@
             "quote": "Minimum two years of industry software engineering",
             "start": 66,
             "end": 116,
-            "confidence": 0.9
+            "confidence": 0.8
           }
         },
         "requirements": [
@@ -632,51 +652,15 @@
               "end": 116,
               "confidence": 1.0
             }
-          },
-          {
-            "text": "Experience with large financial APIs",
-            "category": "technical_skills",
-            "importance": "preferred",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "large financial APIs",
-            "citation": {
-              "quote": "large financial APIs",
-              "start": 118,
-              "end": 138,
-              "confidence": 0.8
-            }
-          },
-          {
-            "text": "Experience with distributed collaboration",
-            "category": "technical_skills",
-            "importance": "preferred",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "distributed collaboration",
-            "citation": {
-              "quote": "distributed collaboration",
-              "start": 140,
-              "end": 165,
-              "confidence": 0.8
-            }
-          },
-          {
-            "text": "Experience with production support",
-            "category": "technical_skills",
-            "importance": "preferred",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "production support",
-            "citation": {
-              "quote": "production support",
-              "start": 170,
-              "end": 188,
-              "confidence": 0.8
-            }
           }
         ],
-        "risk_flags": [],
+        "risk_flags": [
+          "No explicit work mode stated",
+          "No employment type stated",
+          "No salary information provided",
+          "No work authorisation information provided",
+          "No sponsorship information provided"
+        ],
         "review_required": true,
         "job_id": "6f872579-999d-54af-b597-4142a1f4d1b4",
         "job_version": 1
@@ -687,10 +671,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00133650",
-      "latency_ms": 2725,
+      "actual_eur": "0.00114250",
+      "latency_ms": 2162,
       "input_tokens": 1241,
-      "output_tokens": 358,
+      "output_tokens": 261,
       "error_code": null
     },
     {
@@ -841,7 +825,7 @@
         "country": true
       },
       "actual_eur": "0.00144850",
-      "latency_ms": 2968,
+      "latency_ms": 3010,
       "input_tokens": 1237,
       "output_tokens": 415,
       "error_code": null
@@ -930,7 +914,7 @@
         "country": true
       },
       "actual_eur": "0.00112500",
-      "latency_ms": 2403,
+      "latency_ms": 2101,
       "input_tokens": 1238,
       "output_tokens": 253,
       "error_code": null
@@ -961,8 +945,8 @@
             "confidence": 1.0
           },
           "company_name": {
-            "quote": "Employer: EMP-B",
-            "start": 25,
+            "quote": "EMP-B",
+            "start": 35,
             "end": 40,
             "confidence": 1.0
           },
@@ -1001,31 +985,17 @@
             }
           },
           {
-            "text": "automated testing",
+            "text": "automated testing and cloud familiarity are desirable",
             "category": "technical_skills",
             "importance": "preferred",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "automated testing",
+            "source_locator": "automated testing and cloud familiarity are desirable",
             "citation": {
-              "quote": "automated testing",
+              "quote": "automated testing and cloud familiarity are desirable",
               "start": 171,
-              "end": 188,
-              "confidence": 0.9
-            }
-          },
-          {
-            "text": "cloud familiarity",
-            "category": "technical_skills",
-            "importance": "preferred",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "cloud familiarity are desirable",
-            "citation": {
-              "quote": "cloud familiarity are desirable",
-              "start": 193,
               "end": 224,
-              "confidence": 0.9
+              "confidence": 1.0
             }
           }
         ],
@@ -1040,126 +1010,24 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00125200",
-      "latency_ms": 2331,
+      "actual_eur": "0.00118200",
+      "latency_ms": 2382,
       "input_tokens": 1256,
-      "output_tokens": 312,
+      "output_tokens": 277,
       "error_code": null
     },
     {
       "case_id": "REAL-11",
       "model": "gpt-4.1-mini-2025-04-14",
       "split": "development",
-      "status": "succeeded",
-      "result": {
-        "fields": {
-          "title": "Graduate data engineer",
-          "company_name": "EMP-B",
-          "location": "London",
-          "country": "GB",
-          "work_mode": null,
-          "employment_type": null,
-          "seniority": "graduate",
-          "work_authorisation": null,
-          "sponsorship": null,
-          "salary": null
-        },
-        "citations": {
-          "title": {
-            "quote": "Graduate data engineer",
-            "start": 0,
-            "end": 22,
-            "confidence": 1.0
-          },
-          "company_name": {
-            "quote": "EMP-B",
-            "start": 33,
-            "end": 38,
-            "confidence": 1.0
-          },
-          "location": {
-            "quote": "Location: London, GB",
-            "start": 39,
-            "end": 59,
-            "confidence": 1.0
-          },
-          "country": {
-            "quote": "Location: London, GB",
-            "start": 39,
-            "end": 59,
-            "confidence": 1.0
-          },
-          "seniority": {
-            "quote": "Graduate data engineer",
-            "start": 0,
-            "end": 22,
-            "confidence": 1.0
-          }
-        },
-        "requirements": [
-          {
-            "text": "Python and SQL required",
-            "category": "technical_skills",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "Python and SQL required",
-            "citation": {
-              "quote": "Python and SQL required",
-              "start": 60,
-              "end": 83,
-              "confidence": 1.0
-            }
-          },
-          {
-            "text": "dbt desirable",
-            "category": "technical_skills",
-            "importance": "preferred",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "dbt desirable",
-            "citation": {
-              "quote": "dbt desirable",
-              "start": 85,
-              "end": 98,
-              "confidence": 1.0
-            }
-          },
-          {
-            "text": "Graduate data-pipeline role accepts relevant degree or project experience",
-            "category": "education",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "Graduate data-pipeline role accepts relevant degree or project experience",
-            "citation": {
-              "quote": "Graduate data-pipeline role accepts relevant degree or project experience",
-              "start": 100,
-              "end": 173,
-              "confidence": 1.0
-            }
-          }
-        ],
-        "risk_flags": [
-          "Salary described without numeric amount.",
-          "Missing sponsorship information",
-          "salary: valor desconhecido; revisar o trecho: Salary described without numeric amount."
-        ],
-        "review_required": true,
-        "job_id": "da3d1d1b-3c89-5ad6-a725-23b5fc9793a9",
-        "job_version": 1
-      },
-      "field_checks": {
-        "title": true,
-        "company_name": true,
-        "location": true,
-        "country": true
-      },
-      "actual_eur": "0.00126850",
-      "latency_ms": 2559,
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "rejected_public_output": "{\"title\":{\"value\":\"Graduate data engineer\",\"quote\":\"Graduate data engineer\",\"confidence\":1},\"company_name\":{\"value\":\"EMP-B\",\"quote\":\"Employer: EMP-B\",\"confidence\":1},\"location\":{\"value\":\"London\",\"quote\":\"Location: London, GB\",\"confidence\":1},\"country\":{\"value\":\"GB\",\"quote\":\"Location: London, GB\",\"confidence\":1},\"work_mode\":{\"value\":null,\"quote\":null,\"confidence\":0},\"employment_type\":{\"value\":null,\"quote\":null,\"confidence\":0},\"seniority\":{\"value\":\"graduate\",\"quote\":\"Graduate data engineer\",\"confidence\":1},\"work_authorisation\":{\"value\":null,\"quote\":null,\"confidence\":0},\"sponsorship\":{\"value\":null,\"quote\":null,\"confidence\":0},\"salary\":{\"value\":null,\"quote\":\"Salary described without numeric amount.\",\"confidence\":1},\"requirements\":[{\"text\":\"Python and SQL required\",\"category\":\"technical_skills\",\"importance\":\"required\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Python and SQL required\",\"confidence\":1},{\"text\":\"dbt desirable\",\"category\":\"technical_skills\",\"importance\":\"preferred\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"dbt desirable\",\"confidence\":1},{\"text\":\"Graduate data-pipeline role accepts relevant degree or project experience\",\"category\":\"education\",\"importance\":\"required\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Graduate data-pipeline role accepts relevant degree or project experience\",\"confidence\":1}],\"risk_flags\":[\"Salary described without numeric amount.\",\"Missing work mode information.\",\"Missing employment type information.\",\"Missing work authorisation information.\",\"Missing sponsorship information.\"]}",
+      "validation_error": "Missing values must have no evidence or confidence",
+      "actual_eur": "0.00130650",
+      "latency_ms": 2643,
       "input_tokens": 1253,
-      "output_tokens": 321,
-      "error_code": null
+      "output_tokens": 340
     },
     {
       "case_id": "REAL-12",
@@ -1226,7 +1094,7 @@
         "country": true
       },
       "actual_eur": "0.00104600",
-      "latency_ms": 1955,
+      "latency_ms": 2132,
       "input_tokens": 1244,
       "output_tokens": 212,
       "error_code": null
@@ -1297,7 +1165,7 @@
         "country": true
       },
       "actual_eur": "0.00104900",
-      "latency_ms": 3171,
+      "latency_ms": 2561,
       "input_tokens": 1246,
       "output_tokens": 213,
       "error_code": null
@@ -1408,7 +1276,7 @@
         "country": true
       },
       "actual_eur": "0.00126500",
-      "latency_ms": 3351,
+      "latency_ms": 3320,
       "input_tokens": 1258,
       "output_tokens": 318,
       "error_code": null
@@ -1500,11 +1368,8 @@
           }
         ],
         "risk_flags": [
-          "The advert allows exceptions to ordinary nationality criteria.",
-          "No salary information provided.",
-          "No work mode specified.",
-          "No employment type specified.",
-          "No sponsorship information provided."
+          "Salary not specified",
+          "Sponsorship information missing"
         ],
         "review_required": true,
         "job_id": "21310d8c-2537-5f55-b1f7-5d119ff25e81",
@@ -1516,10 +1381,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00125300",
-      "latency_ms": 2512,
+      "actual_eur": "0.00121300",
+      "latency_ms": 2658,
       "input_tokens": 1254,
-      "output_tokens": 313,
+      "output_tokens": 293,
       "error_code": null
     },
     {
@@ -1587,11 +1452,11 @@
             "importance": "required",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "API scripts",
+            "source_locator": "Requires two years in B2B technical support or engineering, API scripts, SQL and customer debugging",
             "citation": {
-              "quote": "API scripts",
-              "start": 124,
-              "end": 135,
+              "quote": "Requires two years in B2B technical support or engineering, API scripts, SQL and customer debugging",
+              "start": 64,
+              "end": 163,
               "confidence": 0.9
             }
           },
@@ -1601,11 +1466,11 @@
             "importance": "required",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "SQL",
+            "source_locator": "Requires two years in B2B technical support or engineering, API scripts, SQL and customer debugging",
             "citation": {
-              "quote": "SQL",
-              "start": 137,
-              "end": 140,
+              "quote": "Requires two years in B2B technical support or engineering, API scripts, SQL and customer debugging",
+              "start": 64,
+              "end": 163,
               "confidence": 1.0
             }
           },
@@ -1615,10 +1480,10 @@
             "importance": "required",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "customer debugging",
+            "source_locator": "Requires two years in B2B technical support or engineering, API scripts, SQL and customer debugging",
             "citation": {
-              "quote": "customer debugging",
-              "start": 145,
+              "quote": "Requires two years in B2B technical support or engineering, API scripts, SQL and customer debugging",
+              "start": 64,
               "end": 163,
               "confidence": 0.9
             }
@@ -1635,126 +1500,24 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00131550",
-      "latency_ms": 2715,
+      "actual_eur": "0.00141950",
+      "latency_ms": 3566,
       "input_tokens": 1255,
-      "output_tokens": 344,
+      "output_tokens": 396,
       "error_code": null
     },
     {
       "case_id": "REAL-17",
       "model": "gpt-4.1-mini-2025-04-14",
       "split": "development",
-      "status": "succeeded",
-      "result": {
-        "fields": {
-          "title": "Graduate infrastructure engineer",
-          "company_name": "EMP-E",
-          "location": "London",
-          "country": "GB",
-          "work_mode": null,
-          "employment_type": null,
-          "seniority": "graduate",
-          "work_authorisation": null,
-          "sponsorship": null,
-          "salary": null
-        },
-        "citations": {
-          "title": {
-            "quote": "Graduate infrastructure engineer",
-            "start": 0,
-            "end": 32,
-            "confidence": 1.0
-          },
-          "company_name": {
-            "quote": "Employer: EMP-E",
-            "start": 33,
-            "end": 48,
-            "confidence": 1.0
-          },
-          "location": {
-            "quote": "Location: London, GB",
-            "start": 49,
-            "end": 69,
-            "confidence": 1.0
-          },
-          "country": {
-            "quote": "Location: London, GB",
-            "start": 49,
-            "end": 69,
-            "confidence": 1.0
-          },
-          "seniority": {
-            "quote": "Graduate infrastructure engineer",
-            "start": 0,
-            "end": 32,
-            "confidence": 1.0
-          }
-        },
-        "requirements": [
-          {
-            "text": "Final-year degree students",
-            "category": "education",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "Final-year degree students",
-            "citation": {
-              "quote": "Final-year degree students",
-              "start": 70,
-              "end": 96,
-              "confidence": 1.0
-            }
-          },
-          {
-            "text": "Linux or networking training",
-            "category": "technical_skills",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "Linux or networking training",
-            "citation": {
-              "quote": "Linux or networking training",
-              "start": 98,
-              "end": 126,
-              "confidence": 1.0
-            }
-          },
-          {
-            "text": "automation and observability",
-            "category": "technical_skills",
-            "importance": "preferred",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "automation and observability",
-            "citation": {
-              "quote": "automation and observability",
-              "start": 128,
-              "end": 156,
-              "confidence": 0.9
-            }
-          }
-        ],
-        "risk_flags": [
-          "Deadline and start-date ordering needs review",
-          "Sponsorship is available only for selected roles.",
-          "sponsorship: valor desconhecido; revisar o trecho: Sponsorship is available only for selected roles."
-        ],
-        "review_required": true,
-        "job_id": "4857a59a-73d2-5107-a29a-23e4f3d37806",
-        "job_version": 1
-      },
-      "field_checks": {
-        "title": true,
-        "company_name": true,
-        "location": true,
-        "country": true
-      },
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "rejected_public_output": "{\"title\":{\"value\":\"Graduate infrastructure engineer\",\"quote\":\"Graduate infrastructure engineer\",\"confidence\":1},\"company_name\":{\"value\":\"EMP-E\",\"quote\":\"Employer: EMP-E\",\"confidence\":1},\"location\":{\"value\":\"London\",\"quote\":\"Location: London, GB\",\"confidence\":1},\"country\":{\"value\":\"GB\",\"quote\":\"Location: London, GB\",\"confidence\":1},\"work_mode\":{\"value\":null,\"quote\":null,\"confidence\":0},\"employment_type\":{\"value\":null,\"quote\":null,\"confidence\":0},\"seniority\":{\"value\":\"graduate\",\"quote\":\"Graduate infrastructure engineer\",\"confidence\":1},\"work_authorisation\":{\"value\":null,\"quote\":null,\"confidence\":0},\"sponsorship\":{\"value\":null,\"quote\":\"Sponsorship is available only for selected roles.\",\"confidence\":0.8},\"salary\":{\"value\":null,\"quote\":null,\"confidence\":0},\"requirements\":[{\"text\":\"Final-year degree students\",\"category\":\"education\",\"importance\":\"required\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Final-year degree students\",\"confidence\":1},{\"text\":\"Linux or networking training\",\"category\":\"technical_skills\",\"importance\":\"required\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Linux or networking training\",\"confidence\":1},{\"text\":\"automation and observability\",\"category\":\"technical_skills\",\"importance\":\"preferred\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"automation and observability\",\"confidence\":0.9}],\"risk_flags\":[\"Deadline and start-date ordering needs review\",\"Sponsorship is available only for selected roles.\"]}",
+      "validation_error": "Missing values must have no evidence or confidence",
       "actual_eur": "0.00128550",
-      "latency_ms": 2706,
+      "latency_ms": 2857,
       "input_tokens": 1259,
-      "output_tokens": 328,
-      "error_code": null
+      "output_tokens": 328
     },
     {
       "case_id": "REAL-18",
@@ -1808,10 +1571,10 @@
         },
         "requirements": [
           {
-            "text": "Requires a relevant MSc",
+            "text": "a relevant MSc",
             "category": "education",
             "importance": "required",
-            "is_eliminatory": false,
+            "is_eliminatory": true,
             "future_authorisation": false,
             "source_locator": "Requires a relevant MSc",
             "citation": {
@@ -1839,7 +1602,7 @@
             "text": "graduation in 2027",
             "category": "education",
             "importance": "required",
-            "is_eliminatory": false,
+            "is_eliminatory": true,
             "future_authorisation": false,
             "source_locator": "Requires a relevant MSc, research track record and graduation in 2027",
             "citation": {
@@ -1855,11 +1618,11 @@
             "importance": "required",
             "is_eliminatory": true,
             "future_authorisation": false,
-            "source_locator": "Postgraduate diploma must not be relabelled as an MSc",
+            "source_locator": "Postgraduate diploma must not be relabelled as an MSc.",
             "citation": {
-              "quote": "Postgraduate diploma must not be relabelled as an MSc",
+              "quote": "Postgraduate diploma must not be relabelled as an MSc.",
               "start": 145,
-              "end": 198,
+              "end": 199,
               "confidence": 1.0
             }
           }
@@ -1875,10 +1638,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00137250",
-      "latency_ms": 2966,
+      "actual_eur": "0.00137050",
+      "latency_ms": 3135,
       "input_tokens": 1245,
-      "output_tokens": 375,
+      "output_tokens": 374,
       "error_code": null
     },
     {
@@ -1913,9 +1676,9 @@
             "confidence": 1.0
           },
           "location": {
-            "quote": "Location: Ontario, OTHER",
+            "quote": "Location: Ontario",
             "start": 64,
-            "end": 88,
+            "end": 81,
             "confidence": 1.0
           },
           "country": {
@@ -1972,10 +1735,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00115200",
-      "latency_ms": 2434,
+      "actual_eur": "0.00114800",
+      "latency_ms": 2553,
       "input_tokens": 1252,
-      "output_tokens": 263,
+      "output_tokens": 261,
       "error_code": null
     },
     {
@@ -2104,7 +1867,7 @@
         "country": true
       },
       "actual_eur": "0.00130300",
-      "latency_ms": 3070,
+      "latency_ms": 2611,
       "input_tokens": 1242,
       "output_tokens": 341,
       "error_code": null
@@ -2135,20 +1898,20 @@
             "confidence": 1.0
           },
           "company_name": {
-            "quote": "Employer: EMP-A",
-            "start": 27,
+            "quote": "EMP-A",
+            "start": 37,
             "end": 42,
             "confidence": 1.0
           },
           "location": {
-            "quote": "Location: Dublin, IE",
-            "start": 43,
+            "quote": "Dublin, IE",
+            "start": 53,
             "end": 63,
             "confidence": 1.0
           },
           "country": {
-            "quote": "Location: Dublin, IE",
-            "start": 43,
+            "quote": "Dublin, IE",
+            "start": 53,
             "end": 63,
             "confidence": 1.0
           },
@@ -2228,10 +1991,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00034438",
-      "latency_ms": 2276,
+      "actual_eur": "0.00034238",
+      "latency_ms": 2437,
       "input_tokens": 1251,
-      "output_tokens": 376,
+      "output_tokens": 372,
       "error_code": null
     },
     {
@@ -2326,7 +2089,7 @@
         "country": true
       },
       "actual_eur": "0.00028363",
-      "latency_ms": 2096,
+      "latency_ms": 1960,
       "input_tokens": 1237,
       "output_tokens": 258,
       "error_code": null
@@ -2423,7 +2186,7 @@
         "country": true
       },
       "actual_eur": "0.00029963",
-      "latency_ms": 2531,
+      "latency_ms": 2641,
       "input_tokens": 1241,
       "output_tokens": 289,
       "error_code": null
@@ -2525,10 +2288,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00029800",
-      "latency_ms": 2823,
+      "actual_eur": "0.00029100",
+      "latency_ms": 1987,
       "input_tokens": 1236,
-      "output_tokens": 287,
+      "output_tokens": 273,
       "error_code": null
     },
     {
@@ -2563,14 +2326,14 @@
             "confidence": 1.0
           },
           "location": {
-            "quote": "Dublin",
+            "quote": "Dublin, IE",
             "start": 56,
-            "end": 62,
+            "end": 66,
             "confidence": 1.0
           },
           "country": {
-            "quote": "IE",
-            "start": 64,
+            "quote": "Dublin, IE",
+            "start": 56,
             "end": 66,
             "confidence": 1.0
           }
@@ -2589,20 +2352,6 @@
               "end": 151,
               "confidence": 1.0
             }
-          },
-          {
-            "text": "Builds APIs and user-facing products.",
-            "category": "technical_skills",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "Builds APIs and user-facing products.",
-            "citation": {
-              "quote": "Builds APIs and user-facing products.",
-              "start": 152,
-              "end": 189,
-              "confidence": 1.0
-            }
           }
         ],
         "risk_flags": [],
@@ -2616,10 +2365,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00029138",
-      "latency_ms": 2027,
+      "actual_eur": "0.00027038",
+      "latency_ms": 1783,
       "input_tokens": 1239,
-      "output_tokens": 273,
+      "output_tokens": 231,
       "error_code": null
     },
     {
@@ -2648,20 +2397,20 @@
             "confidence": 1.0
           },
           "company_name": {
-            "quote": "Employer: EMP-A",
-            "start": 33,
+            "quote": "EMP-A",
+            "start": 43,
             "end": 48,
             "confidence": 1.0
           },
           "location": {
-            "quote": "Location: Dublin, IE",
-            "start": 49,
+            "quote": "Dublin, IE",
+            "start": 59,
             "end": 69,
             "confidence": 1.0
           },
           "country": {
-            "quote": "Location: Dublin, IE",
-            "start": 49,
+            "quote": "Dublin, IE",
+            "start": 59,
             "end": 69,
             "confidence": 1.0
           }
@@ -2669,7 +2418,7 @@
         "requirements": [
           {
             "text": "Minimum two years of industry software engineering, with independent delivery and production debugging",
-            "category": "seniority_experience",
+            "category": "technical_skills",
             "importance": "required",
             "is_eliminatory": true,
             "future_authorisation": false,
@@ -2707,10 +2456,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00029825",
-      "latency_ms": 4090,
+      "actual_eur": "0.00029575",
+      "latency_ms": 2905,
       "input_tokens": 1242,
-      "output_tokens": 286,
+      "output_tokens": 281,
       "error_code": null
     },
     {
@@ -2799,7 +2548,7 @@
         "country": true
       },
       "actual_eur": "0.00029913",
-      "latency_ms": 2122,
+      "latency_ms": 2218,
       "input_tokens": 1241,
       "output_tokens": 288,
       "error_code": null
@@ -2856,37 +2605,23 @@
         },
         "requirements": [
           {
-            "text": "Ten years of technical experience and five in strategic technical leadership",
+            "text": "Ten years of technical experience and five in strategic technical leadership; infrastructure architecture and mentoring.",
             "category": "seniority_experience",
             "importance": "required",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "Ten years of technical experience and five in strategic technical leadership",
+            "source_locator": "Ten years of technical experience and five in strategic technical leadership; infrastructure architecture and mentoring.",
             "citation": {
-              "quote": "Ten years of technical experience and five in strategic technical leadership",
+              "quote": "Ten years of technical experience and five in strategic technical leadership; infrastructure architecture and mentoring.",
               "start": 69,
-              "end": 145,
-              "confidence": 1.0
-            }
-          },
-          {
-            "text": "infrastructure architecture and mentoring",
-            "category": "technical_skills",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "infrastructure architecture and mentoring",
-            "citation": {
-              "quote": "infrastructure architecture and mentoring",
-              "start": 147,
-              "end": 188,
+              "end": 189,
               "confidence": 1.0
             }
           },
           {
             "text": "Mentioned technologies: Java, Python",
             "category": "technical_skills",
-            "importance": "preferred",
+            "importance": "required",
             "is_eliminatory": false,
             "future_authorisation": false,
             "source_locator": "Mentioned technologies: Java, Python",
@@ -2909,10 +2644,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00031763",
-      "latency_ms": 2140,
+      "actual_eur": "0.00030113",
+      "latency_ms": 2088,
       "input_tokens": 1237,
-      "output_tokens": 326,
+      "output_tokens": 293,
       "error_code": null
     },
     {
@@ -2947,21 +2682,21 @@
             "confidence": 1.0
           },
           "location": {
-            "quote": "Dublin, IE",
+            "quote": "Dublin",
             "start": 52,
-            "end": 62,
+            "end": 58,
             "confidence": 1.0
           },
           "country": {
-            "quote": "Dublin, IE",
-            "start": 52,
+            "quote": "IE",
+            "start": 60,
             "end": 62,
             "confidence": 1.0
           },
           "seniority": {
-            "quote": "Staff backend CI engineer",
+            "quote": "Staff",
             "start": 0,
-            "end": 25,
+            "end": 5,
             "confidence": 1.0
           }
         },
@@ -2981,43 +2716,15 @@
             }
           },
           {
-            "text": "distributed systems",
+            "text": "distributed systems, developer tools and mentoring senior engineers",
             "category": "technical_skills",
             "importance": "required",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "distributed systems",
+            "source_locator": "distributed systems, developer tools and mentoring senior engineers",
             "citation": {
-              "quote": "distributed systems",
+              "quote": "distributed systems, developer tools and mentoring senior engineers",
               "start": 111,
-              "end": 130,
-              "confidence": 1.0
-            }
-          },
-          {
-            "text": "developer tools",
-            "category": "technical_skills",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "developer tools",
-            "citation": {
-              "quote": "developer tools",
-              "start": 132,
-              "end": 147,
-              "confidence": 1.0
-            }
-          },
-          {
-            "text": "mentoring senior engineers",
-            "category": "career_value",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "mentoring senior engineers",
-            "citation": {
-              "quote": "mentoring senior engineers",
-              "start": 152,
               "end": 178,
               "confidence": 1.0
             }
@@ -3034,10 +2741,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00032275",
-      "latency_ms": 2346,
+      "actual_eur": "0.00028725",
+      "latency_ms": 1936,
       "input_tokens": 1238,
-      "output_tokens": 336,
+      "output_tokens": 265,
       "error_code": null
     },
     {
@@ -3146,7 +2853,7 @@
         "country": true
       },
       "actual_eur": "0.00033000",
-      "latency_ms": 2395,
+      "latency_ms": 2348,
       "input_tokens": 1256,
       "output_tokens": 346,
       "error_code": null
@@ -3155,87 +2862,98 @@
       "case_id": "REAL-11",
       "model": "gpt-4.1-nano-2025-04-14",
       "split": "development",
+      "status": "invalid",
+      "error_code": "INVALID_OUTPUT",
+      "rejected_public_output": "{\"title\":{\"value\":\"Graduate data engineer\",\"quote\":\"Graduate data engineer\",\"confidence\":1},\"company_name\":{\"value\":\"EMP-B\",\"quote\":\"Employer: EMP-B\",\"confidence\":1},\"location\":{\"value\":\"London\",\"quote\":\"Location: London, GB\",\"confidence\":1},\"country\":{\"value\":\"GB\",\"quote\":\"Location: London, GB\",\"confidence\":1},\"work_mode\":{\"value\":null,\"quote\":null,\"confidence\":0},\"employment_type\":{\"value\":null,\"quote\":null,\"confidence\":0},\"seniority\":{\"value\":\"graduate\",\"quote\":\"Graduate data-pipeline role\",\"confidence\":1},\"work_authorisation\":{\"value\":null,\"quote\":null,\"confidence\":0},\"sponsorship\":{\"value\":null,\"quote\":null,\"confidence\":0},\"salary\":{\"value\":null,\"quote\":\"Salary described without numeric amount.\",\"confidence\":1},\"requirements\":[{\"text\":\"Python and SQL required\",\"category\":\"technical_skills\",\"importance\":\"required\",\"is_eliminatory\":true,\"future_authorisation\":false,\"quote\":\"Python and SQL required\",\"confidence\":1},{\"text\":\"dbt desirable\",\"category\":\"technical_skills\",\"importance\":\"preferred\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"dbt desirable\",\"confidence\":1},{\"text\":\"Graduate data-pipeline role accepts relevant degree or project experience\",\"category\":\"education\",\"importance\":\"required\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Graduate data-pipeline role accepts relevant degree or project experience\",\"confidence\":1}],\"risk_flags\":[]}",
+      "validation_error": "Missing values must have no evidence or confidence",
+      "actual_eur": "0.00031413",
+      "latency_ms": 2423,
+      "input_tokens": 1253,
+      "output_tokens": 315
+    },
+    {
+      "case_id": "REAL-12",
+      "model": "gpt-4.1-nano-2025-04-14",
+      "split": "development",
       "status": "succeeded",
       "result": {
         "fields": {
-          "title": "Graduate data engineer",
+          "title": "Junior software engineer with conflicting body",
           "company_name": "EMP-B",
           "location": "London",
           "country": "GB",
           "work_mode": null,
           "employment_type": null,
-          "seniority": "graduate",
+          "seniority": "junior",
           "work_authorisation": null,
           "sponsorship": null,
           "salary": null
         },
         "citations": {
           "title": {
-            "quote": "Graduate data engineer",
+            "quote": "Junior software engineer with conflicting body",
             "start": 0,
-            "end": 22,
+            "end": 46,
             "confidence": 1.0
           },
           "company_name": {
             "quote": "Employer: EMP-B",
-            "start": 23,
-            "end": 38,
+            "start": 47,
+            "end": 62,
             "confidence": 1.0
           },
           "location": {
             "quote": "Location: London, GB",
-            "start": 39,
-            "end": 59,
+            "start": 63,
+            "end": 83,
             "confidence": 1.0
           },
           "country": {
             "quote": "Location: London, GB",
-            "start": 39,
-            "end": 59,
+            "start": 63,
+            "end": 83,
             "confidence": 1.0
           },
           "seniority": {
-            "quote": "Graduate data-pipeline role",
-            "start": 100,
-            "end": 127,
+            "quote": "Junior software engineer",
+            "start": 0,
+            "end": 24,
             "confidence": 1.0
           }
         },
         "requirements": [
           {
-            "text": "Python and SQL required; dbt desirable.",
-            "category": "technical_skills",
+            "text": "Junior software engineer",
+            "category": "seniority_experience",
             "importance": "required",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "Python and SQL required; dbt desirable.",
+            "source_locator": "Junior software engineer",
             "citation": {
-              "quote": "Python and SQL required; dbt desirable.",
-              "start": 60,
-              "end": 99,
+              "quote": "Junior software engineer",
+              "start": 0,
+              "end": 24,
               "confidence": 1.0
             }
           },
           {
-            "text": "Graduate data-pipeline role accepts relevant degree or project experience.",
-            "category": "education",
-            "importance": "required",
+            "text": "conflicting body",
+            "category": "technical_skills",
+            "importance": "preferred",
             "is_eliminatory": false,
             "future_authorisation": false,
-            "source_locator": "Graduate data-pipeline role accepts relevant degree or project experience.",
+            "source_locator": "conflicting body",
             "citation": {
-              "quote": "Graduate data-pipeline role accepts relevant degree or project experience.",
-              "start": 100,
-              "end": 174,
-              "confidence": 1.0
+              "quote": "conflicting body",
+              "start": 30,
+              "end": 46,
+              "confidence": 0.0
             }
           }
         ],
-        "risk_flags": [
-          "salary: valor desconhecido; revisar o trecho: Salary described without numeric amount."
-        ],
+        "risk_flags": [],
         "review_required": true,
-        "job_id": "da3d1d1b-3c89-5ad6-a725-23b5fc9793a9",
+        "job_id": "f5993c47-1de9-527d-9268-ebcdd18bcd90",
         "job_version": 1
       },
       "field_checks": {
@@ -3244,24 +2962,11 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00029913",
-      "latency_ms": 2061,
-      "input_tokens": 1253,
-      "output_tokens": 285,
-      "error_code": null
-    },
-    {
-      "case_id": "REAL-12",
-      "model": "gpt-4.1-nano-2025-04-14",
-      "split": "development",
-      "status": "invalid",
-      "error_code": "INVALID_OUTPUT",
-      "rejected_public_output": "{\"title\":{\"value\":\"Junior software engineer with conflicting body\",\"quote\":\"Junior software engineer with conflicting body\",\"confidence\":0},\"company_name\":{\"value\":\"EMP-B\",\"quote\":\"Employer: EMP-B\",\"confidence\":0},\"location\":{\"value\":\"London\",\"quote\":\"Location: London, GB\",\"confidence\":0},\"country\":{\"value\":\"GB\",\"quote\":\"Location: London, GB\",\"confidence\":0},\"work_mode\":{\"value\":null,\"quote\":null,\"confidence\":0},\"employment_type\":{\"value\":null,\"quote\":null,\"confidence\":0},\"seniority\":{\"value\":\"junior\",\"quote\":\"Junior software engineer\",\"confidence\":0},\"work_authorisation\":{\"value\":null,\"quote\":null,\"confidence\":0},\"sponsorship\":{\"value\":null,\"quote\":null,\"confidence\":0},\"salary\":{\"value\":null,\"quote\":null,\"confidence\":0},\"requirements\":[{\"text\":\"Junior software engineer\",\"category\":\"seniority_experience\",\"importance\":\"required\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Junior software engineer\",\"confidence\":0},{\"text\":\"conflicting body describing graduate data engineering and duplicates another listing's body\",\"category\":\"technical_skills\",\"importance\":\"preferred\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"conflicting body describes graduate data engineering and duplicates another listing's body\",\"confidence\":0},{\"text\":\"Mentioned technologies: Python, SQL, dbt\",\"category\":\"technical_skills\",\"importance\":\"preferred\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Mentioned technologies: Python, SQL, dbt\",\"confidence\":0}],\"risk_flags\":[]}",
-      "validation_error": "Unsupported citation",
-      "actual_eur": "0.00032300",
-      "latency_ms": 2349,
+      "actual_eur": "0.00028650",
+      "latency_ms": 1794,
       "input_tokens": 1244,
-      "output_tokens": 335
+      "output_tokens": 262,
+      "error_code": null
     },
     {
       "case_id": "REAL-13",
@@ -3341,7 +3046,7 @@
         "country": true
       },
       "actual_eur": "0.00027325",
-      "latency_ms": 1677,
+      "latency_ms": 6093,
       "input_tokens": 1246,
       "output_tokens": 235,
       "error_code": null
@@ -3384,8 +3089,8 @@
             "confidence": 1.0
           },
           "country": {
-            "quote": "Dublin, IE",
-            "start": 52,
+            "quote": "IE",
+            "start": 60,
             "end": 62,
             "confidence": 1.0
           }
@@ -3445,10 +3150,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00032625",
-      "latency_ms": 2292,
+      "actual_eur": "0.00032475",
+      "latency_ms": 2088,
       "input_tokens": 1258,
-      "output_tokens": 338,
+      "output_tokens": 335,
       "error_code": null
     },
     {
@@ -3477,20 +3182,20 @@
             "confidence": 1.0
           },
           "company_name": {
-            "quote": "EMP-D",
-            "start": 42,
+            "quote": "Employer: EMP-D",
+            "start": 32,
             "end": 47,
             "confidence": 1.0
           },
           "location": {
-            "quote": "London",
-            "start": 58,
-            "end": 64,
+            "quote": "Location: London, GB",
+            "start": 48,
+            "end": 68,
             "confidence": 1.0
           },
           "country": {
-            "quote": "GB",
-            "start": 66,
+            "quote": "Location: London, GB",
+            "start": 48,
             "end": 68,
             "confidence": 1.0
           }
@@ -3536,10 +3241,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00028875",
-      "latency_ms": 1817,
+      "actual_eur": "0.00029425",
+      "latency_ms": 1885,
       "input_tokens": 1254,
-      "output_tokens": 264,
+      "output_tokens": 275,
       "error_code": null
     },
     {
@@ -3614,20 +3319,6 @@
               "end": 236,
               "confidence": 1.0
             }
-          },
-          {
-            "text": "Mentioned technologies: SQL, Python, TypeScript",
-            "category": "technical_skills",
-            "importance": "required",
-            "is_eliminatory": false,
-            "future_authorisation": false,
-            "source_locator": "Mentioned technologies: SQL, Python, TypeScript",
-            "citation": {
-              "quote": "Mentioned technologies: SQL, Python, TypeScript",
-              "start": 238,
-              "end": 285,
-              "confidence": 1.0
-            }
           }
         ],
         "risk_flags": [],
@@ -3641,10 +3332,10 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00032138",
-      "latency_ms": 2491,
+      "actual_eur": "0.00029488",
+      "latency_ms": 2653,
       "input_tokens": 1255,
-      "output_tokens": 329,
+      "output_tokens": 276,
       "error_code": null
     },
     {
@@ -3745,7 +3436,7 @@
         "country": true
       },
       "actual_eur": "0.00028988",
-      "latency_ms": 1596,
+      "latency_ms": 1953,
       "input_tokens": 1259,
       "output_tokens": 265,
       "error_code": null
@@ -3856,7 +3547,7 @@
         "country": true
       },
       "actual_eur": "0.00032163",
-      "latency_ms": 2582,
+      "latency_ms": 3121,
       "input_tokens": 1245,
       "output_tokens": 332,
       "error_code": null
@@ -3875,7 +3566,7 @@
           "work_mode": null,
           "employment_type": null,
           "seniority": "senior",
-          "work_authorisation": "existing Canadian work rights are required",
+          "work_authorisation": null,
           "sponsorship": "unavailable",
           "salary": null
         },
@@ -3905,15 +3596,9 @@
             "confidence": 1.0
           },
           "seniority": {
-            "quote": "Senior role in Canada",
+            "quote": "Senior role in Canada requiring five years of production coding",
             "start": 89,
-            "end": 110,
-            "confidence": 1.0
-          },
-          "work_authorisation": {
-            "quote": "Existing Canadian work rights are required",
-            "start": 154,
-            "end": 196,
+            "end": 152,
             "confidence": 1.0
           },
           "sponsorship": {
@@ -3926,7 +3611,7 @@
         "requirements": [
           {
             "text": "requiring five years of production coding",
-            "category": "technical_skills",
+            "category": "seniority_experience",
             "importance": "required",
             "is_eliminatory": true,
             "future_authorisation": false,
@@ -3964,64 +3649,133 @@
         "location": true,
         "country": true
       },
-      "actual_eur": "0.00030200",
-      "latency_ms": 2724,
+      "actual_eur": "0.00030050",
+      "latency_ms": 1721,
       "input_tokens": 1252,
-      "output_tokens": 291,
+      "output_tokens": 288,
       "error_code": null
     },
     {
       "case_id": "REAL-20",
       "model": "gpt-4.1-nano-2025-04-14",
       "split": "evaluation",
-      "status": "invalid",
-      "error_code": "INVALID_OUTPUT",
-      "rejected_public_output": "{\"title\":{\"value\":\"Senior backend Java engineer\",\"quote\":\"Senior backend Java engineer\",\"confidence\":1},\"company_name\":{\"value\":\"EMP-H\",\"quote\":\"EMP-H\",\"confidence\":1},\"location\":{\"value\":\"London\",\"quote\":\"London\",\"confidence\":1},\"country\":{\"value\":\"GB\",\"quote\":\"GB\",\"confidence\":1},\"work_mode\":{\"value\":\"hybrid attendance twice weekly\",\"quote\":\"Hybrid attendance twice weekly\",\"confidence\":1},\"employment_type\":{\"value\":null,\"quote\":null,\"confidence\":0},\"seniority\":{\"value\":\"senior\",\"quote\":\"Senior backend Java engineer\",\"confidence\":1},\"work_authorisation\":{\"value\":null,\"quote\":null,\"confidence\":0},\"sponsorship\":{\"value\":null,\"quote\":null,\"confidence\":0},\"salary\":{\"value\":null,\"quote\":null,\"confidence\":0},\"requirements\":[{\"text\":\"Advanced commercial Java, Spring Boot and Kafka; leading complex multi-engineer projects.\",\"category\":\"technical_skills\",\"importance\":\"required\",\"is_eliminatory\":false,\"future_authorisation\":false,\"quote\":\"Advanced commercial Java, Spring Boot and Kafka; leading complex multi-engineer projects.\",\"confidence\":1}],\"risk_flags\":[]}",
-      "validation_error": "1 validation error for JobEdit\nwork_mode\n  Input should be 'hybrid', 'onsite' or 'remote' [type=literal_error, input_value='hybrid attendance twice weekly', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/literal_error",
-      "actual_eur": "0.00027575",
-      "latency_ms": 1772,
+      "status": "succeeded",
+      "result": {
+        "fields": {
+          "title": "Senior backend Java engineer",
+          "company_name": "EMP-H",
+          "location": "London",
+          "country": "GB",
+          "work_mode": "hybrid",
+          "employment_type": null,
+          "seniority": "senior",
+          "work_authorisation": null,
+          "sponsorship": null,
+          "salary": null
+        },
+        "citations": {
+          "title": {
+            "quote": "Senior backend Java engineer",
+            "start": 0,
+            "end": 28,
+            "confidence": 1.0
+          },
+          "company_name": {
+            "quote": "EMP-H",
+            "start": 39,
+            "end": 44,
+            "confidence": 1.0
+          },
+          "location": {
+            "quote": "London",
+            "start": 55,
+            "end": 61,
+            "confidence": 1.0
+          },
+          "country": {
+            "quote": "GB",
+            "start": 63,
+            "end": 65,
+            "confidence": 1.0
+          },
+          "work_mode": {
+            "quote": "Hybrid attendance twice weekly",
+            "start": 156,
+            "end": 186,
+            "confidence": 1.0
+          },
+          "seniority": {
+            "quote": "Senior backend Java engineer",
+            "start": 0,
+            "end": 28,
+            "confidence": 1.0
+          }
+        },
+        "requirements": [
+          {
+            "text": "Advanced commercial Java, Spring Boot and Kafka; leading complex multi-engineer projects.",
+            "category": "technical_skills",
+            "importance": "required",
+            "is_eliminatory": false,
+            "future_authorisation": false,
+            "source_locator": "Advanced commercial Java, Spring Boot and Kafka; leading complex multi-engineer projects.",
+            "citation": {
+              "quote": "Advanced commercial Java, Spring Boot and Kafka; leading complex multi-engineer projects.",
+              "start": 66,
+              "end": 155,
+              "confidence": 1.0
+            }
+          }
+        ],
+        "risk_flags": [],
+        "review_required": true,
+        "job_id": "92e4f906-c382-5796-a20e-194bf63660f8",
+        "job_version": 1
+      },
+      "field_checks": {
+        "title": true,
+        "company_name": true,
+        "location": true,
+        "country": true
+      },
+      "actual_eur": "0.00027375",
+      "latency_ms": 2026,
       "input_tokens": 1242,
-      "output_tokens": 241
+      "output_tokens": 237,
+      "error_code": null
     }
   ],
-  "model_selection": {
-    "model": "gpt-4.1-mini-2025-04-14",
-    "scope": "default for manually reviewed local parsing and matching",
-    "reason": "Mini meets 95% valid-output and basic-field gates (100%, 98.75%); nano fails valid-output gate (90%) and loses a sponsorship condition. Mini real synthetic matching/injection and production HTTP flows also passed. No autonomous promotion or claim of human gold."
-  },
+  "model_selection": null,
   "human_review": "pending",
   "gates": {
     "valid_output_rate": 0.95,
     "field_accuracy": 0.95,
     "quoted_spans_valid": 1.0,
-    "human_entailment_review": "required per job before scoring; no human benchmark gold claimed"
+    "human_entailment_review": "required"
   },
   "limitations": [
     "Public paraphrases, not complete original adverts.",
     "Labels are design annotations, not human gold.",
     "No candidate data; this benchmark cannot establish matching accuracy.",
-    "Confidence scores are not calibrated probabilities.",
-    "The same 12 development/8 evaluation split was rerun during prompt/normalization development; evaluation is no longer an untouched holdout. Fresh human-labeled cases are needed for generalization estimates.",
-    "Selection is for reviewed local assistance. Requirement-level completeness, confidence calibration and candidate matching accuracy were not measured by the four basic-field checks."
+    "Confidence scores are not calibrated probabilities."
   ],
   "blocked_reason": null,
-  "executed_at": "2026-09-20T05:29:41.190509+00:00",
+  "executed_at": "2026-09-20T05:26:33.965261+00:00",
   "metrics": {
     "gpt-4.1-mini-2025-04-14": {
       "attempted": 20,
-      "valid_outputs": 20,
-      "valid_output_rate": 1.0,
-      "field_accuracy_on_valid_outputs": 0.9875,
+      "valid_outputs": 18,
+      "valid_output_rate": 0.9,
+      "field_accuracy_on_valid_outputs": 0.9861111111111112,
       "refusals": 0,
-      "invalid_outputs": 0,
-      "field_accuracy_all_cases": 0.9875,
-      "latency_p50_ms": 2559,
-      "latency_p95_ms": 3351,
-      "cost_eur": "0.02443300",
+      "invalid_outputs": 2,
+      "latency_p50_ms": 2658,
+      "latency_p95_ms": 3320,
+      "cost_eur": "0.02442300",
       "by_split": {
         "development": {
           "attempted": 12,
-          "valid": 12
+          "valid": 10
         },
         "evaluation": {
           "attempted": 8,
@@ -4032,15 +3786,14 @@
     },
     "gpt-4.1-nano-2025-04-14": {
       "attempted": 20,
-      "valid_outputs": 18,
-      "valid_output_rate": 0.9,
-      "field_accuracy_on_valid_outputs": 0.9861111111111112,
+      "valid_outputs": 19,
+      "valid_output_rate": 0.95,
+      "field_accuracy_on_valid_outputs": 0.9868421052631579,
       "refusals": 0,
-      "invalid_outputs": 2,
-      "field_accuracy_all_cases": 0.8875,
-      "latency_p50_ms": 2276,
-      "latency_p95_ms": 2823,
-      "cost_eur": "0.00610580",
+      "invalid_outputs": 1,
+      "latency_p50_ms": 2088,
+      "latency_p95_ms": 3121,
+      "cost_eur": "0.00597380",
       "by_split": {
         "development": {
           "attempted": 12,
@@ -4048,72 +3801,10 @@
         },
         "evaluation": {
           "attempted": 8,
-          "valid": 7
+          "valid": 8
         }
       },
       "human_review": "pending"
     }
-  },
-  "review": {
-    "reviewer": "assistant_document_review",
-    "reviewed_at": "2026-09-20T05:32:45.428431+00:00",
-    "human_approval": false,
-    "scope": "All 20 selected-model outputs, literal citations and selected cross-model semantic disagreements. Engineering acceptance for manually reviewed local drafts, not calibrated autonomous decisions.",
-    "findings": [
-      {
-        "case_id": "REAL-12",
-        "finding": "Mini shortens the annotated title; counted as one incorrect basic field (79/80). It flags the title/body contradiction. Labels were not changed."
-      },
-      {
-        "case_id": "REAL-17",
-        "finding": "Mini leaves sponsorship unknown with a literal conditional-sponsorship note. Nano incorrectly asserts available without the qualification; reject nano for this interpretation."
-      },
-      {
-        "case_id": "REAL-11",
-        "finding": "A literal explanation of missing salary is normalized to an uncertainty note; no salary amount or confidence in a value is invented."
-      },
-      {
-        "case_id": "REAL-03, REAL-07, REAL-08, REAL-14, REAL-18",
-        "finding": "Requirement importance/categories and contextual statements still need human corrections; basic-field accuracy is not requirement-level or matching accuracy."
-      },
-      {
-        "case_id": "ALL",
-        "finding": "All accepted citation offsets match the source exactly. Unknowns and drafts never approve a candidate or publish a score."
-      }
-    ]
-  },
-  "development_usage": {
-    "project_totals": {
-      "spent_eur": "0.13299404",
-      "reserved_eur": "0",
-      "allocated_eur": "0.13299404",
-      "limit_eur": "10",
-      "combined_allocated_eur": "15.13299404",
-      "combined_limit_eur": "25",
-      "aws_allowance_eur": "15",
-      "unreconciled": false,
-      "alerts": [],
-      "combined_alerts": [
-        50
-      ]
-    },
-    "calls_by_status": [
-      {
-        "status": "failed",
-        "calls": 2,
-        "eur": "0E-8"
-      },
-      {
-        "status": "invalid",
-        "calls": 38,
-        "eur": "0.03579478"
-      },
-      {
-        "status": "succeeded",
-        "calls": 138,
-        "eur": "0.09719926"
-      }
-    ],
-    "estimated_usd_at_recorded_prices": "0.106395232000000000000000"
   }
 }
