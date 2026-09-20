@@ -4,8 +4,8 @@ Implementação autorizada em 2026-09-20, com commits locais por etapa.
 
 | Etapa | Escopo | Estado |
 |---|---|---|
-| P3-01 | Contratos, permissões de uso e snapshots | Em implementação |
-| P3-02 | Estratégia, revisão e geração versionada | Pendente |
+| P3-01 | Contratos, permissões de uso e snapshots | Implementado: `12c9e19` |
+| P3-02 | Estratégia, revisão e geração versionada | Implementado |
 | P3-03 | CV, cover letter, respostas e downloads DOCX/PDF/JSON | Pendente |
 | P3-04 | Tela de aprovação, diferenças e evidências | Pendente |
 | P3-05 | Testes reais, segurança, renderização e documentação | Pendente |
