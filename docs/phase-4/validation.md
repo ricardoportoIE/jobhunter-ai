@@ -1,5 +1,35 @@
 # P4 validation
 
+## Live connection follow-up — 22 September 2026
+
+The operator reported a failure after Google consent. A diagnostic inside the running
+API container reproduced an unreachable IPv6 route while IPv4 connected. The transport
+previously selected only the first validated DNS address. It now tries alternatives
+within the overall deadline, before sending any HTTP request. TLS verification and
+public-address checks remain in place; OAuth POSTs are never automatically replayed.
+Temporary network/provider failures now have distinct, translated feedback.
+
+The operator confirmed a successful live Gmail connection after the rebuilt service
+was installed. A read-only status check confirmed the source was connected and still
+paused. No mailbox content was read for this diagnosis; label selection and alert import
+remain separate user actions. The original delivery's validation record below is
+preserved as historical evidence.
+
+Regression checks passed: 152 API tests without skips and 31 frontend tests. Ruff and
+format checks passed; mypy passed in an isolated Linux container because Windows
+Application Control blocked a local mypy DLL. Tests explicitly clear real Gmail
+credentials from the shared test settings and use synthetic provider responses.
+The rebuilt application's smoke check passed. Network regression tests cover fallback
+in both address-family orders, all-address failure, the overall deadline and actionable
+OAuth errors without credential exposure.
+
+The Gmail browser journey passed on desktop and mobile with synthetic Google
+responses. Initial frontend/browser runs hit time limits while other local checks
+were running; the frontend passed with one worker and the browser rerun passed after
+the API suite finished. No assertions or timeout thresholds were relaxed.
+
+## Original delivery — 20 September 2026
+
 Local review date: **20 September 2026**. P4 extends the existing application without
 changing AI models, prompts or deterministic scoring weights. All automated provider
 responses are synthetic; paid AI calls are not part of this regression suite.

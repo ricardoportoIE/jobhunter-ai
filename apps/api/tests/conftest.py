@@ -44,6 +44,10 @@ def database_settings() -> Settings:
         update={
             "db_name": name,
             "openai_api_key": None,
+            "gmail_client_id": "",
+            "gmail_client_secret": None,
+            "gmail_redirect_uri": ORIGIN + "/",
+            "discovery_encryption_key": None,
             "ai_prices_reviewed": datetime.now(UTC).date(),
         }
     )

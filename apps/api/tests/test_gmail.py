@@ -167,6 +167,32 @@ def test_oauth_wrong_scope_and_expiry(
     )
 
 
+@pytest.mark.parametrize("code", ["SOURCE_UNAVAILABLE", "SOURCE_TIMEOUT", "SOURCE_RATE_LIMIT"])
+def test_oauth_network_failure_has_actionable_feedback(
+    signed_client: TestClient,
+    db_settings: Settings,
+    monkeypatch: pytest.MonkeyPatch,
+    code: str,
+) -> None:
+    configure(signed_client, db_settings)
+    source = add_source(signed_client, "gmail")
+    query = start(signed_client, source)
+
+    def unavailable(*args: Any, **kwargs: Any) -> Any:
+        raise SourceFailure(code)
+
+    monkeypatch.setattr("jobhunter_api.gmail.request_json", unavailable)
+    payload = {"state": query["state"][0], "code": "synthetic-code"}
+    response = signed_client.post("/api/v1/discovery/gmail/complete", json=payload)
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "GMAIL_CONNECTION_FAILED"
+    assert "start Gmail sign-in again" in response.json()["error"]["message"]
+    assert "synthetic-code" not in response.text
+    with connect(db_settings) as db:
+        assert db.execute("SELECT count(*) AS n FROM discovery_secrets").fetchone() == {"n": 0}
+    assert signed_client.post("/api/v1/discovery/gmail/complete", json=payload).status_code == 409
+
+
 def test_secret_binding_and_tampering(signed_client: TestClient, db_settings: Settings) -> None:
     settings = configure(signed_client, db_settings)
     owner, source = uuid4(), uuid4()

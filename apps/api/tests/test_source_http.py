@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from jobhunter_api.source_http import SourceFailure, request_json
+from jobhunter_api.source_http import SourceFailure, connect_address, request_json
 
 
 def wire(
@@ -109,3 +109,45 @@ def test_transport_revalidates_dns_and_preserves_bearer_only_on_allowed_host(
     with pytest.raises(SourceFailure):
         request_json("https://evil.example/steal", headers={"Authorization": "Bearer synthetic"})
     assert len(lookups) == 1 and connection.request.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "addresses", [["2607:f8b0::1", "142.250.1.1"], ["142.250.1.1", "2607:f8b0::1"]]
+)
+def test_unreachable_address_falls_back_before_oauth_post(
+    monkeypatch: pytest.MonkeyPatch, addresses: list[str]
+) -> None:
+    connection = wire(monkeypatch, [200])
+    monkeypatch.setattr(
+        "jobhunter_api.source_http.public_target",
+        lambda _: ("oauth2.googleapis.com", "/token", addresses),
+    )
+    raw = Mock()
+    dial = Mock(side_effect=[OSError(101, "Network unreachable"), raw])
+    monkeypatch.setattr("jobhunter_api.source_http.socket.create_connection", dial)
+    request_json("https://oauth2.googleapis.com/token", body=b"synthetic")
+    assert [call.args[0] for call in dial.call_args_list] == [(a, 443) for a in addresses]
+    assert connection.request.call_count == 1
+    assert connection.request.call_args.args[0] == "POST"
+    raw.close.assert_called_once()
+
+
+def test_all_addresses_unreachable_never_sends_oauth_post(monkeypatch: pytest.MonkeyPatch) -> None:
+    connection = wire(monkeypatch, [200])
+    dial = Mock(side_effect=OSError(101, "Network unreachable"))
+    monkeypatch.setattr("jobhunter_api.source_http.socket.create_connection", dial)
+    with pytest.raises(SourceFailure) as failure:
+        request_json("https://oauth2.googleapis.com/token", body=b"synthetic")
+    assert failure.value.code == "SOURCE_UNAVAILABLE"
+    assert dial.call_count == 1
+    connection.request.assert_not_called()
+
+
+def test_address_fallback_keeps_the_overall_deadline(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("jobhunter_api.source_http.time.monotonic", Mock(side_effect=[1, 5]))
+    dial = Mock(side_effect=TimeoutError)
+    monkeypatch.setattr("jobhunter_api.source_http.socket.create_connection", dial)
+    with pytest.raises(SourceFailure) as failure:
+        connect_address(["2607:f8b0::1", "142.250.1.1"], deadline=4)
+    assert failure.value.code == "SOURCE_TIMEOUT"
+    dial.assert_called_once_with(("2607:f8b0::1", 443), timeout=3)

@@ -836,6 +836,7 @@
   "The provider asked us to wait. The next check has been rescheduled.": "O fornecedor pediu que aguardássemos. A próxima verificação foi reagendada.",
   "The Gmail label is missing. Choose a custom label and enable the source again.": "A etiqueta do Gmail não foi encontrada. Escolha uma etiqueta personalizada e active a fonte novamente.",
   "Reconnect Gmail before checking this source.": "Volte a ligar o Gmail antes de verificar esta fonte.",
+  "The local service could not reach Google or Google is temporarily unavailable. Check the connection and start Gmail sign-in again.": "O serviço local não conseguiu contactar o Google ou o Google está temporariamente indisponível. Verifique a ligação e inicie novamente a ligação ao Gmail.",
   "The source could not be checked. Existing opportunities were preserved.": "Não foi possível verificar a fonte. As oportunidades existentes foram preservadas.",
   "Not yet checked": "Ainda não verificado",
   "Choose a small number of sources. Only enabled sources are checked, once a day while the local app is running.": "Escolha um pequeno número de fontes. Apenas as fontes activas são verificadas, uma vez por dia enquanto a aplicação local estiver em execução.",

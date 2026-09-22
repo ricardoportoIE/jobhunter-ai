@@ -1,8 +1,10 @@
 # Gmail setup for the local pilot
 
 Gmail is optional. Greenhouse and manual imports work without Google credentials.
-No Gmail account was connected during implementation: the project owner has not yet
-created an OAuth client. Automated tests use synthetic tokens, messages and responses.
+The initial delivery used synthetic tokens, messages and responses. On 22 September
+2026 the operator confirmed a successful live account connection after the network
+fallback correction described below. Mailbox import requires selecting a label and
+enabling checks separately; connection alone does not validate imported alerts.
 
 ## Create the local client
 
@@ -63,6 +65,20 @@ Google revocation. If revocation cannot be confirmed, remove the application's a
 in your Google account. Already imported alerts remain in your private local export;
 disconnecting is not data erasure. The existing account erasure command removes discovery
 records and secrets as well. Do not include mailbox exports in a public repository.
+
+## Connection troubleshooting
+
+If Google returns to the application but connection fails, start a new sign-in after
+resolving the cause. OAuth state and authorisation codes cannot be reused by reloading
+the callback. Check that the registered redirect exactly matches the configured local
+address and that the selected Google account is an allowed test user.
+
+The connector tries the DNS-validated addresses within one connection deadline. This
+supports Docker installations without IPv6 routing when Google also supplies an IPv4
+address. Address fallback happens before sending the HTTP request; an OAuth POST is
+never automatically replayed. TLS hostname verification and private-address rejection
+remain enforced. Network/temporary provider failures have distinct feedback from
+rejected authorisation. No credentials or provider response bodies are logged.
 
 ## References checked on 20 September 2026
 

@@ -35,6 +35,19 @@ def retry_time(value: str | None) -> str | None:
         return None
 
 
+def connect_address(addresses: list[str], deadline: float) -> socket.socket:
+    """Try validated DNS addresses before sending HTTP data, within one deadline."""
+    for address in addresses:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise SourceFailure("SOURCE_TIMEOUT")
+        try:
+            return socket.create_connection((address, 443), timeout=min(remaining, 3))
+        except OSError:
+            continue
+    raise SourceFailure("SOURCE_UNAVAILABLE")
+
+
 def request_json(
     url: str,
     *,
@@ -54,7 +67,11 @@ def request_json(
         try:
             host, path, addresses = public_target(url)
             connection = http.client.HTTPSConnection(host, timeout=min(remaining, 8))
-            raw = socket.create_connection((addresses[0], 443), timeout=min(remaining, 8))
+            raw = connect_address(addresses, deadline)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise SourceFailure("SOURCE_TIMEOUT")
+            raw.settimeout(min(remaining, 8))
             connection.sock = ssl.create_default_context().wrap_socket(raw, server_hostname=host)
             connection.request(
                 "POST" if body is not None else "GET",

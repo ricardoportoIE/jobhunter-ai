@@ -229,7 +229,14 @@ def complete(data: CompleteOAuth, actor: Actor, request: Request) -> Row:
             or len(token["refresh_token"]) > 10000
         ):
             raise SourceFailure("GMAIL_RECONNECT")
-    except SourceFailure:
+    except SourceFailure as error:
+        if error.code in {"SOURCE_UNAVAILABLE", "SOURCE_TIMEOUT", "SOURCE_RATE_LIMIT"}:
+            raise Problem(
+                503,
+                "GMAIL_CONNECTION_FAILED",
+                "The local service could not reach Google or Google is temporarily unavailable. "
+                "Check the connection and start Gmail sign-in again.",
+            ) from None
         raise Problem(
             409,
             "GMAIL_RECONNECT",
