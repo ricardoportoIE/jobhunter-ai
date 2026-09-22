@@ -22,7 +22,7 @@ The workflow preserves drafts and form input, explains review requirements and g
 
 The [frontend experience](docs/frontend-experience.md) keeps the everyday journey focused: three main destinations, CV-first onboarding, filters for saved vacancies and expandable detail controls. AI can prepare the first assessment draft; the user confirms it before the deterministic score is calculated.
 
-The [discovery workflow](docs/phase-4/operations.md) adds daily checks of sources the user enables. New and changed adverts retain provenance, while reviewed jobs are preserved until an explicit update. Email digests remain alerts with individual links to review. Gmail needs a separately configured Google OAuth client; its integration is tested with synthetic responses, while Greenhouse also has a recorded live read.
+The [discovery workflow](docs/phase-4/operations.md) adds daily checks of sources the user enables. New and changed adverts retain provenance, while reviewed jobs are preserved until an explicit update. Email digests remain alerts with individual links to review. Gmail needs a separately configured Google OAuth client. Both connectors have synthetic regression coverage and recorded live checks; Gmail validation includes connection, label listing and alert import.
 
 ## Engineering skills demonstrated
 
@@ -153,7 +153,7 @@ The [development guide](docs/local-development.md) lists the lint, type, build a
 
 ## Project scope and next steps
 
-The local core, AI assistance, application packages and P4 discovery workflow are implemented. The project supports individual use with human review. Gmail is optional and awaits live validation with the operator's OAuth client. There is no hosted production service or automated application submission.
+The local core, AI assistance, application packages and P4 discovery workflow are implemented. The project supports individual use with human review. Gmail is optional and requires the operator's OAuth client and explicit consent. There is no hosted production service or automated application submission.
 
 Further work includes broader user-labelled evaluations, testing with more document layouts and sources, and a carefully scoped pilot. The planned stages extend the engineering skills above:
 

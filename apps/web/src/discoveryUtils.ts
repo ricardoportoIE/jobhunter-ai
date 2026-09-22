@@ -2,6 +2,10 @@ import { t, dateLocale } from "./i18n";
 import type { DiscoveryItem } from "./discoveryTypes";
 import type { Profile } from "./types";
 export function sourceError(code: string | null): string {
+  if (code === "SOURCE_CONTENT_LIMIT")
+    return t(
+      "The source exceeded a size or complexity limit. For Gmail, move unusually large alerts out of the selected label and retry after the next check time. Existing opportunities were preserved.",
+    );
   if (code === "GMAIL_API_DISABLED")
     return t(
       "Enable the Gmail API in the Google Cloud project used by this OAuth client, then enable the source again.",

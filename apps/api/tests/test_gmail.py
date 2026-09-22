@@ -14,6 +14,7 @@ from test_discovery import add_source
 
 from jobhunter_api.errors import Problem
 from jobhunter_api.gmail import (
+    MAX_MESSAGE_ENCODED_BYTES,
     SCOPE,
     access_token,
     message_text,
@@ -321,9 +322,88 @@ def test_refresh_and_disconnect_during_refresh(
 
 def test_message_limits() -> None:
     with pytest.raises(SourceFailure):
-        message_text({"mimeType": "text/plain", "body": {"data": "x" * 100001}})
+        message_text(
+            {"mimeType": "text/plain", "body": {"data": "x" * (MAX_MESSAGE_ENCODED_BYTES + 1)}}
+        )
     with pytest.raises(SourceFailure):
         message_text({}, depth=13)
+
+
+def email_part(mime: str, text: str) -> Row:
+    return {"mimeType": mime, "body": {"data": base64.urlsafe_b64encode(text.encode()).decode()}}
+
+
+def test_large_formatted_digest_uses_one_alternative_and_preserves_links() -> None:
+    html = "<style>" + ".layout { colour: blue; }" * 7000 + "</style>"
+    html += '<p>Junior developer vacancy</p><a href="https://example.com/jobs/1">Review vacancy</a>'
+    payload = {
+        "mimeType": "multipart/alternative",
+        "parts": [
+            email_part("text/plain", "Repeated plain version " * 1700),
+            email_part("text/html", html),
+        ],
+    }
+    links: list[str] = []
+    text = message_text(payload, links=links)
+    assert text == "Junior developer vacancy\nReview vacancy"
+    assert links == ["https://example.com/jobs/1"]
+
+
+def test_alternatives_fall_back_from_empty_or_unsupported_parts() -> None:
+    payload = {
+        "mimeType": "multipart/alternative",
+        "parts": [
+            email_part("text/plain", "Read https://example.com/plain"),
+            email_part("text/html", '<a href="https://example.com/empty"></a>'),
+            {
+                "mimeType": "application/octet-stream",
+                "filename": "attachment.bin",
+                "body": {"attachmentId": "never-fetch"},
+            },
+        ],
+    }
+    links: list[str] = []
+    assert message_text(payload, links=links) == "Read https://example.com/plain"
+    assert links == ["https://example.com/plain"]
+
+
+def test_nested_alternative_keeps_independent_mixed_content() -> None:
+    alternative = {
+        "mimeType": "multipart/alternative",
+        "parts": [
+            email_part("text/plain", "Duplicate"),
+            email_part("text/html", "<p>Selected body</p>"),
+        ],
+    }
+    assert (
+        message_text(
+            {
+                "mimeType": "multipart/mixed",
+                "parts": [alternative, email_part("text/plain", "Separate note")],
+            }
+        )
+        == "Selected body\nSeparate note"
+    )
+
+
+def test_message_budget_applies_across_parts_without_truncation() -> None:
+    large_html = email_part("text/html", "<style>" + "x" * 300000 + "</style><p>Small text</p>")
+    with pytest.raises(SourceFailure) as failure:
+        message_text({"parts": [large_html] * 3})
+    assert failure.value.code == "SOURCE_CONTENT_LIMIT"
+    with pytest.raises(SourceFailure) as failure:
+        message_text({"parts": [email_part("text/plain", "x" * 30000)] * 2})
+    assert failure.value.code == "SOURCE_CONTENT_LIMIT"
+    with pytest.raises(SourceFailure) as failure:
+        message_text({"parts": [{"parts": [{}] * 50}] * 2})
+    assert failure.value.code == "SOURCE_CONTENT_LIMIT"
+
+
+def test_invalid_encoded_body_is_reported_without_raw_content() -> None:
+    with pytest.raises(SourceFailure) as failure:
+        message_text({"mimeType": "text/plain", "body": {"data": "invalid-secret-sentinel!"}})
+    assert failure.value.code == "SOURCE_INVALID_RESPONSE"
+    assert "sentinel" not in str(failure.value)
 
 
 def test_oauth_return_cannot_move_to_another_session(

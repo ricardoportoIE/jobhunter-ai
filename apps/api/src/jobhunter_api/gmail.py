@@ -6,6 +6,7 @@ import json
 import re
 import secrets
 import time
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from urllib.parse import urlencode, urlsplit
 from uuid import UUID, uuid4
@@ -28,6 +29,8 @@ router = APIRouter(prefix="/api/v1/discovery/gmail", tags=["Gmail discovery"])
 SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 GMAIL_URL = "https://gmail.googleapis.com/gmail/v1/users/me"
+MAX_MESSAGE_ENCODED_BYTES = 1024 * 1024
+MAX_MESSAGE_TEXT = 50000
 
 
 def cipher(settings: Settings) -> Fernet:
@@ -450,25 +453,69 @@ class EmailText(PageText):
                 self.links.append(reference)
 
 
-def message_text(payload: Row, depth: int = 0, links: list[str] | None = None) -> str:
+@dataclass
+class MessageBudget:
+    parts: int = 0
+    encoded_bytes: int = 0
+
+
+def message_text(
+    payload: Row,
+    depth: int = 0,
+    links: list[str] | None = None,
+    budget: MessageBudget | None = None,
+) -> str:
     links = links if links is not None else []
-    if depth > 12:
+    budget = budget if budget is not None else MessageBudget()
+    budget.parts += 1
+    if depth > 12 or budget.parts > 100:
         raise SourceFailure("SOURCE_CONTENT_LIMIT")
+    if not isinstance(payload, dict):
+        raise SourceFailure("SOURCE_INVALID_RESPONSE")
     # Attachments are never requested, decoded or followed.
     if payload.get("filename"):
         return ""
     parts = payload.get("parts", [])
+    if not isinstance(parts, list):
+        raise SourceFailure("SOURCE_INVALID_RESPONSE")
     if len(parts) > 100:
         raise SourceFailure("SOURCE_CONTENT_LIMIT")
     if parts:
-        text = "\n".join(filter(None, (message_text(part, depth + 1, links) for part in parts)))
+        if payload.get("mimeType") == "multipart/alternative":
+            # MIME alternatives are representations of one body, in preference order.
+            # Select the last readable representation, never concatenate duplicates.
+            text = ""
+            for part in reversed(parts):
+                candidate_links: list[str] = []
+                candidate = message_text(part, depth + 1, candidate_links, budget)
+                if candidate.strip():
+                    text = candidate
+                    links.extend(candidate_links[: max(0, 30 - len(links))])
+                    break
+        else:
+            sections: list[str] = []
+            length = 0
+            for part in parts:
+                section = message_text(part, depth + 1, links, budget)
+                if section:
+                    length += len(section) + (1 if sections else 0)
+                    if length > MAX_MESSAGE_TEXT:
+                        raise SourceFailure("SOURCE_CONTENT_LIMIT")
+                    sections.append(section)
+            text = "\n".join(sections)
     elif payload.get("mimeType") in {"text/plain", "text/html"}:
         data = payload.get("body", {}).get("data", "")
-        if len(data) > 100000:
+        if not isinstance(data, str):
+            raise SourceFailure("SOURCE_INVALID_RESPONSE")
+        budget.encoded_bytes += len(data)
+        if budget.encoded_bytes > MAX_MESSAGE_ENCODED_BYTES:
             raise SourceFailure("SOURCE_CONTENT_LIMIT")
-        text = base64.urlsafe_b64decode(data + "=" * (-len(data) % 4)).decode(
-            "utf-8", errors="replace"
-        )
+        try:
+            text = base64.b64decode(
+                data + "=" * (-len(data) % 4), altchars=b"-_", validate=True
+            ).decode("utf-8", errors="replace")
+        except ValueError:
+            raise SourceFailure("SOURCE_INVALID_RESPONSE") from None
         if payload.get("mimeType") == "text/html":
             parser = EmailText(links)
             parser.feed(text)
@@ -477,7 +524,7 @@ def message_text(payload: Row, depth: int = 0, links: list[str] | None = None) -
             links.extend(re.findall(r"https://[^\s<>\"']+", text)[: max(0, 30 - len(links))])
     else:
         text = ""
-    if len(text) > 50000:
+    if len(text) > MAX_MESSAGE_TEXT:
         raise SourceFailure("SOURCE_CONTENT_LIMIT")
     return text
 

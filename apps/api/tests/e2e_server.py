@@ -99,15 +99,29 @@ def main() -> None:
             return 200, {}, {"messages": [{"id": "fixturemail"}]}
         if "/messages/fixturemail?" in url:
             text = "Synthetic job alert: https://example.com/gmail-vacancy"
+            html = (
+                "<style>" + ".layout { padding: 1px; }" * 7000 + "</style>"
+                "<p>Synthetic job alert</p>"
+                '<a href="https://example.com/gmail-vacancy">Read vacancy</a>'
+            )
             return (
                 200,
                 {},
                 {
                     "labelIds": ["Label_1"],
                     "payload": {
-                        "mimeType": "text/plain",
+                        "mimeType": "multipart/alternative",
                         "headers": [{"name": "Subject", "value": "Synthetic Gmail alert"}],
-                        "body": {"data": base64.urlsafe_b64encode(text.encode()).decode()},
+                        "parts": [
+                            {
+                                "mimeType": "text/plain",
+                                "body": {"data": base64.urlsafe_b64encode(text.encode()).decode()},
+                            },
+                            {
+                                "mimeType": "text/html",
+                                "body": {"data": base64.urlsafe_b64encode(html.encode()).decode()},
+                            },
+                        ],
                     },
                 },
             )

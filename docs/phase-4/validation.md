@@ -47,6 +47,27 @@ cases and a successful labels retry without reconnecting. Ruff, formatting, ESLi
 TypeScript, documentation checks and mypy in Linux passed. The English and Portuguese
 interfaces now explain that the Gmail API must be enabled in the OAuth client's project.
 
+## Live alert import follow-up — 22 September 2026
+
+The first labelled digest exceeded the old 100,000-character encoded-part limit.
+It also supplied plain-text and HTML alternatives, which the reader previously joined.
+The corrected reader selects one readable MIME alternative, preserves independent
+mixed sections and applies an aggregate 1 MiB encoded-body budget with the existing
+50,000-character output limit. Depth, total visited parts and response bytes remain
+bounded. Oversized messages fail explicitly without partial writes or silent truncation.
+
+After rebuilding, the actual reader processed the selected label successfully.
+The source's content-limit retry delay was cleared once through a versioned, audited
+update after diagnosis; the normal synchronisation then completed and stored the
+alerts with their links. The failed run remains in history. No source messages, titles
+or links were copied into the repository and no AI calls were made for this repair.
+
+All 165 API tests and 31 component tests passed. Added cases cover large formatted
+digests, single alternative selection, empty/unsupported alternatives, nested mixed
+parts, aggregate limits and invalid encoding. The browser fixture now contains a
+large multipart digest so the same scenario is exercised through the import interface.
+See [Gmail setup](gmail-setup.md) for the precise limits and troubleshooting steps.
+
 ## Original delivery — 20 September 2026
 
 Local review date: **20 September 2026**. P4 extends the existing application without

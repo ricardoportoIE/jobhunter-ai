@@ -47,6 +47,16 @@ backlog. A large label may take several daily checks and is outside the pilot's 
 Only complete successful batches advance the cursor. A deleted label disables the
 source. Missing emails never imply that an advertised vacancy is closed.
 
+Formatted digests may include both plain text and HTML representations of the same
+message. For `multipart/alternative`, the reader selects the last readable
+representation, following [MIME semantics](https://www.rfc-editor.org/rfc/rfc2046.html#section-5.1.4),
+instead of concatenating duplicate bodies. HTML is converted into text without
+executing scripts or fetching images and links. Independent mixed parts remain joined.
+Each message has an aggregate 1 MiB budget for processed base64-encoded text bodies,
+at most 100 visited MIME parts, a nesting limit of 12 and at most 50,000 extracted
+characters. The HTTP response limit remains 4 MiB. Exceeding a limit fails the batch
+explicitly; the reader never silently truncates an alert or advances a failed cursor.
+
 Attachments are ignored. Email bodies are rendered as text; links are listed for
 explicit review and are never fetched by the email reader. An email can describe many
 jobs, so it is never automatically converted into a single vacancy. Choose one advert
