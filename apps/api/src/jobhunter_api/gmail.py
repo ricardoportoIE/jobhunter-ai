@@ -377,7 +377,14 @@ def labels(source_id: UUID, actor: Actor, request: Request) -> list[Row]:
     deadline = time.monotonic() + 15
     try:
         return custom_labels(access_token(settings, source, deadline), deadline)
-    except SourceFailure:
+    except SourceFailure as error:
+        if error.code == "GMAIL_API_DISABLED":
+            raise Problem(
+                409,
+                "GMAIL_API_DISABLED",
+                "Enable the Gmail API in the Google Cloud project used by this OAuth client, "
+                "then load labels again. You do not need to reconnect Gmail.",
+            ) from None
         raise Problem(
             409, "GMAIL_RECONNECT", "Could not read labels. Check the Gmail connection."
         ) from None

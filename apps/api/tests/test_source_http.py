@@ -1,3 +1,4 @@
+import json
 from typing import Any
 from unittest.mock import Mock
 
@@ -151,3 +152,39 @@ def test_address_fallback_keeps_the_overall_deadline(monkeypatch: pytest.MonkeyP
         connect_address(["2607:f8b0::1", "142.250.1.1"], deadline=4)
     assert failure.value.code == "SOURCE_TIMEOUT"
     dial.assert_called_once_with(("2607:f8b0::1", 443), timeout=3)
+
+
+@pytest.mark.parametrize(
+    "field,reason", [("details", "SERVICE_DISABLED"), ("errors", "accessNotConfigured")]
+)
+def test_disabled_gmail_api_is_distinct_and_redacted(
+    monkeypatch: pytest.MonkeyPatch, field: str, reason: str
+) -> None:
+    content = json.dumps(
+        {"error": {field: [{"reason": reason}], "message": "private-sentinel"}}
+    ).encode()
+    connection = wire(monkeypatch, [403], content=content)
+    with pytest.raises(SourceFailure) as failure:
+        request_json("https://gmail.googleapis.com/gmail/v1/users/me/labels")
+    assert failure.value.code == "GMAIL_API_DISABLED" and failure.value.stop
+    assert "private-sentinel" not in str(failure.value)
+    assert connection.request.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        b"invalid",
+        b"[]",
+        b'{"error":{"details":null}}',
+        b'{"error":{"details":[null]}}',
+        b"x" * 16385,
+    ],
+)
+def test_unrecognised_or_oversized_forbidden_body_stays_denied(
+    monkeypatch: pytest.MonkeyPatch, content: bytes
+) -> None:
+    wire(monkeypatch, [403], content=content)
+    with pytest.raises(SourceFailure) as failure:
+        request_json("https://gmail.googleapis.com/gmail/v1/users/me/labels")
+    assert failure.value.code == "SOURCE_ACCESS_DENIED"

@@ -68,6 +68,12 @@ records and secrets as well. Do not include mailbox exports in a public reposito
 
 ## Connection troubleshooting
 
+Successful OAuth consent does not mean the Gmail API is enabled. If the application
+asks you to enable it, open the [Gmail API library page](https://console.cloud.google.com/apis/library/gmail.googleapis.com),
+select the project that owns the configured OAuth client and enable the API. Allow
+time for the setting to propagate, then select **Load Gmail labels** again. Existing
+credentials remain connected; this configuration error does not require a new login.
+
 If Google returns to the application but connection fails, start a new sign-in after
 resolving the cause. OAuth state and authorisation codes cannot be reused by reloading
 the callback. Check that the registered redirect exactly matches the configured local

@@ -193,6 +193,40 @@ def test_oauth_network_failure_has_actionable_feedback(
     assert signed_client.post("/api/v1/discovery/gmail/complete", json=payload).status_code == 409
 
 
+def test_disabled_api_labels_error_preserves_connection_and_allows_retry(
+    signed_client: TestClient, db_settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    configure(signed_client, db_settings)
+    source = add_source(signed_client, "gmail")
+    query = start(signed_client, source)
+    monkeypatch.setattr("jobhunter_api.gmail.request_json", lambda *a, **kw: (200, {}, token()))
+    signed_client.post(
+        "/api/v1/discovery/gmail/complete",
+        json={"state": query["state"][0], "code": "synthetic-code"},
+    ).raise_for_status()
+
+    def disabled(*args: Any, **kwargs: Any) -> Any:
+        raise SourceFailure("GMAIL_API_DISABLED", stop=True)
+
+    monkeypatch.setattr("jobhunter_api.gmail.gmail_get", disabled)
+    path = f"/api/v1/discovery/gmail/{source['id']}/labels"
+    response = signed_client.get(path)
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "GMAIL_API_DISABLED"
+    assert "do not need to reconnect" in response.json()["error"]["message"]
+    sources = signed_client.get("/api/v1/discovery/sources").json()
+    assert sources[0]["connected"] and not sources[0]["enabled"]
+    with connect(db_settings) as db:
+        assert db.execute(
+            "SELECT count(*) AS n FROM discovery_secrets WHERE purpose='token'"
+        ).fetchone() == {"n": 1}
+    monkeypatch.setattr(
+        "jobhunter_api.gmail.gmail_get",
+        lambda *a: {"labels": [{"type": "user", "id": "Label_1", "name": "Synthetic alerts"}]},
+    )
+    assert signed_client.get(path).json() == [{"id": "Label_1", "name": "Synthetic alerts"}]
+
+
 def test_secret_binding_and_tampering(signed_client: TestClient, db_settings: Settings) -> None:
     settings = configure(signed_client, db_settings)
     owner, source = uuid4(), uuid4()

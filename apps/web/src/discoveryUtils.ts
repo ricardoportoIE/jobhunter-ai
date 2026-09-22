@@ -2,6 +2,10 @@ import { t, dateLocale } from "./i18n";
 import type { DiscoveryItem } from "./discoveryTypes";
 import type { Profile } from "./types";
 export function sourceError(code: string | null): string {
+  if (code === "GMAIL_API_DISABLED")
+    return t(
+      "Enable the Gmail API in the Google Cloud project used by this OAuth client, then enable the source again.",
+    );
   if (code === "SOURCE_ACCESS_DENIED")
     return t("Access was refused. The source has been paused.");
   if (code === "SOURCE_RATE_LIMIT")

@@ -14,6 +14,7 @@ from jobhunter_api.store import Row
 
 HOSTS = {"boards-api.greenhouse.io", "gmail.googleapis.com", "oauth2.googleapis.com"}
 MAX_BYTES = 4 * 1024 * 1024
+MAX_ERROR_BYTES = 16384
 
 
 class SourceFailure(Exception):
@@ -46,6 +47,41 @@ def connect_address(addresses: list[str], deadline: float) -> socket.socket:
         except OSError:
             continue
     raise SourceFailure("SOURCE_UNAVAILABLE")
+
+
+def gmail_api_disabled(
+    response: http.client.HTTPResponse,
+    connection: http.client.HTTPSConnection,
+    deadline: float,
+) -> bool:
+    """Recognise only Google's disabled-service reason; never expose error content."""
+    try:
+        chunks = bytearray()
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return False
+            if connection.sock:
+                connection.sock.settimeout(min(remaining, 3))
+            chunk = response.read1(min(4096, MAX_ERROR_BYTES + 1 - len(chunks)))
+            if not chunk:
+                break
+            chunks.extend(chunk)
+            if len(chunks) > MAX_ERROR_BYTES:
+                return False
+        payload = json.loads(chunks)
+        error = payload.get("error") if isinstance(payload, dict) else None
+        if not isinstance(error, dict):
+            return False
+        for field, reason in (("details", "SERVICE_DISABLED"), ("errors", "accessNotConfigured")):
+            entries = error.get(field, [])
+            if isinstance(entries, list) and any(
+                isinstance(item, dict) and item.get("reason") == reason for item in entries
+            ):
+                return True
+    except (OSError, ValueError, RecursionError, http.client.HTTPException):
+        pass
+    return False
 
 
 def request_json(
@@ -90,6 +126,12 @@ def request_json(
             if status == 304:
                 return status, result_headers, {}
             if status in {401, 403}:
+                if (
+                    status == 403
+                    and host == "gmail.googleapis.com"
+                    and gmail_api_disabled(response, connection, deadline)
+                ):
+                    raise SourceFailure("GMAIL_API_DISABLED", stop=True)
                 raise SourceFailure("SOURCE_ACCESS_DENIED", stop=True)
             if status == 429 or status in {502, 503, 504}:
                 retry_at = retry_time(result_headers.get("retry-after"))

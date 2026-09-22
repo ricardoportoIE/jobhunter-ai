@@ -28,6 +28,25 @@ responses. Initial frontend/browser runs hit time limits while other local check
 were running; the frontend passed with one worker and the browser rerun passed after
 the API suite finished. No assertions or timeout thresholds were relaxed.
 
+## Live labels follow-up — 22 September 2026
+
+A subsequent labels request returned HTTP 403 with the recognised Google reasons
+`SERVICE_DISABLED` and `accessNotConfigured`. The operator enabled the Gmail API in
+the OAuth client's Google Cloud project. A repeat of the actual connector request
+then successfully listed custom labels using the existing connection. No new login
+was required and no email bodies were fetched.
+
+The transport now recognises this configuration error from a bounded, 16 KiB error
+response. It exposes a fixed error code and instruction rather than Google response
+text, project identifiers or credentials. Labels failures preserve the connection;
+scheduled reads pause the source until its configuration is corrected. Unknown,
+malformed and oversized errors retain the existing access-denied behaviour.
+
+All 160 API tests and 31 component tests passed, including the new error-response
+cases and a successful labels retry without reconnecting. Ruff, formatting, ESLint,
+TypeScript, documentation checks and mypy in Linux passed. The English and Portuguese
+interfaces now explain that the Gmail API must be enabled in the OAuth client's project.
+
 ## Original delivery — 20 September 2026
 
 Local review date: **20 September 2026**. P4 extends the existing application without
