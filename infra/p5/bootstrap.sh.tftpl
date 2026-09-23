@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+umask 077
+# Arm termination before package installation or application bootstrap can fail.
+expiry=$(date -u -d '${expires_at}' +%s)
+now=$(date -u +%s)
+remaining=$((expiry-now))
+if [ "$remaining" -le 0 ]; then shutdown -h now; exit 1; fi
+systemd-run --unit=jobhunter-expiry --on-active="$remaining" /usr/sbin/shutdown -h now
+dnf install -y docker python3
+systemctl enable --now docker
+mkdir -p /usr/local/lib/docker/cli-plugins /opt/jobhunter
+curl --fail --location --proto '=https' --tlsv1.2 --max-time 120 \
+  'https://github.com/docker/compose/releases/download/${compose_version}/docker-compose-linux-x86_64' \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+echo '${compose_sha256}  /usr/local/lib/docker/cli-plugins/docker-compose' | sha256sum --check --status
+chmod 755 /usr/local/lib/docker/cli-plugins/docker-compose
+aws s3 cp 's3://${bucket}/${bundle_key}' /opt/bundle.tar.gz --region eu-west-1 --only-show-errors
+echo '${bundle_sha256}  /opt/bundle.tar.gz' | sha256sum --check --status
+tar -xzf /opt/bundle.tar.gz -C /opt/jobhunter
+cd /opt/jobhunter
+printf '%s\n' '${session_id}' > /opt/jobhunter-session
+printf '%s\n' '${bucket}' > /opt/jobhunter-bucket
+bash infra/p5/host/start.sh

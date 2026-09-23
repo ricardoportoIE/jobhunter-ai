@@ -1,0 +1,1 @@
+Synthetic Terraform test fixture. It is never deployed.
