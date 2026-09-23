@@ -28,3 +28,16 @@ connectivity. EBS and S3 are encrypted; S3 public access is blocked. Each sessio
 an AWS termination schedule and an operating-system timer. These stop compute but
 do not remove every resource: complete Terraform teardown and a residual scan are
 mandatory. No production availability or hard AWS billing cap is claimed.
+
+## Host checks
+
+```powershell
+python -m unittest discover -s infra/p5/host -p "test_*.py"
+python scripts/check_p5_local.py
+```
+
+The second command requires Docker and unused local ports 15173, 18000 and 15433.
+It builds a separate Compose project with fictional records, exercises the host's
+application and PostgreSQL recovery operations, then removes that project's volumes
+and containers. Private results stay beneath `.private/p5/`. S3 transfer is replaced
+with local file copying in this check; AWS integration still needs a live session.

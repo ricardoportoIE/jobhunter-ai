@@ -7,7 +7,7 @@ All cloud resources are temporary; everyday use and personal records remain loca
 |---|---|---|
 | P5-01 | Architecture, budget and acceptance boundaries | Defined |
 | P5-02 | Terraform, isolation and termination controls | Implemented; validation and two mocked plans passed |
-| P5-03 | Bootstrap, synthetic workflow, backup/restore and telemetry | In progress |
+| P5-03 | Bootstrap, synthetic workflow, backup/restore and telemetry | Implemented; local workflow and seven failure-path checks passed; AWS checks pending |
 | P5-04 | Cost gate, session controller and automated checks | Pending |
 | P5-05 | Live exercise, evidence, verified teardown and final review | Pending |
 
@@ -24,3 +24,18 @@ live deployment. The account-specific copy is private; the reviewable template i
 `infra/p5/operator-iam-policy.template.json`. No role or cloud resource was created
 during the mocked Terraform tests. Both roles carry a PowerUserAccess permissions
 boundary in addition to their narrower runtime policies.
+
+## Local runtime evidence
+
+`python scripts/check_p5_local.py` built a disposable Compose project with newly
+generated credentials and synthetic records. Authentication, profile review, vacancy
+review, deterministic analysis and shortlisting passed twice. A PostgreSQL dump was
+restored into a separate scratch database, with matching file and record digests.
+The test removed its containers, network and volume in a `finally` block. Existing
+local application data was not used. Object transfer used a local file substitute:
+this does not establish that S3 permissions, SSM access or CloudWatch work in AWS.
+
+Seven offline host tests cover session isolation, a changing database during backup,
+corrupt downloads, failed restore cleanup and data verification before success is
+reported. Terraform's two mocked plans also passed after release-tag validation was
+added. The live cloud checks remain part of P5-05.

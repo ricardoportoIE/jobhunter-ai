@@ -34,7 +34,13 @@ variable "bundle_sha256" {
     error_message = "The source bundle must have a SHA-256 digest."
   }
 }
-variable "compose_version" { type = string }
+variable "compose_version" {
+  type = string
+  validation {
+    condition     = can(regex("^v[0-9]+\\.[0-9]+\\.[0-9]+$", var.compose_version))
+    error_message = "Pin a stable Docker Compose release tag."
+  }
+}
 variable "compose_sha256" {
   type = string
   validation {
