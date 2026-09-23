@@ -15,6 +15,11 @@ curl --fail --location --proto '=https' --tlsv1.2 --max-time 120 \
   -o /usr/local/lib/docker/cli-plugins/docker-compose
 echo '${compose_sha256}  /usr/local/lib/docker/cli-plugins/docker-compose' | sha256sum --check --status
 chmod 755 /usr/local/lib/docker/cli-plugins/docker-compose
+curl --fail --location --proto '=https' --tlsv1.2 --max-time 120 \
+  'https://github.com/docker/buildx/releases/download/${buildx_version}/buildx-${buildx_version}.linux-amd64' \
+  -o /usr/local/lib/docker/cli-plugins/docker-buildx
+echo '${buildx_sha256}  /usr/local/lib/docker/cli-plugins/docker-buildx' | sha256sum --check --status
+chmod 755 /usr/local/lib/docker/cli-plugins/docker-buildx
 aws s3 cp 's3://${bucket}/${bundle_key}' /opt/bundle.tar.gz --region eu-west-1 --only-show-errors
 echo '${bundle_sha256}  /opt/bundle.tar.gz' | sha256sum --check --status
 tar -xzf /opt/bundle.tar.gz -C /opt/jobhunter

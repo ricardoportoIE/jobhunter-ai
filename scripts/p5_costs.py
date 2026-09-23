@@ -162,3 +162,65 @@ def mark_destroyed(path, session):
     with closing(ledger(path)) as db:
         # Keep the full monetary reservation until month end: billing is delayed.
         db.execute("UPDATE reservations SET state='destroyed' WHERE session=?", (session,))
+
+
+def reserve_retry(path, session, parent, parent_quote, quote, spending, at=None):
+    """Allow one sequential cold-start retry inside the original money and time reservation."""
+    at = at or now()
+    original = estimate(parent_quote, parent["hours"], at)
+    extra = estimate(quote, session["hours"], at)
+    fresh(spending["checked_at"], at)
+    month = at.strftime("%Y-%m")
+    if (
+        parent.get("parent")
+        or session.get("parent") != parent["id"]
+        or session["account"] != parent["account"]
+        or spending["account"] != parent["account"]
+        or timestamp(session["expires_at"]) > timestamp(parent["expires_at"])
+        or timestamp(parent["expires_at"]) <= at
+        or spending["month"] != month
+        or not spending.get("reference", "").strip()
+        or original + extra > SESSION_CENTS
+    ):
+        raise ValueError("Retry exceeds the original identity, time or money reservation")
+    with closing(ledger(path)) as db:
+        try:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute(
+                "SELECT state,binding,month FROM reservations WHERE session=?", (parent["id"],)
+            ).fetchone()
+            if not row or row != ("destroyed", json.dumps(parent, sort_keys=True), month):
+                raise ValueError("The original bound session must be fully destroyed first")
+            active = db.execute(
+                "SELECT 1 FROM reservations WHERE account=? AND state!='destroyed'",
+                (session["account"],),
+            ).fetchone()
+            used, count = db.execute(
+                "SELECT coalesce(sum(cents),0),count(*) FROM reservations "
+                "WHERE account=? AND month=?",
+                (session["account"], month),
+            ).fetchone()
+            existing = cents(amount(spending["usd"]) * EUR_PER_USD * CONTINGENCY)
+            if active or count >= 2 or existing + used + RESIDUAL_CENTS > AWS_CENTS:
+                raise ValueError("Retry is blocked by the monthly or active-session gate")
+            db.execute(
+                "INSERT INTO reservations VALUES (?,?,?,?,?,?)",
+                (
+                    session["id"],
+                    session["account"],
+                    month,
+                    "reserved",
+                    0,
+                    json.dumps(session, sort_keys=True),
+                ),
+            )
+            db.commit()
+        except BaseException:
+            db.rollback()
+            raise
+    return {
+        "estimate_eur": extra / 100,
+        "combined_attempt_estimate_eur": (original + extra) / 100,
+        "reserved_eur": SESSION_CENTS / 100,
+        "reservation_reused": parent["id"],
+    }

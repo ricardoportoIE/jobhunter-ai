@@ -117,8 +117,95 @@ class GateTests(unittest.TestCase):
         with ThreadPoolExecutor(max_workers=2) as pool:
             self.assertEqual(sorted(pool.map(attempt, (1, 2))), [False, True])
 
+    def prepare_retry(self):
+        self.session["expires_at"] = (self.at + timedelta(hours=2)).isoformat()
+        self.reserve()
+        child = self.session | {"id": "p5-abcdef654321", "parent": self.session["id"]}
+        return child
+
+    def retry(self, child, **overrides):
+        args = dict(
+            path=self.path,
+            session=child,
+            parent=self.session,
+            parent_quote=self.quote,
+            quote=self.quote,
+            spending=self.spending,
+            at=self.at,
+        )
+        return costs.reserve_retry(**(args | overrides))
+
+    def test_retry_requires_cleanup_and_preserves_the_original_reservation(self):
+        child = self.prepare_retry()
+        with self.assertRaises(ValueError):
+            self.retry(child)
+        costs.mark_destroyed(self.path, self.session["id"])
+        self.retry(child)
+        db = costs.ledger(self.path)
+        try:
+            self.assertEqual(
+                db.execute("SELECT sum(cents),count(*) FROM reservations").fetchone(), (500, 2)
+            )
+        finally:
+            db.close()
+
+    def test_retry_cannot_extend_the_deadline_or_reuse_another_account(self):
+        child = self.prepare_retry()
+        costs.mark_destroyed(self.path, self.session["id"])
+        for changes in (
+            {"expires_at": (self.at + timedelta(hours=3)).isoformat()},
+            {"account": "999999999999"},
+            {"parent": "p5-other"},
+        ):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                self.retry(child | changes)
+
+    def test_retry_must_fit_both_estimates_and_cannot_repeat(self):
+        child = self.prepare_retry()
+        costs.mark_destroyed(self.path, self.session["id"])
+        quote = copy.deepcopy(self.quote)
+        quote["rates"]["compute"]["usd"] = "0.8"
+        with self.assertRaises(ValueError):
+            self.retry(child, parent_quote=quote, quote=quote)
+        self.retry(child)
+        costs.mark_destroyed(self.path, child["id"])
+        with self.assertRaises(ValueError):
+            self.retry(child | {"id": "p5-abcdef987654"})
+
 
 class ControllerTests(unittest.TestCase):
+    def test_residual_scan_uses_the_nat_cli_filter_and_fails_closed(self):
+        keys = {
+            "describe-instances": "Reservations",
+            "describe-volumes": "Volumes",
+            "describe-vpcs": "Vpcs",
+            "describe-subnets": "Subnets",
+            "describe-security-groups": "SecurityGroups",
+            "describe-network-interfaces": "NetworkInterfaces",
+            "describe-internet-gateways": "InternetGateways",
+            "describe-route-tables": "RouteTables",
+            "describe-addresses": "Addresses",
+            "describe-nat-gateways": "NatGateways",
+            "describe-vpc-endpoints": "VpcEndpoints",
+            "describe-snapshots": "Snapshots",
+            "describe-alarms": "MetricAlarms",
+            "describe-log-groups": "logGroups",
+        }
+
+        def response(profile, service, operation, *args, **kwargs):
+            if operation == "describe-nat-gateways":
+                self.assertEqual(args[0], "--filter")
+            return {keys[operation]: []} if operation in keys else None
+
+        session = {"id": "p5-abcdef123456", "account": "123456789012", "profile": "test"}
+        with patch.object(p5, "aws", side_effect=response):
+            self.assertFalse(any(p5.residuals(session).values()))
+        with (
+            patch.object(p5, "aws", side_effect=RuntimeError("Unavailable")),
+            self.assertRaises(RuntimeError),
+        ):
+            p5.residuals(session)
+
     def test_personal_files_history_and_tests_are_excluded_from_upload(self):
         for path in (
             ".env",

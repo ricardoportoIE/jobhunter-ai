@@ -9,6 +9,8 @@ variables {
   bundle_sha256   = sha256("synthetic")
   compose_version = "v2.39.4"
   compose_sha256  = sha256("synthetic-compose")
+  buildx_version  = "v0.37.1"
+  buildx_sha256   = sha256("synthetic-buildx")
 }
 
 run "isolated_plan" {

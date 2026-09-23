@@ -64,7 +64,13 @@ def write(path, value):
 
 def environment(profile):
     result = {k: v for k, v in os.environ.items() if not k.startswith(("AWS_", "TF_"))}
-    result.update(AWS_PROFILE=profile, AWS_DEFAULT_REGION=REGION, AWS_PAGER="")
+    result.update(
+        AWS_PROFILE=profile,
+        AWS_DEFAULT_REGION=REGION,
+        AWS_PAGER="",
+        AWS_CLI_OUTPUT_ENCODING="UTF-8",
+        AWS_CLI_FILE_ENCODING="UTF-8",
+    )
     return result
 
 
@@ -231,6 +237,14 @@ def prepare(args):
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT).strip():
         raise ValueError("Commit reviewed changes before preparing an immutable session")
     account = identity(args.profile)
+    parent = None
+    if args.reuse_reservation:
+        parent_folder, parent = load_session(args.reuse_reservation)
+        intact(parent_folder, parent)
+        if parent["account"] != account or any(residuals(parent).values()):
+            raise ValueError(
+                "The original reservation must belong to this account and be cleaned up"
+            )
     existing = aws(
         args.profile,
         "resourcegroupstaggingapi",
@@ -292,7 +306,25 @@ def prepare(args):
     compose_digest = asset["digest"].removeprefix("sha256:")
     if not re.fullmatch(r"[a-f0-9]{64}", compose_digest):
         raise ValueError("Docker Compose release has no verified SHA-256 digest")
+    with urlopen(
+        Request(
+            "https://api.github.com/repos/docker/buildx/releases/latest",
+            headers={"User-Agent": "JobHunter-P5"},
+        ),
+        timeout=30,
+    ) as response:
+        buildx_release = json.load(response)
+    buildx_asset = next(
+        a
+        for a in buildx_release["assets"]
+        if a["name"] == f"buildx-{buildx_release['tag_name']}.linux-amd64"
+    )
+    buildx_digest = buildx_asset["digest"].removeprefix("sha256:")
+    if not re.fullmatch(r"[a-f0-9]{64}", buildx_digest):
+        raise ValueError("Docker Buildx release has no verified SHA-256 digest")
     expires = (costs.now() + timedelta(hours=args.hours)).replace(microsecond=0)
+    if parent:
+        expires = min(expires, costs.timestamp(parent["expires_at"]))
     variables = {
         "account_id": account,
         "session_id": session_id,
@@ -302,6 +334,8 @@ def prepare(args):
         "bundle_sha256": digest(folder / "source.tar.gz"),
         "compose_version": release["tag_name"],
         "compose_sha256": compose_digest,
+        "buildx_version": buildx_release["tag_name"],
+        "buildx_sha256": buildx_digest,
     }
     write(folder / "variables.json", variables)
     tf(
@@ -344,6 +378,8 @@ def prepare(args):
             ]
         },
     }
+    if parent:
+        binding["parent"] = parent["id"]
     write(folder / "session.json", binding)
     print(
         json.dumps({"session": session_id, "status": "prepared", "cloud_resources_created": False})
@@ -531,7 +567,8 @@ def residuals(session):
         ("describe-vpc-endpoints", "VpcEndpoints"),
         ("describe-snapshots", "Snapshots"),
     ):
-        data = aws(profile, "ec2", operation, "--filters", filters)[key]
+        filter_option = "--filter" if operation == "describe-nat-gateways" else "--filters"
+        data = aws(profile, "ec2", operation, filter_option, filters)[key]
         if operation == "describe-instances":
             data = [i for r in data for i in r["Instances"] if i["State"]["Name"] != "terminated"]
         if operation == "describe-nat-gateways":
@@ -625,12 +662,23 @@ def run(session_id):
     intact(folder, session)
     if costs.timestamp(session["expires_at"]) - costs.now() < timedelta(minutes=45):
         raise ValueError("Too little time remains; prepare a fresh session")
-    summary = costs.reserve(
-        PRIVATE / "ledger.sqlite",
-        session,
-        json.loads((folder / "quote.json").read_text()),
-        json.loads((folder / "spending.json").read_text()),
-    )
+    quote = json.loads((folder / "quote.json").read_text())
+    spending = json.loads((folder / "spending.json").read_text())
+    if session.get("parent"):
+        parent_folder, parent = load_session(session["parent"])
+        intact(parent_folder, parent)
+        if any(residuals(parent).values()):
+            raise ValueError("The original session still has residual resources")
+        summary = costs.reserve_retry(
+            PRIVATE / "ledger.sqlite",
+            session,
+            parent,
+            json.loads((parent_folder / "quote.json").read_text()),
+            quote,
+            spending,
+        )
+    else:
+        summary = costs.reserve(PRIVATE / "ledger.sqlite", session, quote, spending)
     write(folder / "reservation.json", summary)
     print(json.dumps(summary), flush=True)
     try:
@@ -659,6 +707,7 @@ def main():
     prepare_parser.add_argument("--spending-usd", required=True)
     prepare_parser.add_argument("--spending-checked-at", required=True)
     prepare_parser.add_argument("--spending-reference", required=True)
+    prepare_parser.add_argument("--reuse-reservation")
     for action in ("run", "destroy"):
         commands.add_parser(action).add_argument("session")
     args = parser.parse_args()

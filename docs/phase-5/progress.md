@@ -8,8 +8,8 @@ All cloud resources are temporary; everyday use and personal records remain loca
 | P5-01 | Architecture, budget and acceptance boundaries | Defined |
 | P5-02 | Terraform, isolation and termination controls | Implemented; validation and two mocked plans passed |
 | P5-03 | Bootstrap, synthetic workflow, backup/restore and telemetry | Implemented; local workflow and seven failure-path checks passed; AWS checks pending |
-| P5-04 | Cost gate, session controller and automated checks | Implemented; twelve offline regression checks passed |
-| P5-05 | Live exercise, evidence, verified teardown and final review | Pending |
+| P5-04 | Cost gate, session controller and automated checks | Implemented; sixteen offline regression checks passed |
+| P5-05 | Live exercise, evidence, verified teardown and final review | First live workflow and scheduled termination passed; corrected cold start under review |
 
 The concrete topology and trade-offs are in [ADR-005](../adr/0005-temporary-aws-demo.md).
 The operator selected the `portfolio` AWS profile and reported USD 1 of project AWS
@@ -41,7 +41,14 @@ reported. Terraform's two mocked plans also passed after release-tag validation 
 added. The live cloud checks remain part of P5-05.
 
 The [session runbook](runbook.md) describes immutable source/plan inputs, current SKU
-quotes, atomic reservations and automatic cleanup. Twelve regression tests cover
+quotes, atomic reservations and automatic cleanup. Sixteen regression tests cover
 unknown/stale costs, competing reservations, monthly carry-over, changed plans,
 source exclusions and cleanup after a failed apply. CI also exercises the local
 synthetic runtime and the mocked Terraform plans without cloud credentials.
+
+The first live deployment passed private SSM access, the synthetic workflow, S3
+backup/export, database restoration, CloudWatch telemetry and actual Scheduler
+termination. It exposed an outdated Buildx in the Amazon Linux Docker package;
+bootstrap now pins and verifies Buildx explicitly. The residual scanner also now
+uses the NAT gateway CLI's singular `--filter` argument. A final cold start will
+validate these corrections within the original reservation and deadline.

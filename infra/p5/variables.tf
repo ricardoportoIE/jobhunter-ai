@@ -48,3 +48,17 @@ variable "compose_sha256" {
     error_message = "Pin the verified Docker Compose Linux x86_64 binary digest."
   }
 }
+variable "buildx_version" {
+  type = string
+  validation {
+    condition     = can(regex("^v[0-9]+\\.[0-9]+\\.[0-9]+$", var.buildx_version))
+    error_message = "Pin a stable Docker Buildx release tag."
+  }
+}
+variable "buildx_sha256" {
+  type = string
+  validation {
+    condition     = can(regex("^[a-f0-9]{64}$", var.buildx_sha256))
+    error_message = "Pin the verified Docker Buildx Linux amd64 binary digest."
+  }
+}

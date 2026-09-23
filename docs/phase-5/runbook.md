@@ -84,6 +84,17 @@ There is deliberately no command to reset them. Existing spending plus reservati
 may allow fewer than two sessions. Unknown spending blocks new allocation; an
 operator declaration is labelled as such and is not a billing API reconciliation.
 
+One sequential cold-start retry may use `prepare --reuse-reservation <session>` with
+the other preparation arguments. This requires verified cleanup of the first attempt,
+fresh evidence, the same account and a deadline no later than the original deadline.
+Both conservative attempt estimates must fit the existing EUR 5 reservation. The
+retry counts towards the two-attempt monthly limit, cannot itself be retried and does
+not release or reset money. Its separate state and artefacts preserve both attempts.
+
+Compose and Buildx are both pinned to official release digests. The first live test
+exposed an older Buildx in Amazon Linux's Docker package; explicitly installing the
+verified Buildx binary is now part of bootstrap rather than relying on that package.
+
 ## Evidence and validation
 
 Offline checks run in CI without AWS credentials. `check_p5_local.py` validates the

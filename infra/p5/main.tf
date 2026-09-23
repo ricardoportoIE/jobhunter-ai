@@ -182,6 +182,8 @@ resource "aws_instance" "demo" {
     session_id      = var.session_id
     compose_version = var.compose_version
     compose_sha256  = var.compose_sha256
+    buildx_version  = var.buildx_version
+    buildx_sha256   = var.buildx_sha256
   })
   depends_on = [aws_iam_role_policy_attachment.ssm, aws_iam_role_policy.host, aws_iam_role_policy.expiry, aws_route_table_association.demo]
   lifecycle {
