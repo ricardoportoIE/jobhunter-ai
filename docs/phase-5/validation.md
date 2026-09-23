@@ -77,6 +77,11 @@ Preflight now confirms their state with EC2 directly. Only confirmed termination
 an explicit not-found response is ignored; unknown resources and denied reads still
 block deployment. This is also covered by a regression.
 
+The first GitHub infrastructure job exposed a missing Linux package checksum in the
+provider lockfile. The signed HashiCorp checksums are now recorded for both Windows
+and Linux amd64; the provider version remains 6.66.0. A clean Linux initialisation,
+validation and mocked test run verifies the corrected lockfile without AWS access.
+
 ## Cost evidence and limits
 
 Thirteen paid regional SKUs were fetched from AWS Pricing, without free-tier credits.

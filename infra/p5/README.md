@@ -14,6 +14,10 @@ terraform -chdir=infra/p5 test
 The committed tests use a mocked AWS provider and plan-only runs. They do not create
 cloud resources or require credentials. Do not add an unmocked apply run to CI.
 The dependency lockfile fixes the provider selected during validation.
+It includes signed-package checksums for both Windows and Linux amd64. When updating
+the provider, refresh both platforms with
+`terraform -chdir=infra/p5 providers lock -platform=windows_amd64 -platform=linux_amd64`
+and test a clean Linux initialisation before committing the lockfile.
 
 The operator needs an authenticated AWS profile and permission to create the scoped
 session resources. PowerUserAccess alone lacks the required IAM operations. An
