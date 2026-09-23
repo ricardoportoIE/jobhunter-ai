@@ -93,7 +93,7 @@ def aws(profile, *arguments, region=REGION, absent=()):
         env=environment(profile),
     )
     if result.returncode:
-        found = re.search(rb"\((\w+)\) when calling", result.stderr)
+        found = re.search(rb"\(([A-Za-z0-9_.-]+)\) when calling", result.stderr)
         code = found[1].decode() if found else "CLIError"
         if code in absent:
             return None
@@ -104,6 +104,51 @@ def aws(profile, *arguments, region=REGION, absent=()):
 
 def identity(profile):
     return aws(profile, "sts", "get-caller-identity")["Account"]
+
+
+def live_tagged_resources(profile, account):
+    """Resolve stale EC2 tag-index entries against the authoritative service API."""
+    resources = aws(
+        profile,
+        "resourcegroupstaggingapi",
+        "get-resources",
+        "--tag-filters",
+        "Key=Project,Values=jobhunter-ai",
+    )["ResourceTagMappingList"]
+    active = []
+    for resource in resources:
+        prefix = f"arn:aws:ec2:{REGION}:{account}:"
+        arn = resource["ResourceARN"]
+        if arn.startswith(prefix + "instance/"):
+            result = aws(
+                profile,
+                "ec2",
+                "describe-instances",
+                "--instance-ids",
+                arn.rsplit("/", 1)[1],
+                absent=("InvalidInstanceID.NotFound",),
+            )
+            if result is None or all(
+                i["State"]["Name"] == "terminated"
+                for r in result["Reservations"]
+                for i in r["Instances"]
+            ):
+                continue
+        elif arn.startswith(prefix + "volume/"):
+            if (
+                aws(
+                    profile,
+                    "ec2",
+                    "describe-volumes",
+                    "--volume-ids",
+                    arn.rsplit("/", 1)[1],
+                    absent=("InvalidVolume.NotFound",),
+                )
+                is None
+            ):
+                continue
+        active.append(resource)
+    return active
 
 
 def allowed_source(name):
@@ -245,13 +290,7 @@ def prepare(args):
             raise ValueError(
                 "The original reservation must belong to this account and be cleaned up"
             )
-    existing = aws(
-        args.profile,
-        "resourcegroupstaggingapi",
-        "get-resources",
-        "--tag-filters",
-        "Key=Project,Values=jobhunter-ai",
-    )["ResourceTagMappingList"]
+    existing = live_tagged_resources(args.profile, account)
     if existing:
         raise ValueError("Existing tagged project resources require review and cleanup first")
     aws(

@@ -174,6 +174,35 @@ class GateTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_stale_tag_index_entries_require_authoritative_confirmation(self):
+        prefix = "arn:aws:ec2:eu-west-1:123456789012:"
+        entries = [
+            {"ResourceARN": prefix + kind}
+            for kind in ("instance/i-example", "volume/vol-example", "vpc/vpc-example")
+        ]
+        with patch.object(
+            p5,
+            "aws",
+            side_effect=[
+                {"ResourceTagMappingList": entries},
+                {"Reservations": [{"Instances": [{"State": {"Name": "terminated"}}]}]},
+                None,
+            ],
+        ):
+            self.assertEqual(p5.live_tagged_resources("test", "123456789012"), [entries[2]])
+        with (
+            patch.object(
+                p5,
+                "aws",
+                side_effect=[
+                    {"ResourceTagMappingList": [entries[0]]},
+                    RuntimeError("AccessDenied"),
+                ],
+            ),
+            self.assertRaises(RuntimeError),
+        ):
+            p5.live_tagged_resources("test", "123456789012")
+
     def test_residual_scan_uses_the_nat_cli_filter_and_fails_closed(self):
         keys = {
             "describe-instances": "Reservations",
