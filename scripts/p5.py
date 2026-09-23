@@ -477,9 +477,26 @@ def remote(session, instance, commands):
     raise TimeoutError("Remote synthetic check timed out")
 
 
+def export_backup(folder, session):
+    """Export already-uploaded synthetic recovery artefacts without a spending gate."""
+    bucket = f"jobhunter-{session['id']}-{session['account']}"
+    for name in ("demo.dump", "backup.json", "workflow.json", "restore.json"):
+        aws(
+            session["profile"],
+            "s3",
+            "cp",
+            f"s3://{bucket}/backup/{name}",
+            str(folder / name),
+            "--only-show-errors",
+        )
+    backup = json.loads((folder / "backup.json").read_text())
+    if digest(folder / "demo.dump") != backup["sha256"]:
+        raise ValueError("The exported backup failed SHA-256 verification")
+
+
 def exercise(folder, session):
     outputs = json.loads(tf(folder, session["profile"], "output", "-json"))
-    instance, bucket = outputs["instance_id"]["value"], outputs["bucket"]["value"]
+    instance = outputs["instance_id"]["value"]
     write(folder / "outputs.json", outputs)
     deadline = time.monotonic() + 600
     while time.monotonic() < deadline:
@@ -511,18 +528,7 @@ def exercise(folder, session):
         ],
     )
     (folder / "remote-check.txt").write_text(result)
-    for name in ("demo.dump", "backup.json", "workflow.json", "restore.json"):
-        aws(
-            session["profile"],
-            "s3",
-            "cp",
-            f"s3://{bucket}/backup/{name}",
-            str(folder / name),
-            "--only-show-errors",
-        )
-    backup = json.loads((folder / "backup.json").read_text())
-    if digest(folder / "demo.dump") != backup["sha256"]:
-        raise ValueError("The exported backup failed SHA-256 verification")
+    export_backup(folder, session)
     health = aws(
         session["profile"],
         "cloudwatch",
@@ -747,13 +753,15 @@ def main():
     prepare_parser.add_argument("--spending-checked-at", required=True)
     prepare_parser.add_argument("--spending-reference", required=True)
     prepare_parser.add_argument("--reuse-reservation")
-    for action in ("run", "destroy"):
+    for action in ("run", "destroy", "export"):
         commands.add_parser(action).add_argument("session")
     args = parser.parse_args()
     if args.action == "prepare":
         prepare(args)
     elif args.action == "run":
         run(args.session)
+    elif args.action == "export":
+        export_backup(*load_session(args.session))
     else:
         destroy(*load_session(args.session))
 

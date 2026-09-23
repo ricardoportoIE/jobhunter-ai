@@ -38,6 +38,7 @@ The [discovery workflow](docs/phase-4/operations.md) adds daily checks of source
 | Document processing | pypdf, python-docx, ReportLab | Importing source material and producing reviewable DOCX/PDF documents from approved facts. |
 | Quality assurance | pytest, Vitest, Testing Library, Playwright, axe | Domain, API, database, component and browser tests, including failure recovery, accessibility checks and desktop/mobile journeys. |
 | Developer tooling and delivery | Docker Compose, Nginx, GitHub Actions, uv, npm, Ruff, mypy, ESLint, Prettier | Reproducible environments, locked dependencies, static analysis, production builds, health checks and continuous integration. |
+| Cloud engineering and operations | Terraform, EC2, IAM, Systems Manager, S3, CloudWatch, EventBridge Scheduler | Private temporary environments, verified database recovery, atomic cost reservations, automatic termination and audited teardown. |
 | Product and architecture | Modular monolith, threat modelling, architecture decision records | A scoped product, documented trade-offs, reviewable decisions and a clear separation between implemented features and future plans. |
 
 For a focused code review, start with the [scoring engine](apps/api/src/jobhunter_api/scoring.py), [AI validation](apps/api/src/jobhunter_api/ai_matching.py), [CV import](apps/api/src/jobhunter_api/cv_import.py), [public URL reader](apps/api/src/jobhunter_api/job_url.py) and [browser journeys](apps/web/e2e).
@@ -117,9 +118,9 @@ Stop the application with `docker compose down`; this retains the database. See 
 
 ## Testing and validation
 
-The [GitHub Actions workflow](.github/workflows/ci.yml) defines five jobs: API, frontend, Docker Compose, browser end-to-end tests and design contracts. It checks formatting, types, application behaviour, evaluation contracts, builds and database outage recovery. Automated tests use synthetic data; recorded live AI results are validated without making paid calls in CI.
+The [GitHub Actions workflow](.github/workflows/ci.yml) defines six jobs: API, frontend, Docker Compose, browser end-to-end tests, design contracts and temporary infrastructure. It checks formatting, types, application behaviour, evaluation contracts, builds, database outage recovery, mocked Terraform plans and cloud budget/recovery controls. Automated tests use synthetic data; CI does not deploy AWS resources or make paid AI calls.
 
-Local verification on **20 September 2026** passed **145 API tests, 31 frontend tests and 16 desktop/mobile browser tests**, with no skipped API tests. Static checks, package and frontend builds, evaluation contracts, documentation checks, axe accessibility checks and database outage/recovery checks also passed. Two upstream Python deprecation warnings remain; browser tests used Microsoft Edge. See [P4 validation](docs/phase-4/validation.md) for coverage and the pending live Gmail setup.
+Verification on **23 September 2026** passed **165 API tests, 31 frontend tests and 16 desktop/mobile browser tests**, with no skipped API tests. Static checks, Python types, package and frontend builds, evaluation contracts and documentation checks passed. Two upstream Python deprecation warnings remain. This run used Linux containers and Chromium because local Windows application controls blocked the managed Python interpreter. See [P4 validation](docs/phase-4/validation.md) for discovery coverage and the [P5 runbook](docs/phase-5/runbook.md) for infrastructure checks.
 
 Run the API tests against a separate test database, with the local PostgreSQL service running:
 
@@ -153,16 +154,17 @@ The [development guide](docs/local-development.md) lists the lint, type, build a
 
 ## Project scope and next steps
 
-The local core, AI assistance, application packages and P4 discovery workflow are implemented. The project supports individual use with human review. Gmail is optional and requires the operator's OAuth client and explicit consent. There is no hosted production service or automated application submission.
+The local core, AI assistance, application packages and P4 discovery workflow are implemented. P5 adds a temporary, private AWS demonstration with synthetic data: one EC2 host runs the Docker stack, SSM provides private access, S3 holds recovery artefacts and CloudWatch records readiness. Terraform and two termination mechanisms support a bounded lifecycle. The [live P5 validation](docs/phase-5/validation.md) passed deployment, recovery, scheduled termination and verified teardown. The demonstration resources have been removed.
+
+The project supports individual use with human review. Gmail is optional and requires the operator's OAuth client and explicit consent. Everyday use remains local; there is no hosted production service or automated application submission. The smaller [P5 topology](docs/adr/0005-temporary-aws-demo.md) was selected to fit the temporary demonstration budget. RDS, Fargate, Cognito, API Gateway and other services in the original conceptual architecture are not claimed as implemented capabilities.
 
 Further work includes broader user-labelled evaluations, testing with more document layouts and sources, and a carefully scoped pilot. The planned stages extend the engineering skills above:
 
 | Planned stage | Skills and technologies to develop | Intended purpose |
 |---|---|---|
-| Temporary AWS demonstration | Terraform, IAM, Secrets Manager, Cognito, API Gateway, Lambda, ECS Fargate, RDS, S3, EventBridge, Step Functions and observability | Validate reproducible deployment, access controls, backups, cost monitoring and clean-up. The topology remains subject to budget and design validation. |
 | Controlled orchestration | Resumable workflows, idempotent integrations and scoped approval; LangGraph or MCP only where justified | Test one permitted channel or sandbox with final confirmation and auditable outcomes. |
 
-These are future plans, not deployed capabilities. Bedrock is an inference option for the cloud pilot; AgentCore remains deferred until a measured requirement justifies it. Everyday use remains local, and temporary cloud environments must fit the project's cost constraints. See the [product brief](docs/phase-0/product-brief.md), [architecture](docs/architecture/overview.md) and [runtime decision](docs/adr/0002-ai-runtime.md) for the reasoning behind this scope.
+Controlled orchestration remains a future plan. The P5 demonstration does not enable paid inference; Bedrock and AgentCore remain deferred until a measured requirement justifies them. Temporary cloud environments must fit the project's cost constraints. See the [product brief](docs/phase-0/product-brief.md), [architecture](docs/architecture/overview.md) and [runtime decision](docs/adr/0002-ai-runtime.md) for the reasoning behind this scope.
 
 ## Explore the project
 
@@ -175,6 +177,7 @@ These are future plans, not deployed capabilities. Bedrock is an inference optio
 | AI quality, costs and limitations | [AI operations](docs/phase-2/operations.md) · [Evaluation results](docs/phase-2/validation.md) · [Model migration evidence](docs/evals/luna-migration.md) |
 | Application documents and approval | [Package workflow](docs/phase-3/operations.md) · [Validation and visual checks](docs/phase-3/validation.md) |
 | Discovery, alerts and source updates | [Operations](docs/phase-4/operations.md) · [Gmail setup](docs/phase-4/gmail-setup.md) · [P4 validation](docs/phase-4/validation.md) |
+| Temporary AWS delivery and recovery | [Session runbook](docs/phase-5/runbook.md) · [Live validation](docs/phase-5/validation.md) · [Infrastructure](infra/p5/README.md) |
 | Development and documentation conventions | [Local development](docs/local-development.md) · [Documentation policy](docs/documentation-policy.md) · [Project conventions](AGENTS.md) |
 
 Public fixtures are fictitious. Real-vacancy evaluation cases are paraphrased and pseudonymised; their design labels are not a complete human gold set. Personal CVs, contact details, original private evidence and credentials are excluded from the repository.

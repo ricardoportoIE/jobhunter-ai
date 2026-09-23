@@ -46,3 +46,12 @@ run "reject_session_name" {
   variables { session_id = "unrelated-production" }
   expect_failures = [var.session_id]
 }
+
+run "reject_untrusted_release_tags" {
+  command = plan
+  variables {
+    compose_version = "$(unexpected)"
+    buildx_version  = "v1.2.3; unexpected"
+  }
+  expect_failures = [var.compose_version, var.buildx_version]
+}

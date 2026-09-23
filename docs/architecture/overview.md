@@ -2,6 +2,11 @@
 
 Adopted baseline: a local application, modular monolith and AWS only for temporary validation. The €25/month ceiling makes the cloud topology below an ephemeral demonstration environment; it will not run as continuous personal production infrastructure. See [ADR-004](../adr/0004-local-first-budget.md).
 
+P5 implementation note: [ADR-005](../adr/0005-temporary-aws-demo.md) replaces the
+multi-service cloud reference below with one disposable EC2/Docker host, private
+SSM access, S3 recovery artefacts, CloudWatch and Scheduler. The reference diagram
+is retained as the original design, not a claim that every service was deployed.
+
 ## Local core — phase 1
 
 ```mermaid

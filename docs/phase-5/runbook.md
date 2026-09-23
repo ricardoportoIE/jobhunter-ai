@@ -57,6 +57,11 @@ session tags. Any failed query or remaining resource prevents a clean result.
 Historical CloudWatch metric samples may remain under AWS retention rules; no further
 custom metric publishing continues after the host is terminated.
 
+To recover the latest already-uploaded synthetic backup before destroying the bucket,
+run `python scripts/p5.py export <session>`. This checks the selected account and
+downloaded SHA-256 digest but does not require a fresh price quote or reservation.
+It cannot recover an object that was never uploaded or whose bucket has been deleted.
+
 ## Budget interpretation
 
 The quote retrieves 13 paid SKUs directly from AWS Pricing in `eu-west-1`: compute,

@@ -174,6 +174,20 @@ class GateTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_export_requires_a_matching_digest_but_no_spending_gate(self):
+        session = {"id": "p5-abcdef123456", "account": "123456789012", "profile": "test"}
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            payload = folder / "demo.dump"
+            payload.write_bytes(b"synthetic")
+            (folder / "backup.json").write_text(json.dumps({"sha256": p5.digest(payload)}))
+            with patch.object(p5, "aws"), patch.object(costs, "reserve") as gate:
+                p5.export_backup(folder, session)
+                gate.assert_not_called()
+                payload.write_bytes(b"corrupt")
+                with self.assertRaisesRegex(ValueError, "SHA-256"):
+                    p5.export_backup(folder, session)
+
     def test_stale_tag_index_entries_require_authoritative_confirmation(self):
         prefix = "arn:aws:ec2:eu-west-1:123456789012:"
         entries = [
