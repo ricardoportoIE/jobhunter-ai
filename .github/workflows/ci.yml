@@ -12,6 +12,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  temporary-infrastructure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: '0.12.7'
+          python-version: '3.13'
+      - name: Install the pinned Terraform binary
+        run: |
+          curl --fail --silent --show-error -O https://releases.hashicorp.com/terraform/1.16.0/terraform_1.16.0_linux_amd64.zip
+          curl --fail --silent --show-error -O https://releases.hashicorp.com/terraform/1.16.0/terraform_1.16.0_SHA256SUMS
+          grep ' terraform_1.16.0_linux_amd64.zip$' terraform_1.16.0_SHA256SUMS | sha256sum --check
+          unzip -q terraform_1.16.0_linux_amd64.zip -d /tmp/p5-bin
+          echo /tmp/p5-bin >> "$GITHUB_PATH"
+          rm terraform_1.16.0_linux_amd64.zip terraform_1.16.0_SHA256SUMS
+      - run: terraform -chdir=infra/p5 init -backend=false -input=false -lockfile=readonly
+      - run: terraform -chdir=infra/p5 fmt -check
+      - run: terraform -chdir=infra/p5 validate
+      - run: terraform -chdir=infra/p5 test
+      - run: python -m unittest discover -s scripts -p test_p5.py
+      - run: python -m unittest discover -s infra/p5/host -p 'test_*.py'
+      - run: uv run --project apps/api --locked ruff check --config apps/api/pyproject.toml scripts/p5.py scripts/p5_costs.py scripts/test_p5.py scripts/check_p5_local.py infra/p5/host
+      - run: uv run --project apps/api --locked ruff format --check --config apps/api/pyproject.toml scripts/p5.py scripts/p5_costs.py scripts/test_p5.py scripts/check_p5_local.py infra/p5/host
+      - run: bash -n infra/p5/host/start.sh
+      - run: python scripts/check_p5_local.py
+
   api:
     runs-on: ubuntu-latest
     timeout-minutes: 10

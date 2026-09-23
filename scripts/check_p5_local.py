@@ -63,6 +63,7 @@ def main():
     host.command = command
     try:
         run(["docker", "compose", "up", "--build", "--detach", "--wait", "--wait-timeout", "180"])
+        bootstrap_user = ["--user", f"{os.getuid()}:{os.getgid()}"] if hasattr(os, "getuid") else []
         run(
             [
                 "docker",
@@ -71,6 +72,7 @@ def main():
                 "--rm",
                 "--no-deps",
                 "-T",
+                *bootstrap_user,
                 "-v",
                 f"{target / '.private'}:/private",
                 "migrate",

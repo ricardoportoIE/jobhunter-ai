@@ -8,7 +8,7 @@ All cloud resources are temporary; everyday use and personal records remain loca
 | P5-01 | Architecture, budget and acceptance boundaries | Defined |
 | P5-02 | Terraform, isolation and termination controls | Implemented; validation and two mocked plans passed |
 | P5-03 | Bootstrap, synthetic workflow, backup/restore and telemetry | Implemented; local workflow and seven failure-path checks passed; AWS checks pending |
-| P5-04 | Cost gate, session controller and automated checks | Pending |
+| P5-04 | Cost gate, session controller and automated checks | Implemented; twelve offline regression checks passed |
 | P5-05 | Live exercise, evidence, verified teardown and final review | Pending |
 
 The concrete topology and trade-offs are in [ADR-005](../adr/0005-temporary-aws-demo.md).
@@ -18,9 +18,9 @@ reconciliation. Prices, current account identity and any existing resources must
 be checked before reserving a session. No actual account identifiers or credentials
 belong in public reports.
 
-The authenticated profile currently has PowerUserAccess. AWS refused an IAM role
-read, so an administrator must apply the narrowly scoped additional policy before
-live deployment. The account-specific copy is private; the reviewable template is
+The authenticated profile has PowerUserAccess plus the scoped additional policy
+applied by the operator. The previously refused IAM read is now authorised. The
+account-specific copy is private; the reviewable template is
 `infra/p5/operator-iam-policy.template.json`. No role or cloud resource was created
 during the mocked Terraform tests. Both roles carry a PowerUserAccess permissions
 boundary in addition to their narrower runtime policies.
@@ -39,3 +39,9 @@ Seven offline host tests cover session isolation, a changing database during bac
 corrupt downloads, failed restore cleanup and data verification before success is
 reported. Terraform's two mocked plans also passed after release-tag validation was
 added. The live cloud checks remain part of P5-05.
+
+The [session runbook](runbook.md) describes immutable source/plan inputs, current SKU
+quotes, atomic reservations and automatic cleanup. Twelve regression tests cover
+unknown/stale costs, competing reservations, monthly carry-over, changed plans,
+source exclusions and cleanup after a failed apply. CI also exercises the local
+synthetic runtime and the mocked Terraform plans without cloud credentials.
