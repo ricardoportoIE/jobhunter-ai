@@ -1,0 +1,107 @@
+{
+  "recorded_at_utc": "2026-09-23T22:28:56.965512+00:00",
+  "scope": "JobHunter P5 in eu-west-1; IAM and S3 checks include the session resources.",
+  "tests": {
+    "api": 165,
+    "frontend": 31,
+    "browser": 16,
+    "p5_controller": 18,
+    "p5_host": 7,
+    "terraform_test_runs": 3
+  },
+  "total_test_cases_and_terraform_runs": 240,
+  "ci": {
+    "url": "https://github.com/ricardoportoIE/jobhunter-ai/actions/runs/35928117735",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "compose",
+        "conclusion": "success",
+        "duration_seconds": 59
+      },
+      {
+        "name": "web",
+        "conclusion": "success",
+        "duration_seconds": 32
+      },
+      {
+        "name": "api",
+        "conclusion": "success",
+        "duration_seconds": 66
+      },
+      {
+        "name": "temporary-infrastructure",
+        "conclusion": "success",
+        "duration_seconds": 87
+      },
+      {
+        "name": "browser-e2e",
+        "conclusion": "success",
+        "duration_seconds": 148
+      },
+      {
+        "name": "design-contracts",
+        "conclusion": "success",
+        "duration_seconds": 9
+      }
+    ]
+  },
+  "live_attempts": [
+    {
+      "attempt": "initial",
+      "terraform_resources_created": 21,
+      "instance_resource_creation_seconds": 18,
+      "source_bundle_bytes": 245355,
+      "backup_bytes": 29926,
+      "backup_sha256_verified": true,
+      "restore_result": "passed",
+      "scheduler_termination": "passed",
+      "residual_checks": 19,
+      "residual_resources": 0
+    },
+    {
+      "attempt": "corrected_cold_start",
+      "terraform_resources_created": 21,
+      "instance_resource_creation_seconds": 15,
+      "source_bundle_bytes": 245356,
+      "backup_bytes": 29940,
+      "backup_sha256_verified": true,
+      "restore_result": "passed",
+      "scheduler_termination": "passed",
+      "residual_checks": 19,
+      "residual_resources": 0
+    }
+  ],
+  "cleanup": {
+    "checked_at_utc": "2026-09-23T22:27:27.293953+00:00",
+    "tagged_project_resources": 0,
+    "prefix_inventory": {
+      "p5_buckets": 0,
+      "p5_schedules": 0,
+      "p5_log_groups": 0,
+      "p5_alarms": 0
+    },
+    "regional_inventory": {
+      "non_terminated_instances": 0,
+      "ebs_volumes": 0,
+      "elastic_ips": 0,
+      "nat_gateways": 0,
+      "rds_instances": 0,
+      "load_balancers": 0
+    },
+    "terraform_resources_in_final_states": 0
+  },
+  "costs": {
+    "currency": "EUR",
+    "estimated_per_attempt": 2.08,
+    "combined_attempt_estimate": 4.16,
+    "retained_reservation": 5,
+    "final_invoice_known": false
+  },
+  "limitations": [
+    "Single-session observations, not performance or availability benchmarks.",
+    "Instance creation time is Terraform resource creation, not application readiness or recovery time.",
+    "CI job durations include setup and are not application latency.",
+    "Historical metrics and delayed charges for past usage may remain; no new deployment was performed for this audit."
+  ]
+}

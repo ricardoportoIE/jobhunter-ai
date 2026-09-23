@@ -35,6 +35,62 @@ termination and clear residual scans. The independent export command was also
 exercised successfully before the second bucket was removed. The final monetary
 reservation remains in the private ledger; cleanup does not erase cost history.
 
+## Recorded metrics
+
+The [anonymised metrics snapshot](metrics.json) contains the measured values and the
+source CI run. The 240 automated test cases and Terraform test runs comprise 212
+application tests and 28 P5 checks. They are different types of checks, not 240
+independent production scenarios.
+
+| Live metric | Initial attempt | Corrected cold start |
+|---|---:|---:|
+| Terraform-managed resources created | 21 | 21 |
+| EC2 resource creation reported by Terraform | 18 seconds | 15 seconds |
+| Source bundle | 245,355 bytes | 245,356 bytes |
+| Exported PostgreSQL backup | 29,926 bytes | 29,940 bytes |
+| Downloaded SHA-256 and restored-record checks | Passed | Passed |
+| Actual Scheduler termination | Passed | Passed |
+| Fresh residual checks | 19 passed | 19 passed |
+| Remaining session resources | 0 | 0 |
+
+The EC2 timings measure resource creation only, not application readiness or recovery
+time. The initial attempt required the documented Buildx correction; the corrected
+cold start completed without manual bootstrap intervention. These are two individual
+observations, not a performance benchmark, RTO measurement or availability percentage.
+
+All six jobs passed in [the verified P5 CI run](https://github.com/ricardoportoIE/jobhunter-ai/actions/runs/35928117735):
+
+| CI job | Elapsed time |
+|---|---:|
+| API | 66 seconds |
+| Frontend | 32 seconds |
+| Docker Compose | 59 seconds |
+| Browser end-to-end | 148 seconds |
+| Temporary infrastructure | 87 seconds |
+| Design contracts | 9 seconds |
+
+These job durations include setup and execution on separate runners. They must not
+be summed as pipeline wall-clock duration or interpreted as application latency.
+
+## Final AWS cleanup audit
+
+A fresh read-only audit on **23 September 2026, 22:27–22:28 UTC** confirmed all 38
+session residual checks clear and zero live resources with the project's tag.
+Both final Terraform states contain zero managed resources. Prefix scans also
+found zero P5 buckets, schedules, log groups and alarms.
+
+An additional regional inventory in `eu-west-1` found zero non-terminated EC2
+instances, EBS volumes, Elastic IP addresses, active NAT gateways, RDS instances
+and load balancers. Global bucket and exact session IAM checks were also clear.
+No remaining P5 resource required further deletion and no deployment was started
+for this audit. Other accounts, unrelated projects and other regions were outside
+the destructive scope; no unrelated resource was removed.
+
+The application has no active AWS demonstration infrastructure left to accrue ongoing
+resource charges. Historical CloudWatch samples and delayed billing for past usage
+may still appear. The EUR 5 reservation is retained until costs can be reconciled;
+zero residual resources is not a claim that the earlier usage was free.
+
 ## What the cloud exercise establishes
 
 Terraform provisions a dedicated VPC with no inbound security-group rules, one

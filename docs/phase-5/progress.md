@@ -54,3 +54,13 @@ uses the NAT gateway CLI's singular `--filter` argument. A final cold start vali
 these corrections without manual intervention, within the original reservation and
 deadline. Both attempts were destroyed and verified clear. No permanent application
 endpoint or active session resource remains; actual billing may arrive later.
+
+## Final evidence refresh
+
+On 23 September 2026 at 22:27–22:28 UTC, a fresh AWS audit repeated all 38 session
+residual checks and found zero remaining resources. Prefix scans and the additional
+regional compute/storage inventory were also clear; both Terraform states are empty.
+The [validation report](validation.md) now includes measured backup sizes, resource
+creation timings, CI job durations and the [anonymised metrics snapshot](metrics.json).
+All six CI jobs passed for the verified P5 delivery. This documentation refresh does
+not redeploy infrastructure or reset the retained cost reservation.

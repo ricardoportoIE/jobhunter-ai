@@ -122,6 +122,25 @@ The [GitHub Actions workflow](.github/workflows/ci.yml) defines six jobs: API, f
 
 Verification on **23 September 2026** passed **165 API tests, 31 frontend tests and 16 desktop/mobile browser tests**, with no skipped API tests. Static checks, Python types, package and frontend builds, evaluation contracts and documentation checks passed. Two upstream Python deprecation warnings remain. This run used Linux containers and Chromium because local Windows application controls blocked the managed Python interpreter. See [P4 validation](docs/phase-4/validation.md) for discovery coverage and the [P5 runbook](docs/phase-5/runbook.md) for infrastructure checks.
 
+P5 adds **28 infrastructure and recovery checks**, bringing the recorded total to
+**240 automated test cases and Terraform test runs**. All six jobs passed in the
+[verified P5 CI run](https://github.com/ricardoportoIE/jobhunter-ai/actions/runs/35928117735).
+
+| P5 delivery metric | Verified result |
+|---|---|
+| Real AWS validation | Two attempts; the corrected cold start required no manual intervention |
+| Backup and recovery | 2/2 passed, including downloaded SHA-256 and restored-record checks |
+| Automatic compute termination | 2/2 Scheduler tests passed |
+| Final cleanup | 38 residual checks clear; zero remaining session resources |
+| Cost control | EUR 4.16 combined estimate within one retained EUR 5 reservation; final billing pending |
+
+The final AWS audit at **22:27–22:28 UTC on 23 September 2026** also found no P5
+buckets, schedules, log groups or alarms. Both Terraform states are empty. The
+[validation report](docs/phase-5/validation.md) and [metrics snapshot](docs/phase-5/metrics.json)
+record timings, backup sizes, scope and limitations. These are measured demonstration
+results, not production availability or performance claims. No permanent AWS endpoint
+is running, and no new deployment is required to run CI.
+
 Run the API tests against a separate test database, with the local PostgreSQL service running:
 
 ```powershell
