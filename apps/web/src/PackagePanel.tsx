@@ -800,6 +800,19 @@ function PackageReview({ item, saved }: { item: Package; saved: () => void }) {
       )}
       {item.status === "APPROVED" && !item.stale && !dirty && (
         <nav className="actions" aria-label={t("Package downloads")}>
+          <button
+            disabled={task.busy}
+            onClick={() =>
+              void task.run(async () => {
+                await api("/applications", "POST", {
+                  job_id: item.snapshot.job.id,
+                });
+                window.location.hash = "tracker";
+              }, "")
+            }
+          >
+            {t("Continue to application rehearsal")}
+          </button>
           {[
             "cv.docx",
             "cv.pdf",

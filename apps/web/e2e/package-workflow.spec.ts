@@ -1,5 +1,6 @@
 import { expect, test } from "./fixtures";
-test("strategy → documents → sensitive answer → diff → approval → download", async ({
+import AxeBuilder from "@axe-core/playwright";
+test("strategy → documents → sensitive answer → approval → download → sandbox recovery", async ({
   page,
 }, info) => {
   await page.goto("/");
@@ -176,4 +177,103 @@ test("strategy → documents → sensitive answer → diff → approval → down
     path: info.outputPath("approved-package.png"),
     fullPage: true,
   });
+  const currentProfile = await (
+    await page.request.get("/api/v1/candidate/profile")
+  ).json();
+  const analysis = await page.request.post(`/api/v1/jobs/${job.id}/analyse`, {
+    headers,
+    data: {
+      job_version: job.version,
+      profile_version: currentProfile.version,
+      assessments: [],
+      review_confirmed: true,
+    },
+  });
+  expect(analysis.status()).toBe(201);
+  await page
+    .getByRole("button", { name: "Continue to application rehearsal" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Your applications" }),
+  ).toBeVisible();
+  const card = page
+    .locator("article.panel")
+    .filter({ has: page.locator(`a[href="#job/${job.id}"]`) });
+  await card.getByRole("button", { name: "Rehearse application" }).click();
+  await card.getByRole("button", { name: "Prepare final review" }).click();
+  await expect(
+    card.getByRole("button", { name: "Authorise rehearsal" }),
+  ).toBeDisabled();
+  await expect(card.getByText("alex@example.test")).toBeVisible();
+  await expect(
+    card.getByText("I would like to discuss the range for this role."),
+  ).toBeVisible();
+  await card
+    .getByLabel(
+      "I reviewed this content and authorise this local simulation only.",
+    )
+    .check();
+  await card.getByRole("button", { name: "Authorise rehearsal" }).click();
+  await expect(
+    card.getByRole("button", { name: "Run local rehearsal" }),
+  ).toBeVisible();
+  await card.getByRole("button", { name: "Cancel rehearsal" }).click();
+  await expect(
+    card.getByText("Rehearsal cancelled", { exact: true }).first(),
+  ).toBeVisible();
+  await card.getByRole("button", { name: "Prepare final review" }).click();
+  await card
+    .getByLabel(
+      "I reviewed this content and authorise this local simulation only.",
+    )
+    .check();
+  await card.getByRole("button", { name: "Authorise rehearsal" }).click();
+  await expect(
+    card.getByRole("button", { name: "Run local rehearsal" }),
+  ).toBeVisible();
+  await page.reload();
+  await card.getByRole("button", { name: "Rehearse application" }).click();
+  // Lose the acknowledgement after the server completes, then recover by reading.
+  await page.route(
+    "**/api/v1/submissions/*/execute",
+    async (route) => {
+      await route.fetch();
+      await route.abort("failed");
+    },
+    { times: 1 },
+  );
+  await card.getByRole("button", { name: "Run local rehearsal" }).click();
+  await expect(
+    card.getByText(
+      "Reload the rehearsal to check what was saved before continuing.",
+    ),
+  ).toBeVisible();
+  await card.getByRole("button", { name: "Refresh rehearsal" }).click();
+  await expect(
+    card.getByRole("heading", { name: "Simulated receipt" }),
+  ).toBeVisible();
+  await expect(
+    card.getByText("Your real application status has not changed."),
+  ).toBeVisible();
+  await expect(
+    card.getByText("In shortlist", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    card.getByRole("button", { name: "Run local rehearsal" }),
+  ).toHaveCount(0);
+  await page.reload();
+  await card.getByRole("button", { name: "Rehearse application" }).click();
+  await expect(
+    card.getByRole("heading", { name: "Simulated receipt" }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    ),
+  ).toBe(false);
+  await page.screenshot({
+    path: info.outputPath("simulated-receipt.png"),
+    fullPage: true,
+  });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });

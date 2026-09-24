@@ -1347,3 +1347,16 @@ footer {
 .gmail-connection {
   margin-top: 18px;
 }
+/* Keep receipt digests and long source content inside narrow review panels. */
+.submission-panel {
+  margin-block: 1rem;
+}
+.submission-panel .review-callout {
+  margin-top: 0.75rem;
+}
+.submission-panel p {
+  overflow-wrap: anywhere;
+}
+.submission-panel details {
+  margin-block: 1rem;
+}

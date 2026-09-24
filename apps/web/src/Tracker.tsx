@@ -4,6 +4,7 @@ import { api } from "./api";
 import { optional, value } from "./forms";
 import { useTask } from "./useTask";
 import { ErrorState, Field, Loading } from "./ui";
+import SubmissionPanel from "./SubmissionPanel";
 type Application = {
   id: string;
   version: number;
@@ -11,6 +12,7 @@ type Application = {
   job_title: string | null;
   company_name: string | null;
   status: string;
+  last_simulation?: { id: string };
   submission: {
     submitted_at: string;
     channel: string;
@@ -76,7 +78,7 @@ export default function Tracker() {
       <h1>{t("Your applications")}</h1>
       <p>
         {t(
-          "Record what happened and keep a history. Submission is done by you, outside the application.",
+          "Track real applications or rehearse a final review locally. Employer submissions are still made outside this app.",
         )}
       </p>
       {error ? (
@@ -94,7 +96,7 @@ export default function Tracker() {
           )}
           {data.items.map((item) => (
             <ApplicationCard
-              key={`${item.id}/${item.version}`}
+              key={item.id}
               item={item}
               changed={() => setRefresh(refresh + 1)}
             />
@@ -126,6 +128,9 @@ function ApplicationCard({
   changed: () => void;
 }) {
   const [target, setTarget] = useState(transitions[item.status]?.[0] ?? "");
+  const selectedTarget = transitions[item.status]?.includes(target)
+    ? target
+    : (transitions[item.status]?.[0] ?? "");
   const task = useTask();
   return (
     <article className="panel">
@@ -136,6 +141,17 @@ function ApplicationCard({
         </a>
       </h2>
       <p>{item.company_name || t("Company not provided")}</p>
+      {item.last_simulation && (
+        <p className="tag">{t("Local rehearsal completed")}</p>
+      )}
+      {(["SHORTLISTED", "RESEARCHED"].includes(item.status) ||
+        item.last_simulation) && (
+        <SubmissionPanel
+          applicationId={item.id}
+          jobId={item.job_id}
+          changed={changed}
+        />
+      )}
       <details>
         <summary>
           {t("Timeline (")}
@@ -161,7 +177,7 @@ function ApplicationCard({
           </p>
         )}
       </details>
-      {target && (
+      {(transitions[item.status]?.length ?? 0) > 0 && (
         <details className="transition-form">
           <summary>{t("Record update")}</summary>
           <form
@@ -171,7 +187,7 @@ function ApplicationCard({
               void task.run(async () => {
                 await api(`/applications/${item.id}/events`, "POST", {
                   expected_version: item.version,
-                  to_status: target,
+                  to_status: selectedTarget,
                   note: value(data, "note"),
                   manual_confirmation: data.has("manual_confirmation"),
                   submitted_at: optional(data, "submitted_at")
@@ -186,7 +202,7 @@ function ApplicationCard({
           >
             <Field label={t("New state")}>
               <select
-                value={target}
+                value={selectedTarget}
                 onChange={(event) => setTarget(event.target.value)}
               >
                 {transitions[item.status]?.map((state) => (
@@ -199,7 +215,7 @@ function ApplicationCard({
             <Field label={t("Update note")}>
               <textarea name="note" maxLength={3000} rows={2} />
             </Field>
-            {target === "SUBMITTED" && (
+            {selectedTarget === "SUBMITTED" && (
               <fieldset>
                 <legend>{t("Manual submission record")}</legend>
                 <Field label={t("Date and time of submission")}>
