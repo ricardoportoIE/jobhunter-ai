@@ -27,6 +27,7 @@ from jobhunter_api.profile import router as profile_router
 from jobhunter_api.research import router as research_router
 from jobhunter_api.semantic import router as semantic_router
 from jobhunter_api.settings import Settings
+from jobhunter_api.submissions import router as submissions_router
 
 
 class LiveStatus(BaseModel):
@@ -87,6 +88,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(research_router)
     application.include_router(discovery_router)
     application.include_router(gmail_router)
+    application.include_router(submissions_router)
 
     @application.get("/api/health/live", tags=["health"])
     def live() -> LiveStatus:
