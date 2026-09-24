@@ -1,7 +1,9 @@
 """Version-bound authorisation for a local application rehearsal."""
 
 from datetime import UTC, datetime
-from uuid import UUID
+from uuid import UUID, uuid4
+
+from psycopg.types.json import Jsonb
 
 from jobhunter_api.clarifications import collect
 from jobhunter_api.deduplication import fingerprint
@@ -143,6 +145,12 @@ def check_authorisation(db: Connection, owner: UUID, workflow: Row) -> None:
 
 
 def advance(db: Connection, row: Row, status: str, **changes: object) -> Row:
+    # Preserve the exact previous payload and authorisation, including revoked revisions.
+    db.execute(
+        "INSERT INTO snapshots (id,owner_id,kind,source_id,version,data) "
+        "VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING",
+        (uuid4(), row["owner_id"], row["kind"], row["id"], row["version"], Jsonb(row["data"])),
+    )
     event = {
         "status": status,
         "at": now().isoformat(),

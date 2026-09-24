@@ -96,7 +96,13 @@ Job intelligence pipeline: `DISCOVERED → PARSED → SCORED`. `PARSED` requires
 
 `WITHDRAWN` is permitted from non-terminal states; `EXPIRED` is permitted before submission. `ARCHIVED` is a job marker, independent of the application outcome. Phase 1 has no automated package generation or submission: the tracker can record a manual submission with explicit confirmation, origin `manual_record` and a date/supporting record. The future automated adapter must not use this exception.
 
-A change to the profile, job, evidence or package invalidates the affected approval. Future submission requires a separate approval with `submission` scope, recipient/channel, package hash and expiry. If the external outcome is ambiguous, record an `UNKNOWN` attempt outside the main state and reconcile it before retrying.
+A change to the profile, job, evidence or package invalidates the affected approval.
+P6 implements separate approval with `submission:sandbox` scope, a fixed local recipient,
+payload/package hashes and expiry. Its workflow states are separate from the conceptual
+application lifecycle above: `NEEDS_REVIEW → APPROVED → DISPATCHING → SIMULATED`, with
+`UNKNOWN`, `FAILED` and `CANCELLED` recovery states. Simulation never changes the tracker
+to `SUBMITTED`. An ambiguous attempt must be reconciled before retrying. See
+[ADR-006](../adr/0006-controlled-submission.md) and [P6 operations](../phase-6/operations.md).
 
 ## Trust boundaries
 

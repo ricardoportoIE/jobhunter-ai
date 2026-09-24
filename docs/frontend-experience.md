@@ -7,6 +7,11 @@ users to understand the application's internal data model.
 
 ## Start with the next useful action
 
+P6 extends **Applications** with an optional local rehearsal. A final content review,
+separate confirmation and expiring authorisation lead to a clearly labelled simulated
+receipt. Recovery reads the saved workflow before offering another action; a lost
+response never triggers automatic resubmission. The real tracker status is preserved.
+
 The main navigation contains **Opportunities**, **My profile** and **Applications**.
 **Import vacancy** remains a prominent action. Privacy, semantic search and AI activity
 are available under **More tools**, with their existing routes preserved.

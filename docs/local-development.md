@@ -1,4 +1,4 @@
-# Local development — P1 to P4
+# Local development — P1 to P6
 
 The core includes login, a factual profile, evidence, vacancy review, deterministic matching,
 an Inbox, a manual tracker and export. P2 adds explicitly requested AI calls and semantic search.
@@ -6,7 +6,9 @@ See [P2 configuration, privacy, costs and benchmark](phase-2/operations.md).
 P3 adds strategy, documents and approval: [operation](phase-3/operations.md)
 and [validation](phase-3/validation.md). `python-docx` and ReportLab are in the API lockfile;
 Word and LibreOffice are not required to run the application.
-AWS and submission channels remain outside the current runtime.
+P6 adds a local sandbox submission rehearsal with separate authorisation, durable
+receipts and recovery: [operations](phase-6/operations.md). Real employer delivery
+and AWS remain outside the everyday runtime.
 
 P4 adds the local discovery worker, Greenhouse and optional read-only Gmail alerts:
 [operations](phase-4/operations.md), [Gmail setup](phase-4/gmail-setup.md) and
@@ -143,8 +145,8 @@ python scripts/smoke_local.py --exercise-db-recovery
 python scripts/check_documentation.py
 ```
 
-The second command briefly stops this project's `db`, verifies liveness 200/readiness 503, and restarts it in `finally` without deleting data. `--web-url`/`--api-url` allow different ports. The five CI jobs cover the API, frontend, Compose, browser E2E and design contracts. The workflow runs on pushes and pull requests; see [GitHub Actions](https://github.com/ricardoportoIE/jobhunter-ai/actions/workflows/ci.yml) for its current status.
+The second command briefly stops this project's `db`, verifies liveness 200/readiness 503, and restarts it in `finally` without deleting data. `--web-url`/`--api-url` allow different ports. The six CI jobs cover the API, frontend, Compose, browser E2E, design contracts and temporary infrastructure. The workflow runs on pushes and pull requests; see [GitHub Actions](https://github.com/ricardoportoIE/jobhunter-ai/actions/workflows/ci.yml) for its current status.
 
 ## Privacy
 
-Export data from the privacy screen. Complete application data erasure is an administrative command requiring explicit confirmation; see [security and data](phase-1/security-and-data.md). Discovery reads only enabled, reviewed sources. There is no submission endpoint or `.private/` mount in the containers. Private backups and exports must not enter Git.
+Export data from the privacy screen. Complete application data erasure is an administrative command requiring explicit confirmation; see [security and data](phase-1/security-and-data.md). Discovery reads only enabled, reviewed sources. Submission endpoints operate only on the local sandbox; there is no employer delivery or `.private/` mount in the containers. Private backups and exports must not enter Git.

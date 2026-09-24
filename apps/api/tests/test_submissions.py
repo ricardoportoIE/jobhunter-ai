@@ -103,7 +103,15 @@ def test_separate_approval_receipt_replay_and_export(signed_client: TestClient) 
         ).status_code
         == 409
     )
-    records = client.get("/api/v1/candidate/export").json()["records"]
+    exported = client.get("/api/v1/candidate/export").json()
+    records = exported["records"]
+    approvals = [
+        s
+        for s in exported["snapshots"]
+        if s["kind"] == "submission_workflow" and s["data"]["status"] == "APPROVED"
+    ]
+    assert len(approvals) == 1
+    assert approvals[0]["data"]["authorisation"]["payload_hash"] == workflow["payload_hash"]
     assert len([r for r in records if r["kind"] == "sandbox_receipt"]) == 1
     assert [h["status"] for h in result["history"]] == [
         "NEEDS_REVIEW",
