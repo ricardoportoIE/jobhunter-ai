@@ -46,10 +46,12 @@ export default function SubmissionPanel({
   applicationId,
   jobId,
   changed,
+  active = true,
 }: {
   applicationId: string;
   jobId: string;
   changed: () => void;
+  active?: boolean;
 }) {
   const task = useTask();
   const [opened, setOpened] = useState(false);
@@ -62,7 +64,7 @@ export default function SubmissionPanel({
   const uncertain =
     workflow && ["DISPATCHING", "UNKNOWN"].includes(workflow.status);
   const finished = workflow?.status === "SIMULATED";
-  const canPrepare = !uncertain && !finished;
+  const canPrepare = active && !uncertain && !finished;
   async function refresh() {
     const [current, choices] = await Promise.all([
       api<Submission | null>(`/applications/${applicationId}/submission`),
@@ -143,6 +145,13 @@ export default function SubmissionPanel({
           )}
           {loaded && (
             <>
+              {!active && (
+                <p>
+                  {t(
+                    "This application is closed for rehearsal. Existing attempts can still be checked.",
+                  )}
+                </p>
+              )}
               {canPrepare && (
                 <>
                   {packages.length ? (
@@ -257,7 +266,7 @@ export default function SubmissionPanel({
                           <input
                             type="checkbox"
                             checked={confirmed}
-                            disabled={task.busy || refreshRequired}
+                            disabled={!active || task.busy || refreshRequired}
                             onChange={(e) => setConfirmed(e.target.checked)}
                           />
                           {t(
@@ -267,6 +276,7 @@ export default function SubmissionPanel({
                         <div className="actions">
                           <button
                             disabled={
+                              !active ||
                               task.busy ||
                               refreshRequired ||
                               !confirmed ||
@@ -283,7 +293,7 @@ export default function SubmissionPanel({
                           >
                             {t("Authorise rehearsal")}
                           </button>
-                          {workflow.status === "APPROVED" && (
+                          {active && workflow.status === "APPROVED" && (
                             <button
                               className="primary"
                               disabled={

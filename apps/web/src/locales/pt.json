@@ -962,5 +962,6 @@
   "An accepted or uncertain attempt cannot be cancelled. Check its result.": "Uma tentativa aceite ou incerta não pode ser cancelada. Verifique o resultado.",
   "Authorise the current rehearsal before running it.": "Autorize a simulação atual antes de a executar.",
   "Reload the current attempt before checking its result.": "Atualize a tentativa atual antes de verificar o resultado.",
-  "Local rehearsal completed. Nothing was sent to an employer.": "Simulação local concluída. Nada foi enviado a um empregador."
+  "Local rehearsal completed. Nothing was sent to an employer.": "Simulação local concluída. Nada foi enviado a um empregador.",
+  "This application is closed for rehearsal. Existing attempts can still be checked.": "Esta candidatura está fechada para simulações. As tentativas existentes ainda podem ser verificadas."
 }

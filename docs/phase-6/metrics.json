@@ -1,0 +1,39 @@
+{
+  "recorded_on": "2026-09-24",
+  "scope": "Local sandbox orchestration and application regression checks with synthetic data",
+  "tests": {
+    "api": 192,
+    "api_failed": 0,
+    "api_skipped": 0,
+    "p6_api_subset": 27,
+    "frontend": 36,
+    "p6_frontend_subset": 5,
+    "browser": 16,
+    "p6_browser_subset": 2,
+    "infrastructure_controller": 18,
+    "host_recovery": 7,
+    "terraform_mock_runs": 3,
+    "total_cases_and_runs": 272
+  },
+  "timings_seconds": {
+    "full_api_suite": 49.814,
+    "p6_desktop_journey": 7.7,
+    "p6_mobile_journey": 7.0
+  },
+  "tested_outcomes": {
+    "duplicate_receipts": 0,
+    "unauthorised_acceptances": 0,
+    "real_employer_submissions": 0,
+    "paid_inference_calls": 0,
+    "aws_deployments": 0,
+    "receipt_screen_axe_violations": 0,
+    "desktop_mobile_horizontal_overflow": false,
+    "backup_restore_verified": true
+  },
+  "limits": [
+    "Timings measure test execution, not request latency or a production recovery objective.",
+    "The local sandbox does not establish compatibility with a real employer channel.",
+    "Failure counts describe the recorded successful runs, not every development iteration.",
+    "Existing historical evaluation targets are not newly measured product outcomes."
+  ]
+}

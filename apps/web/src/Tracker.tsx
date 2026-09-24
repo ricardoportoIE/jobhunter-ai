@@ -144,14 +144,12 @@ function ApplicationCard({
       {item.last_simulation && (
         <p className="tag">{t("Local rehearsal completed")}</p>
       )}
-      {(["SHORTLISTED", "RESEARCHED"].includes(item.status) ||
-        item.last_simulation) && (
-        <SubmissionPanel
-          applicationId={item.id}
-          jobId={item.job_id}
-          changed={changed}
-        />
-      )}
+      <SubmissionPanel
+        applicationId={item.id}
+        jobId={item.job_id}
+        changed={changed}
+        active={["SHORTLISTED", "RESEARCHED"].includes(item.status)}
+      />
       <details>
         <summary>
           {t("Timeline (")}

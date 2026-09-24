@@ -34,6 +34,8 @@ Closing the tab or restarting the API does not discard the checkpoint. Reopen th
 application's rehearsal to read its saved state. **Refresh rehearsal** is a read-only
 recovery action. After a lost write response, the interface requires a refresh before
 another action; it never automatically retries execution.
+Existing attempts remain available for reconciliation after withdrawal or another
+real tracker outcome, although those applications cannot start a new rehearsal.
 
 | Saved state | Next action |
 |---|---|

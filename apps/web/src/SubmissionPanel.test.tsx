@@ -152,3 +152,35 @@ test("receipt remains explicitly simulated without another send button", async (
     screen.queryByRole("button", { name: "Run local rehearsal" }),
   ).not.toBeInTheDocument();
 });
+
+test("a withdrawn application can reconcile an existing attempt but cannot prepare another", async () => {
+  request.mockImplementation(async (path) =>
+    path.includes("/packages") ? [] : { ...draft, status: "UNKNOWN" },
+  );
+  const user = userEvent.setup();
+  render(
+    <SubmissionPanel
+      applicationId="application"
+      jobId="job"
+      changed={vi.fn()}
+      active={false}
+    />,
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Rehearse application" }),
+  );
+  await screen.findByText(
+    "This application is closed for rehearsal. Existing attempts can still be checked.",
+  );
+  expect(
+    screen.queryByRole("button", { name: "Prepare final review" }),
+  ).not.toBeInTheDocument();
+  await user.click(
+    screen.getByRole("button", { name: "Check attempt result" }),
+  );
+  expect(request).toHaveBeenCalledWith(
+    "/submissions/workflow/reconcile",
+    "POST",
+    { expected_version: 1 },
+  );
+});

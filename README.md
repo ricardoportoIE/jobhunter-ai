@@ -8,7 +8,7 @@ Job searching involves more than matching keywords. A useful decision needs to a
 
 This portfolio project demonstrates full-stack development, applied AI, data modelling, security and automated testing through a working local application. Its central engineering principle is simple: **AI proposes; verifiable rules and human review control what becomes an accepted fact, a score or an approved document.**
 
-**Available now:** a Docker-based local application with profile and vacancy imports, opt-in Greenhouse discovery, optional read-only Gmail alerts, evidence-backed matching, application documents and a manual tracker. The interface defaults to English (UK), with a persistent Portuguese option. All authored project documentation is in British English.
+**Available now:** a Docker-based local application with profile and vacancy imports, opt-in Greenhouse discovery, optional read-only Gmail alerts, evidence-backed matching, application documents, a manual tracker and a resumable local application rehearsal. The interface defaults to English (UK), with a persistent Portuguese option. All authored project documentation is in British English.
 
 ## The user journey
 
@@ -16,7 +16,8 @@ This portfolio project demonstrates full-stack development, applied AI, data mod
 2. **Understand a vacancy.** Import a public HTTPS link or paste the advertisement. Review the extracted role, requirements and source text before continuing.
 3. **Assess the fit.** Examine each requirement against approved evidence. The application shows a deterministic score, evidence coverage, explicit blockers and questions that still need clarification.
 4. **Prepare an application.** Review an AI-assisted strategy, select supported facts and generate CV and cover letter documents in DOCX/PDF. Check answers, differences and evidence before approving a specific package version.
-5. **Track the outcome.** Shortlist vacancies and record applications, interviews and outcomes. Submission takes place outside the application and is recorded explicitly by the user.
+5. **Rehearse the final review.** Review the exact application content, authorise a local simulation and receive a durable simulated receipt. Resume interrupted attempts without duplicate acceptance. Nothing is sent to an employer.
+6. **Track the outcome.** Record real applications, interviews and outcomes. Employer submission takes place outside the application and is recorded explicitly by the user; a rehearsal preserves the real tracker status.
 
 The workflow preserves drafts and form input, explains review requirements and guides the user to the next step. Desktop and mobile browser tests exercise both the successful journey and recovery from errors.
 
@@ -35,6 +36,7 @@ The [discovery workflow](docs/phase-4/operations.md) adds daily checks of source
 | Reliability and evaluation | Deterministic rules, contract validation, frozen evaluation sets | Reproducible scoring, source checks, clarification gates, disagreement handling and recorded model comparisons with stated limitations. |
 | Security and privacy | Argon2, session cookies, CSRF protection, authorisation, SSRF controls | User isolation, protected writes, restricted public URL fetching, bounded document parsing and backend-only credentials. |
 | External integrations | Greenhouse Job Board API, Gmail OAuth, PKCE, Fernet, conditional requests | Reviewed source activation, a bounded local worker, encrypted credentials, traceable updates and recovery from interrupted reads. |
+| Workflow orchestration | Persistent state machines, scoped approvals, idempotency and reconciliation | Expiring authorisation bound to exact content, committed dispatch checkpoints, a local receipt receiver and recovery from lost acknowledgements or concurrent requests. |
 | Document processing | pypdf, python-docx, ReportLab | Importing source material and producing reviewable DOCX/PDF documents from approved facts. |
 | Quality assurance | pytest, Vitest, Testing Library, Playwright, axe | Domain, API, database, component and browser tests, including failure recovery, accessibility checks and desktop/mobile journeys. |
 | Developer tooling and delivery | Docker Compose, Nginx, GitHub Actions, uv, npm, Ruff, mypy, ESLint, Prettier | Reproducible environments, locked dependencies, static analysis, production builds, health checks and continuous integration. |
@@ -49,6 +51,7 @@ For a focused code review, start with the [scoring engine](apps/api/src/jobhunte
 - **Rules own the decision boundaries.** Code calculates weights and scores. Desirable skills cannot compensate for an explicit disqualifier, and permission to pursue an offer remains separate from permission to start employment.
 - **Uncertainty remains visible.** Missing decisive information, conflicting evidence and title/body disagreements require clarification. Different assessments are preserved for review rather than silently selecting the most favourable result.
 - **Approval belongs to a version.** Changes to source information invalidate affected approvals. A previously approved package is not treated as current after its supporting evidence changes.
+- **Delivery has its own permission.** P6 requires separate, expiring authorisation for its local sandbox. An uncertain result is checked before another attempt, and a simulated receipt never implies employer delivery.
 - **AI calls are accountable.** A cost ledger reserves and settles usage, caches equivalent requests and blocks further calls when unresolved usage requires reconciliation. Model, reasoning effort and prompt settings are configurable by task within a validated catalogue.
 - **External content is untrusted.** Document parsing has size, time and resource limits. URL imports check destinations and redirects, respect source restrictions and do not bypass authentication or CAPTCHAs.
 
@@ -120,10 +123,15 @@ Stop the application with `docker compose down`; this retains the database. See 
 
 The [GitHub Actions workflow](.github/workflows/ci.yml) defines six jobs: API, frontend, Docker Compose, browser end-to-end tests, design contracts and temporary infrastructure. It checks formatting, types, application behaviour, evaluation contracts, builds, database outage recovery, mocked Terraform plans and cloud budget/recovery controls. Automated tests use synthetic data; CI does not deploy AWS resources or make paid AI calls.
 
-Verification on **23 September 2026** passed **165 API tests, 31 frontend tests and 16 desktop/mobile browser tests**, with no skipped API tests. Static checks, Python types, package and frontend builds, evaluation contracts and documentation checks passed. Two upstream Python deprecation warnings remain. This run used Linux containers and Chromium because local Windows application controls blocked the managed Python interpreter. See [P4 validation](docs/phase-4/validation.md) for discovery coverage and the [P5 runbook](docs/phase-5/runbook.md) for infrastructure checks.
+Verification on **24 September 2026** passed **192 API tests, 36 frontend tests and 16 desktop/mobile browser tests**, with no skipped API tests. Static checks, Python types, package and frontend builds, evaluation contracts and documentation checks passed. Two upstream Python deprecation warnings remain. Linux containers and Chromium avoid the local Windows restriction on the managed Python interpreter. See [P6 validation](docs/phase-6/validation.md) for measured results, [P4 validation](docs/phase-4/validation.md) for discovery coverage and the [P5 runbook](docs/phase-5/runbook.md) for infrastructure checks.
 
-P5 adds **28 infrastructure and recovery checks**, bringing the recorded total to
-**240 automated test cases and Terraform test runs**. All six jobs passed in the
+The **28 infrastructure and recovery checks** also passed locally, bringing the P6
+total to **272 automated test cases and Terraform test runs**. P6 adds 27 API cases
+and five component cases, and extends both document browser journeys with sandbox
+review and recovery. There were no duplicate receipts or unauthorised acceptances
+in those scenarios. No paid inference or AWS deployment was needed.
+
+The earlier P5 delivery recorded 240 cases and runs. All six jobs passed in the
 [verified P5 CI run](https://github.com/ricardoportoIE/jobhunter-ai/actions/runs/35928117735).
 
 | P5 delivery metric | Verified result |
@@ -173,17 +181,22 @@ The [development guide](docs/local-development.md) lists the lint, type, build a
 
 ## Project scope and next steps
 
-The local core, AI assistance, application packages and P4 discovery workflow are implemented. P5 adds a temporary, private AWS demonstration with synthetic data: one EC2 host runs the Docker stack, SSM provides private access, S3 holds recovery artefacts and CloudWatch records readiness. Terraform and two termination mechanisms support a bounded lifecycle. The [live P5 validation](docs/phase-5/validation.md) passed deployment, recovery, scheduled termination and verified teardown. The demonstration resources have been removed.
+The local core, AI assistance, application packages, discovery and P6 sandbox orchestration are implemented. P5 provides a temporary, private AWS demonstration with synthetic data: one EC2 host runs the Docker stack, SSM provides private access, S3 holds recovery artefacts and CloudWatch records readiness. Terraform and two termination mechanisms support a bounded lifecycle. The [live P5 validation](docs/phase-5/validation.md) passed deployment, recovery, scheduled termination and verified teardown. The demonstration resources have been removed; P6 does not recreate them.
 
 The project supports individual use with human review. Gmail is optional and requires the operator's OAuth client and explicit consent. Everyday use remains local; there is no hosted production service or automated application submission. The smaller [P5 topology](docs/adr/0005-temporary-aws-demo.md) was selected to fit the temporary demonstration budget. RDS, Fargate, Cognito, API Gateway and other services in the original conceptual architecture are not claimed as implemented capabilities.
 
-Further work includes broader user-labelled evaluations, testing with more document layouts and sources, and a carefully scoped pilot. The planned stages extend the engineering skills above:
+The [P6 workflow](docs/phase-6/operations.md) uses PostgreSQL transactions and checkpoints,
+with separate human approval, cancellation and reconciliation. A local receiver makes
+the failure cases reproducible without contacting employers. No additional orchestration
+framework was required; see [ADR-006](docs/adr/0006-controlled-submission.md).
+
+Further work includes broader user-labelled evaluations, testing with more document layouts and sources, and a carefully scoped pilot:
 
 | Planned stage | Skills and technologies to develop | Intended purpose |
 |---|---|---|
-| Controlled orchestration | Resumable workflows, idempotent integrations and scoped approval; LangGraph or MCP only where justified | Test one permitted channel or sandbox with final confirmation and auditable outcomes. |
+| Permitted external channel pilot | Channel-specific permission, credentials, integration contracts and outcome reconciliation | Extend the tested sandbox workflow only after a real channel is selected and explicitly authorised. |
 
-Controlled orchestration remains a future plan. The P5 demonstration does not enable paid inference; Bedrock and AgentCore remain deferred until a measured requirement justifies them. Temporary cloud environments must fit the project's cost constraints. See the [product brief](docs/phase-0/product-brief.md), [architecture](docs/architecture/overview.md) and [runtime decision](docs/adr/0002-ai-runtime.md) for the reasoning behind this scope.
+The P5 demonstration does not enable paid inference; Bedrock and AgentCore remain deferred until a measured requirement justifies them. Temporary cloud environments must fit the project's cost constraints. See the [product brief](docs/phase-0/product-brief.md), [architecture](docs/architecture/overview.md) and [runtime decision](docs/adr/0002-ai-runtime.md) for the reasoning behind this scope.
 
 ## Explore the project
 
